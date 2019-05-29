@@ -23,7 +23,7 @@ The software has three main branches, `production`, `master` and `develop`.  The
 
 
 ## Feynman-Hellmann
-This code constructs the Feynman-Hellmann propagators and correlation functions as described in [arXiv:1612.06963](https://arxiv.org/abs/1612.06963) and used to compute the nucleon axial charge in [arXiv:1805.12130](https://arxiv.org/abs/1805.12130).  
+This code constructs the Feynman-Hellmann propagators and correlation functions as described in [arXiv:1612.06963](https://arxiv.org/abs/1612.06963?target=_blank) and used to compute the nucleon axial charge in [arXiv:1805.12130](https://arxiv.org/abs/1805.12130).  
 
 If this routine is used, please acknowledge the two publications
 - *On the Feynman-Hellmann Theorem in Quantum Field Theory and the Calculation of Matrix Elements*  
