@@ -9,13 +9,17 @@ Henry Monge-Camacho
 Pavlos Vranas  
 André Walker-Loud
 
-[Copywrite](#copyright-notice)
+[Copywrite](#copyright-notice) below.
 
 This software links against Chroma (https://github.com/JeffersonLab/chroma) and performs various computations related to two-point functions and three point functions.  In particular
 * [Feynman-Hellmann propagators and correlation functions](#feynman-hellmann)
 * [three point functions](#three-point-functions)
 * [HDF5 for correlation functions](#hdf5)
+* [Monte Carlo Methods for Trace Estimators](#monte-carlo-method-for-estimating-traces)
 * [Hierarchical Probing](#hierarchical-probing)
+
+The software has three main branches, `production`, `master` and `develop`.  The `production` branch is the most stable, is thoroughly revision tested, but may be out of date compared to `master`.  The `master` branch contains all revision tested code, including that not currently in production.  The `develop` branch is used to collect development from users where it is tested against all changes before being accepted into `master`.
+
 
 
 ## Feynman-Hellmann
