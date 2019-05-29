@@ -13,7 +13,7 @@ André Walker-Loud
 
 This software links against Chroma (https://github.com/JeffersonLab/chroma) and performs various computations related to two-point functions and three point functions.  In particular
 * [Feynman-Hellmann propagators and correlation functions](#feynman-hellmann)
-* [three point functions](#three-point-functions)
+* [Three point functions](#three-point-functions)
 * [HDF5 for correlation functions](#hdf5)
 * [Monte Carlo Methods for Trace Estimators](#monte-carlo-method-for-estimating-traces)
 * [Hierarchical Probing](#hierarchical-probing)
