@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<lalibe>
+<annotation>
+;
+; Test input file for lalibe main program
+;
+</annotation>
+<Param>
+  <InlineMeasurements>
+
+    <elem>
+    <Name>HDF5_READ_NAMED_OBJECT</Name>
+    <Frequency>1</Frequency>
+    <NamedObject>
+      <object_id>prop_pt_proton_DD_up_up_seqsource_src_x0y0z0t0</object_id>
+      <object_type>LatticeUpperPropagator</object_type>
+    </NamedObject>
+    <File>
+      <file_name>./seqsrc_propagator.h5</file_name>
+      <path>/pt</path>
+      <obj_name>proton</obj_name>
+    </File>
+    </elem>
+    
+    <elem>
+    <Name>HDF5_READ_NAMED_OBJECT</Name>
+    <Frequency>1</Frequency>
+    <NamedObject>
+      <object_id>sh_prop_0</object_id>
+      <object_type>LatticePropagator</object_type>
+    </NamedObject>
+    <File>
+      <file_name>./propagator.h5</file_name>
+      <path>/sh</path>
+      <obj_name>weak_field</obj_name>
+    </File>
+    </elem>
+    
+    <elem>
+      <annotation>
+      ; BAR3PTFN input file.
+      </annotation>
+
+      <Name>LALIBE_BAR3PTFN</Name>
+      <Frequency>1</Frequency>
+      <Param>
+	<version>7</version>
+        <j_decay>3</j_decay>
+       <currents><elem>S</elem><elem>P</elem><elem>V4</elem><elem>A3</elem></currents>
+       <p2_max>1</p2_max>
+        <h5_file_name>bar3ptfn_upper.h5</h5_file_name>
+        <path>/testing</path>
+      </Param>
+      <NamedObject>
+        <gauge_id>default_gauge_field</gauge_id>
+        <prop_id>sh_prop_0</prop_id>
+        <seqprops>
+          <elem>
+            <seqprop_id>prop_pt_proton_DD_up_up_seqsource_src_x0y0z0t0</seqprop_id>
+            <gamma_insertion>0</gamma_insertion>
+          </elem>
+       </seqprops>
+      </NamedObject>
+    </elem>
+    
+
+
+
+  </InlineMeasurements>
+   <nrow>4 4 4 8</nrow>
+</Param>
+
+<RNG>
+  <Seed>
+    <elem>11</elem>
+    <elem>11</elem>
+    <elem>11</elem>
+    <elem>0</elem>
+  </Seed>
+</RNG>
+
+<Cfg>
+ <cfg_type>WEAK_FIELD</cfg_type>
+ <cfg_file>dummy</cfg_file>
+</Cfg>
+</lalibe>
+

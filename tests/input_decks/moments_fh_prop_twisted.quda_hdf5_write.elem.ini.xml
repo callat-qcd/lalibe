@@ -1,0 +1,188 @@
+<?xml version="1.0"?>
+<lalibe>
+<Param>
+<InlineMeasurements>
+
+<elem>
+<Name>MAKE_SOURCE</Name>
+<Frequency>1</Frequency>
+<Param>
+<version>6</version>
+<Source>
+  <version>1</version>
+  <SourceType>SHELL_SOURCE</SourceType>
+  <j_decay>3</j_decay>
+  <t_srce>1 1 1 1</t_srce>
+  <SmearingParam>
+    <wvf_kind>GAUGE_INV_GAUSSIAN</wvf_kind>
+    <wvf_param>2.0</wvf_param>
+    <wvfIntPar>25</wvfIntPar>
+    <no_smear_dir>3</no_smear_dir>
+  </SmearingParam>
+</Source>
+</Param>
+<NamedObject>
+  <gauge_id>default_gauge_field</gauge_id>
+  <source_id>src_sh</source_id>
+</NamedObject>
+</elem>
+
+<elem>
+<Name>PROPAGATOR</Name>
+<Frequency>1</Frequency>
+<Param>
+<version>10</version>
+<quarkSpinType>FULL</quarkSpinType>
+<obsvP>true</obsvP>
+<numRetries>1</numRetries>
+<FermionAction>
+<FermAct>NEF</FermAct>
+  <OverMass>1.2</OverMass>
+  <N5>8</N5>
+  <b5>1.25</b5>
+  <c5>0.25</c5>
+  <Mass>0.05</Mass>
+  <FermionBC>
+    <FermBC>TWISTED_FERMBC</FermBC>
+    <boundary>1 1 1 -1</boundary>
+    <phases_by_pi>0.2 0.4 0</phases_by_pi>
+    <phases_dir>0 1 2</phases_dir>
+  </FermionBC>
+</FermionAction>
+<InvertParam>
+<invType>QUDA_NEF_INVERTER</invType>
+<DoCGNR>true</DoCGNR>
+<MaxIter>2000</MaxIter>
+<RsdTarget>5.e-7</RsdTarget>
+<Delta>0.1</Delta>
+<RsdToleranceFactor>100</RsdToleranceFactor>
+<MaxResIncrease>1</MaxResIncrease>
+<SolverType>CG</SolverType>
+<Verbose>true</Verbose>
+<AsymmetricLinop>false</AsymmetricLinop>
+<CudaReconstruct>RECONS_NONE</CudaReconstruct>
+<CudaSloppyPrecision>HALF</CudaSloppyPrecision>
+<CudaSloppyReconstruct>RECONS_12</CudaSloppyReconstruct>
+<AxialGaugeFix>false</AxialGaugeFix>
+<AutotuneDslash>true</AutotuneDslash>
+<NEFParams>
+  <OverMass>1.2</OverMass>
+  <N5>8</N5>
+  <b5>1.25</b5>
+  <c5>0.25</c5>
+  <Mass>0.05</Mass>
+  <clovCoeff>0</clovCoeff>
+</NEFParams>
+<AntiPeriodicT>true</AntiPeriodicT>
+</InvertParam>
+</Param>
+<NamedObject>
+  <gauge_id>default_gauge_field</gauge_id>
+  <source_id>src_sh</source_id>
+  <prop_id>prop</prop_id>
+</NamedObject>
+<xml_file>prop.out.xml</xml_file>
+</elem>
+
+<elem>
+<Name>MOMENTS_FH_PROPAGATOR</Name>
+<MomentsFHParams>
+<currents>
+  <elem>A3</elem>
+  <elem>V4</elem>
+</currents>
+<z_2_direction>3</z_2_direction>
+<PropagatorParam>
+    <version>10</version>
+    <quarkSpinType>FULL</quarkSpinType>
+    <obsvP>true</obsvP>
+    <numRetries>1</numRetries>
+    <FermionAction>
+    <FermAct>NEF</FermAct>
+      <OverMass>1.2</OverMass>
+      <N5>8</N5>
+      <b5>1.25</b5>
+      <c5>0.25</c5>
+      <Mass>0.05</Mass>
+      <FermionBC>
+        <FermBC>TWISTED_FERMBC</FermBC>
+        <boundary>1 1 1 -1</boundary>
+	<phases_by_pi>0.2 0.4 0</phases_by_pi>
+	<phases_dir>0 1 2</phases_dir>
+      </FermionBC>
+    </FermionAction>
+    <InvertParam>
+    <invType>QUDA_NEF_INVERTER</invType>
+    <DoCGNR>true</DoCGNR>
+    <MaxIter>5000</MaxIter>
+    <RsdTarget>1.e-6</RsdTarget>
+    <Delta>0.1</Delta>
+    <RsdToleranceFactor>80</RsdToleranceFactor>
+    <MaxResIncrease>1</MaxResIncrease>
+    <SolverType>CG</SolverType>
+    <Verbose>true</Verbose>
+    <AsymmetricLinop>false</AsymmetricLinop>
+    <CudaReconstruct>RECONS_NONE</CudaReconstruct>
+    <CudaSloppyPrecision>HALF</CudaSloppyPrecision>
+    <CudaSloppyReconstruct>RECONS_NONE</CudaSloppyReconstruct>
+    <AxialGaugeFix>false</AxialGaugeFix>
+    <AutotuneDslash>true</AutotuneDslash>
+    <NEFParams>
+      <OverMass>1.2</OverMass>
+      <N5>8</N5>
+      <b5>1.25</b5>
+      <c5>0.25</c5>
+      <Mass>0.05</Mass>
+      <clovCoeff>0</clovCoeff>
+    </NEFParams>
+    <AntiPeriodicT>true</AntiPeriodicT>
+    </InvertParam>
+</PropagatorParam>
+</MomentsFHParams>
+<NamedObject>
+  <gauge_id>default_gauge_field</gauge_id>
+  <src_prop_id>prop</src_prop_id>
+  <fh_prop_id>
+    <elem>fh_prop_A3</elem>
+    <elem>fh_prop_V4</elem>
+  </fh_prop_id>
+</NamedObject>
+</elem>
+
+<elem>
+  <Name>HDF5_WRITE_ERASE_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>fh_prop_A3</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./moment_propagator.h5</file_name>
+    <path>/axial_radius/twist_0</path>
+    <obj_name>A3_prop</obj_name>
+  </File>
+</elem>
+
+<elem>
+  <Name>HDF5_WRITE_ERASE_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>fh_prop_V4</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./moment_propagator.h5</file_name>
+    <path>/charge_radius/twist_0</path>
+    <obj_name>V4_prop</obj_name>
+  </File>
+</elem>
+
+</InlineMeasurements>
+<nrow>8 8 8 16</nrow>
+</Param>
+<Cfg>
+  <cfg_type>WEAK_FIELD</cfg_type>
+  <cfg_file>dummy</cfg_file>
+  <parallel_io>true</parallel_io>
+</Cfg>
+</lalibe>

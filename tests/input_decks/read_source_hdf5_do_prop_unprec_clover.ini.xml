@@ -1,0 +1,96 @@
+<?xml version="1.0"?>
+<lalibe>
+<annotation>
+;
+; Test input file for lalibe main program
+;
+</annotation>
+<Param> 
+  <InlineMeasurements>
+<elem>
+<Name>HDF5_READ_NAMED_OBJECT</Name>
+<Frequency>1</Frequency>
+<NamedObject>
+  <object_id>sh_source_0</object_id>
+  <object_type>LatticePropagator</object_type>
+</NamedObject>
+<File>
+  <file_name>test_propagator.h5</file_name>
+  <path>hello/world/</path>
+  <obj_name>prop</obj_name>
+</File>
+</elem>
+
+<elem>
+<Name>HDF5_READ_NAMED_OBJECT</Name>
+<Frequency>1</Frequency>
+<NamedObject>
+  <object_id>special_field</object_id>
+  <object_type>Multi1dLatticeColorMatrix</object_type>
+</NamedObject>
+<File>
+  <file_name>test_gauge_field.h5</file_name>
+  <path>hello/world/</path>
+  <obj_name>links</obj_name>
+</File>
+</elem>
+
+    <elem>
+      <Name>PROPAGATOR</Name>
+      <Frequency>1</Frequency>
+      <Param>
+        <version>10</version>
+        <quarkSpinType>FULL</quarkSpinType>
+        <obsvP>false</obsvP>
+        <numRetries>1</numRetries>
+        <FermionAction>
+         <FermAct>UNPRECONDITIONED_CLOVER</FermAct>
+         <Kappa>0.115</Kappa>
+         <clovCoeff>1.17</clovCoeff>
+         <clovCoeffR>0.91</clovCoeffR>
+         <clovCoeffT>1.07</clovCoeffT>
+         <AnisoParam>
+           <anisoP>true</anisoP>
+           <t_dir>3</t_dir>
+           <xi_0>2.464</xi_0>
+           <nu>0.95</nu>
+         </AnisoParam>
+         <FermionBC>
+           <FermBC>SIMPLE_FERMBC</FermBC>
+           <boundary>1 1 1 -1</boundary>
+         </FermionBC>
+        </FermionAction>
+        <InvertParam>
+          <invType>CG_INVERTER</invType>
+          <RsdCG>1.0e-8</RsdCG>
+          <MaxCG>1000</MaxCG>
+        </InvertParam>
+      </Param>
+      <NamedObject>
+        <gauge_id>special_field</gauge_id>
+        <source_id>sh_source_0</source_id>
+        <prop_id>sh_prop_0</prop_id>
+      </NamedObject>
+    </elem>
+
+
+  </InlineMeasurements>
+   <nrow>4 4 4 8</nrow>
+</Param>
+
+<RNG>
+  <Seed>	
+    <elem>11</elem>
+    <elem>11</elem>
+    <elem>11</elem>
+    <elem>0</elem>
+  </Seed>
+</RNG>
+
+<Cfg>
+ <cfg_type>WEAK_FIELD</cfg_type>
+ <cfg_file>dummy</cfg_file>
+</Cfg>
+</lalibe>
+
+

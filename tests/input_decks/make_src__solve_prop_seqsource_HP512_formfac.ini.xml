@@ -1,0 +1,419 @@
+<?xml version="1.0"?>
+<lalibe>
+<annotation>
+;
+; Test input file for lalibe main program
+;
+</annotation>
+<Param>
+  <InlineMeasurements>
+
+    <elem>
+      <Name>MAKE_SOURCE</Name>
+      <Frequency>1</Frequency>
+      <Param>
+	<version>6</version>
+        <Source>
+          <version>2</version>
+          <SourceType>SHELL_SOURCE</SourceType>
+          <j_decay>3</j_decay>
+          <t_srce>0 0 0 0</t_srce>
+
+          <SmearingParam>
+            <wvf_kind>GAUGE_INV_GAUSSIAN</wvf_kind>
+            <wvf_param>2.0</wvf_param>
+            <wvfIntPar>5</wvfIntPar>
+            <no_smear_dir>3</no_smear_dir>
+          </SmearingParam>
+
+          <Displacement>
+            <version>1</version>
+            <DisplacementType>NONE</DisplacementType>
+          </Displacement>
+
+          <noLinkSmearing>
+            <LinkSmearingType>APE_SMEAR</LinkSmearingType>
+            <link_smear_fact>2.5</link_smear_fact>
+            <link_smear_num>1</link_smear_num>
+            <no_smear_dir>3</no_smear_dir>
+          </noLinkSmearing>
+        </Source>
+      </Param>
+      <NamedObject>
+        <gauge_id>default_gauge_field</gauge_id>
+        <source_id>sh_source_0</source_id>
+      </NamedObject>
+    </elem>
+
+
+    <elem>
+      <Name>PROPAGATOR</Name>
+      <Frequency>1</Frequency>
+      <Param>
+	<version>10</version>
+        <quarkSpinType>FULL</quarkSpinType>
+        <obsvP>false</obsvP>
+        <numRetries>1</numRetries>
+        <FermionAction>
+         <FermAct>UNPRECONDITIONED_CLOVER</FermAct>
+         <Kappa>0.115</Kappa>
+         <clovCoeff>1.17</clovCoeff>
+         <clovCoeffR>0.91</clovCoeffR>
+         <clovCoeffT>1.07</clovCoeffT>
+         <AnisoParam>
+           <anisoP>true</anisoP>
+           <t_dir>3</t_dir>
+           <xi_0>2.464</xi_0>
+           <nu>0.95</nu>
+         </AnisoParam>
+         <FermionBC>
+           <FermBC>SIMPLE_FERMBC</FermBC>
+           <boundary>1 1 1 -1</boundary>
+         </FermionBC>
+        </FermionAction>
+        <InvertParam>
+          <invType>CG_INVERTER</invType>
+          <RsdCG>1.0e-8</RsdCG>
+          <MaxCG>1000</MaxCG>
+        </InvertParam>
+      </Param>
+      <NamedObject>
+        <gauge_id>default_gauge_field</gauge_id>
+        <source_id>sh_source_0</source_id>
+        <prop_id>sh_prop_0</prop_id>
+      </NamedObject>
+    </elem>
+
+<elem>
+    <Name>LALIBE_SEQSOURCE</Name>
+    <Frequency>1</Frequency>
+    <SeqSourceParams>
+    <particle>proton</particle>
+    <flavor>DD</flavor>
+    <source_spin>up</source_spin>
+    <sink_spin>up</sink_spin>
+    <sink_mom>0 0 0</sink_mom>
+    <t_sink>5</t_sink>
+    </SeqSourceParams>
+    <NamedObject>
+        <gauge_id>default_gauge_field</gauge_id>
+        <up_quark>sh_prop_0</up_quark>
+        <down_quark>sh_prop_0</down_quark>
+        <seqsource_id>pt_proton_DD_up_up_seqsource_src_x0y0z0t0</seqsource_id>
+    </NamedObject>
+</elem>
+
+<elem>
+  <Name>HP_PROPAGATOR</Name>   
+  <Frequency>1</Frequency>
+  <HPParams>
+   <PropagatorParam>
+   <version>10</version>
+   <quarkSpinType>FULL</quarkSpinType>
+   <obsvP>true</obsvP>
+   <numRetries>1</numRetries>
+   <FermionAction>
+    <FermAct>UNPRECONDITIONED_CLOVER</FermAct>
+    <Kappa>0.115</Kappa>
+    <clovCoeff>1.17</clovCoeff>
+    <clovCoeffR>0.91</clovCoeffR>
+    <clovCoeffT>1.07</clovCoeffT>
+    <AnisoParam>
+      <anisoP>true</anisoP>
+      <t_dir>3</t_dir>
+      <xi_0>2.464</xi_0>
+      <nu>0.95</nu>
+    </AnisoParam>
+    <FermionBC>
+      <FermBC>SIMPLE_FERMBC</FermBC>
+      <boundary>1 1 1 -1</boundary>
+    </FermionBC>
+   </FermionAction>
+   <InvertParam>
+     <invType>CG_INVERTER</invType>
+     <RsdCG>1.0e-8</RsdCG>
+     <MaxCG>1000</MaxCG>
+   </InvertParam>
+</PropagatorParam>
+   <ZN>4</ZN>
+   <Seed>
+    <Seed>
+     <elem>1971540</elem>
+     <elem>1691065</elem>
+     <elem>1835011</elem>
+     <elem>1114728</elem>
+     </Seed>
+   </Seed>
+   <starting_vector>1</starting_vector>
+   <ending_vector>512</ending_vector>
+  </HPParams>
+  <NamedObject>
+   <gauge_id>default_gauge_field</gauge_id>
+   <hp_prop_id>
+    <elem>S1</elem><elem>S2</elem><elem>S3</elem><elem>S4</elem><elem>S5</elem><elem>S6</elem>
+    <elem>S7</elem><elem>S8</elem><elem>S9</elem><elem>S10</elem><elem>S11</elem><elem>S12</elem>
+    <elem>S13</elem><elem>S14</elem><elem>S15</elem><elem>S16</elem><elem>S17</elem><elem>S18</elem>
+    <elem>S19</elem><elem>S20</elem><elem>S21</elem><elem>S22</elem><elem>S23</elem><elem>S24</elem>
+    <elem>S25</elem><elem>S26</elem><elem>S27</elem><elem>S28</elem><elem>S29</elem><elem>S30</elem>
+    <elem>S31</elem><elem>S32</elem>
+    <elem>A1</elem><elem>A2</elem><elem>A3</elem><elem>A4</elem><elem>A5</elem><elem>A6</elem>
+    <elem>A7</elem><elem>A8</elem><elem>A9</elem><elem>A10</elem><elem>A11</elem><elem>A12</elem>
+    <elem>A13</elem><elem>A14</elem><elem>A15</elem><elem>A16</elem><elem>A17</elem><elem>A18</elem>
+    <elem>A19</elem><elem>A20</elem><elem>A21</elem><elem>A22</elem><elem>A23</elem><elem>A24</elem>
+    <elem>A25</elem><elem>A26</elem><elem>A27</elem><elem>A28</elem><elem>A29</elem><elem>A30</elem>
+    <elem>A31</elem><elem>A32</elem>
+    <elem>B1</elem><elem>B2</elem><elem>B3</elem><elem>B4</elem><elem>B5</elem><elem>B6</elem>
+    <elem>B7</elem><elem>B8</elem><elem>B9</elem><elem>B10</elem><elem>B11</elem><elem>B12</elem>
+    <elem>B13</elem><elem>B14</elem><elem>B15</elem><elem>B16</elem><elem>B17</elem><elem>B18</elem>
+    <elem>B19</elem><elem>B20</elem><elem>B21</elem><elem>B22</elem><elem>B23</elem><elem>B24</elem>
+    <elem>B25</elem><elem>B26</elem><elem>B27</elem><elem>B28</elem><elem>B29</elem><elem>B30</elem>
+    <elem>B31</elem><elem>B32</elem>
+    <elem>C1</elem><elem>C2</elem><elem>C3</elem><elem>C4</elem><elem>C5</elem><elem>C6</elem>
+    <elem>C7</elem><elem>C8</elem><elem>C9</elem><elem>C10</elem><elem>C11</elem><elem>C12</elem>
+    <elem>C13</elem><elem>C14</elem><elem>C15</elem><elem>C16</elem><elem>C17</elem><elem>C18</elem>
+    <elem>C19</elem><elem>C20</elem><elem>C21</elem><elem>C22</elem><elem>C23</elem><elem>C24</elem>
+    <elem>C25</elem><elem>C26</elem><elem>C27</elem><elem>C28</elem><elem>C29</elem><elem>C30</elem>
+    <elem>C31</elem><elem>C32</elem>
+    <elem>D1</elem><elem>D2</elem><elem>D3</elem><elem>D4</elem><elem>D5</elem><elem>D6</elem>
+    <elem>D7</elem><elem>D8</elem><elem>D9</elem><elem>D10</elem><elem>D11</elem><elem>D12</elem>
+    <elem>D13</elem><elem>D14</elem><elem>D15</elem><elem>D16</elem><elem>D17</elem><elem>D18</elem>
+    <elem>D19</elem><elem>D20</elem><elem>D21</elem><elem>D22</elem><elem>D23</elem><elem>D24</elem>
+    <elem>D25</elem><elem>D26</elem><elem>D27</elem><elem>D28</elem><elem>D29</elem><elem>D30</elem>
+    <elem>D31</elem><elem>D32</elem>
+    <elem>E1</elem><elem>E2</elem><elem>E3</elem><elem>E4</elem><elem>E5</elem><elem>E6</elem>
+    <elem>E7</elem><elem>E8</elem><elem>E9</elem><elem>E10</elem><elem>E11</elem><elem>E12</elem>
+    <elem>E13</elem><elem>E14</elem><elem>E15</elem><elem>E16</elem><elem>E17</elem><elem>E18</elem>
+    <elem>E19</elem><elem>E20</elem><elem>E21</elem><elem>E22</elem><elem>E23</elem><elem>E24</elem>
+    <elem>E25</elem><elem>E26</elem><elem>E27</elem><elem>E28</elem><elem>E29</elem><elem>E30</elem>
+    <elem>E31</elem><elem>E32</elem>
+    <elem>F1</elem><elem>F2</elem><elem>F3</elem><elem>F4</elem><elem>F5</elem><elem>F6</elem>
+    <elem>F7</elem><elem>F8</elem><elem>F9</elem><elem>F10</elem><elem>F11</elem><elem>F12</elem>
+    <elem>F13</elem><elem>F14</elem><elem>F15</elem><elem>F16</elem><elem>F17</elem><elem>F18</elem>
+    <elem>F19</elem><elem>F20</elem><elem>F21</elem><elem>F22</elem><elem>F23</elem><elem>F24</elem>
+    <elem>F25</elem><elem>F26</elem><elem>F27</elem><elem>F28</elem><elem>F29</elem><elem>F30</elem>
+    <elem>F31</elem><elem>F32</elem>
+    <elem>G1</elem><elem>G2</elem><elem>G3</elem><elem>G4</elem><elem>G5</elem><elem>G6</elem>
+    <elem>G7</elem><elem>G8</elem><elem>G9</elem><elem>G10</elem><elem>G11</elem><elem>G12</elem>
+    <elem>G13</elem><elem>G14</elem><elem>G15</elem><elem>G16</elem><elem>G17</elem><elem>G18</elem>
+    <elem>G19</elem><elem>G20</elem><elem>G21</elem><elem>G22</elem><elem>G23</elem><elem>G24</elem>
+    <elem>G25</elem><elem>G26</elem><elem>G27</elem><elem>G28</elem><elem>G29</elem><elem>G30</elem>
+    <elem>G31</elem><elem>G32</elem>
+    <elem>H1</elem><elem>H2</elem><elem>H3</elem><elem>H4</elem><elem>H5</elem><elem>H6</elem>
+    <elem>H7</elem><elem>H8</elem><elem>H9</elem><elem>H10</elem><elem>H11</elem><elem>H12</elem>
+    <elem>H13</elem><elem>H14</elem><elem>H15</elem><elem>H16</elem><elem>H17</elem><elem>H18</elem>
+    <elem>H19</elem><elem>H20</elem><elem>H21</elem><elem>H22</elem><elem>H23</elem><elem>H24</elem>
+    <elem>H25</elem><elem>H26</elem><elem>H27</elem><elem>H28</elem><elem>H29</elem><elem>H30</elem>
+    <elem>H31</elem><elem>H32</elem>
+    <elem>I1</elem><elem>I2</elem><elem>I3</elem><elem>I4</elem><elem>I5</elem><elem>I6</elem>
+    <elem>I7</elem><elem>I8</elem><elem>I9</elem><elem>I10</elem><elem>I11</elem><elem>I12</elem>
+    <elem>I13</elem><elem>I14</elem><elem>I15</elem><elem>I16</elem><elem>I17</elem><elem>I18</elem>
+    <elem>I19</elem><elem>I20</elem><elem>I21</elem><elem>I22</elem><elem>I23</elem><elem>I24</elem>
+    <elem>I25</elem><elem>I26</elem><elem>I27</elem><elem>I28</elem><elem>I29</elem><elem>I30</elem>
+    <elem>I31</elem><elem>I32</elem>
+    <elem>J1</elem><elem>J2</elem><elem>J3</elem><elem>J4</elem><elem>J5</elem><elem>J6</elem>
+    <elem>J7</elem><elem>J8</elem><elem>J9</elem><elem>J10</elem><elem>J11</elem><elem>J12</elem>
+    <elem>J13</elem><elem>J14</elem><elem>J15</elem><elem>J16</elem><elem>J17</elem><elem>J18</elem>
+    <elem>J19</elem><elem>J20</elem><elem>J21</elem><elem>J22</elem><elem>J23</elem><elem>J24</elem>
+    <elem>J25</elem><elem>J26</elem><elem>J27</elem><elem>J28</elem><elem>J29</elem><elem>J30</elem>
+    <elem>J31</elem><elem>J32</elem>
+    <elem>K1</elem><elem>K2</elem><elem>K3</elem><elem>K4</elem><elem>K5</elem><elem>K6</elem>
+    <elem>K7</elem><elem>K8</elem><elem>K9</elem><elem>K10</elem><elem>K11</elem><elem>K12</elem>
+    <elem>K13</elem><elem>K14</elem><elem>K15</elem><elem>K16</elem><elem>K17</elem><elem>K18</elem>
+    <elem>K19</elem><elem>K20</elem><elem>K21</elem><elem>K22</elem><elem>K23</elem><elem>K24</elem>
+    <elem>K25</elem><elem>K26</elem><elem>K27</elem><elem>K28</elem><elem>K29</elem><elem>K30</elem>
+    <elem>K31</elem><elem>K32</elem>
+    <elem>L1</elem><elem>L2</elem><elem>L3</elem><elem>L4</elem><elem>L5</elem><elem>L6</elem>
+    <elem>L7</elem><elem>L8</elem><elem>L9</elem><elem>L10</elem><elem>L11</elem><elem>L12</elem>
+    <elem>L13</elem><elem>L14</elem><elem>L15</elem><elem>L16</elem><elem>L17</elem><elem>L18</elem>
+    <elem>L19</elem><elem>L20</elem><elem>L21</elem><elem>L22</elem><elem>L23</elem><elem>L24</elem>
+    <elem>L25</elem><elem>L26</elem><elem>L27</elem><elem>L28</elem><elem>L29</elem><elem>L30</elem>
+    <elem>L31</elem><elem>L32</elem>
+    <elem>M1</elem><elem>M2</elem><elem>M3</elem><elem>M4</elem><elem>M5</elem><elem>M6</elem>
+    <elem>M7</elem><elem>M8</elem><elem>M9</elem><elem>M10</elem><elem>M11</elem><elem>M12</elem>
+    <elem>M13</elem><elem>M14</elem><elem>M15</elem><elem>M16</elem><elem>M17</elem><elem>M18</elem>
+    <elem>M19</elem><elem>M20</elem><elem>M21</elem><elem>M22</elem><elem>M23</elem><elem>M24</elem>
+    <elem>M25</elem><elem>M26</elem><elem>M27</elem><elem>M28</elem><elem>M29</elem><elem>M30</elem>
+    <elem>M31</elem><elem>M32</elem>
+    <elem>N1</elem><elem>N2</elem><elem>N3</elem><elem>N4</elem><elem>N5</elem><elem>N6</elem>
+    <elem>N7</elem><elem>N8</elem><elem>N9</elem><elem>N10</elem><elem>N11</elem><elem>N12</elem>
+    <elem>N13</elem><elem>N14</elem><elem>N15</elem><elem>N16</elem><elem>N17</elem><elem>N18</elem>
+    <elem>N19</elem><elem>N20</elem><elem>N21</elem><elem>N22</elem><elem>N23</elem><elem>N24</elem>
+    <elem>N25</elem><elem>N26</elem><elem>N27</elem><elem>N28</elem><elem>N29</elem><elem>N30</elem>
+    <elem>N31</elem><elem>N32</elem>
+    <elem>O1</elem><elem>O2</elem><elem>O3</elem><elem>O4</elem><elem>O5</elem><elem>O6</elem>
+    <elem>O7</elem><elem>O8</elem><elem>O9</elem><elem>O10</elem><elem>O11</elem><elem>O12</elem>
+    <elem>O13</elem><elem>O14</elem><elem>O15</elem><elem>O16</elem><elem>O17</elem><elem>O18</elem>
+    <elem>O19</elem><elem>O20</elem><elem>O21</elem><elem>O22</elem><elem>O23</elem><elem>O24</elem>
+    <elem>O25</elem><elem>O26</elem><elem>O27</elem><elem>O28</elem><elem>O29</elem><elem>O30</elem>
+    <elem>O31</elem><elem>O32</elem>
+   </hp_prop_id>
+  </NamedObject>
+</elem>
+
+<elem>
+  <Name>HP_FH_PROPAGATOR</Name>
+  <Frequency>1</Frequency>
+  <HPFHParams>
+   <ZN>4</ZN>
+   <currents><elem>S</elem></currents>
+   <starting_vector>1</starting_vector>
+   <ending_vector>512</ending_vector>
+   <Seed><Seed><elem>1971540</elem><elem>1691065</elem><elem>1835011</elem>
+    <elem>1114728</elem></Seed></Seed>
+  </HPFHParams>
+  <NamedObject>
+    <gauge_id>default_gauge_field</gauge_id>
+    <src_prop_id>pt_proton_DD_up_up_seqsource_src_x0y0z0t0</src_prop_id>
+    <hp_prop_id>
+      <elem>S1</elem><elem>S2</elem><elem>S3</elem><elem>S4</elem><elem>S5</elem><elem>S6</elem>
+      <elem>S7</elem><elem>S8</elem><elem>S9</elem><elem>S10</elem><elem>S11</elem><elem>S12</elem>
+      <elem>S13</elem><elem>S14</elem><elem>S15</elem><elem>S16</elem><elem>S17</elem><elem>S18</elem>
+      <elem>S19</elem><elem>S20</elem><elem>S21</elem><elem>S22</elem><elem>S23</elem><elem>S24</elem>
+      <elem>S25</elem><elem>S26</elem><elem>S27</elem><elem>S28</elem><elem>S29</elem><elem>S30</elem>
+      <elem>S31</elem><elem>S32</elem>
+      <elem>A1</elem><elem>A2</elem><elem>A3</elem><elem>A4</elem><elem>A5</elem><elem>A6</elem>
+      <elem>A7</elem><elem>A8</elem><elem>A9</elem><elem>A10</elem><elem>A11</elem><elem>A12</elem>
+      <elem>A13</elem><elem>A14</elem><elem>A15</elem><elem>A16</elem><elem>A17</elem><elem>A18</elem>
+      <elem>A19</elem><elem>A20</elem><elem>A21</elem><elem>A22</elem><elem>A23</elem><elem>A24</elem>
+      <elem>A25</elem><elem>A26</elem><elem>A27</elem><elem>A28</elem><elem>A29</elem><elem>A30</elem>
+      <elem>A31</elem><elem>A32</elem>
+      <elem>B1</elem><elem>B2</elem><elem>B3</elem><elem>B4</elem><elem>B5</elem><elem>B6</elem>
+      <elem>B7</elem><elem>B8</elem><elem>B9</elem><elem>B10</elem><elem>B11</elem><elem>B12</elem>
+      <elem>B13</elem><elem>B14</elem><elem>B15</elem><elem>B16</elem><elem>B17</elem><elem>B18</elem>
+      <elem>B19</elem><elem>B20</elem><elem>B21</elem><elem>B22</elem><elem>B23</elem><elem>B24</elem>
+      <elem>B25</elem><elem>B26</elem><elem>B27</elem><elem>B28</elem><elem>B29</elem><elem>B30</elem>
+      <elem>B31</elem><elem>B32</elem>
+      <elem>C1</elem><elem>C2</elem><elem>C3</elem><elem>C4</elem><elem>C5</elem><elem>C6</elem>
+      <elem>C7</elem><elem>C8</elem><elem>C9</elem><elem>C10</elem><elem>C11</elem><elem>C12</elem>
+      <elem>C13</elem><elem>C14</elem><elem>C15</elem><elem>C16</elem><elem>C17</elem><elem>C18</elem>
+      <elem>C19</elem><elem>C20</elem><elem>C21</elem><elem>C22</elem><elem>C23</elem><elem>C24</elem>
+      <elem>C25</elem><elem>C26</elem><elem>C27</elem><elem>C28</elem><elem>C29</elem><elem>C30</elem>
+      <elem>C31</elem><elem>C32</elem>
+      <elem>D1</elem><elem>D2</elem><elem>D3</elem><elem>D4</elem><elem>D5</elem><elem>D6</elem>
+      <elem>D7</elem><elem>D8</elem><elem>D9</elem><elem>D10</elem><elem>D11</elem><elem>D12</elem>
+      <elem>D13</elem><elem>D14</elem><elem>D15</elem><elem>D16</elem><elem>D17</elem><elem>D18</elem>
+      <elem>D19</elem><elem>D20</elem><elem>D21</elem><elem>D22</elem><elem>D23</elem><elem>D24</elem>
+      <elem>D25</elem><elem>D26</elem><elem>D27</elem><elem>D28</elem><elem>D29</elem><elem>D30</elem>
+      <elem>D31</elem><elem>D32</elem>
+      <elem>E1</elem><elem>E2</elem><elem>E3</elem><elem>E4</elem><elem>E5</elem><elem>E6</elem>
+      <elem>E7</elem><elem>E8</elem><elem>E9</elem><elem>E10</elem><elem>E11</elem><elem>E12</elem>
+      <elem>E13</elem><elem>E14</elem><elem>E15</elem><elem>E16</elem><elem>E17</elem><elem>E18</elem>
+      <elem>E19</elem><elem>E20</elem><elem>E21</elem><elem>E22</elem><elem>E23</elem><elem>E24</elem>
+      <elem>E25</elem><elem>E26</elem><elem>E27</elem><elem>E28</elem><elem>E29</elem><elem>E30</elem>
+      <elem>E31</elem><elem>E32</elem>
+      <elem>F1</elem><elem>F2</elem><elem>F3</elem><elem>F4</elem><elem>F5</elem><elem>F6</elem>
+      <elem>F7</elem><elem>F8</elem><elem>F9</elem><elem>F10</elem><elem>F11</elem><elem>F12</elem>
+      <elem>F13</elem><elem>F14</elem><elem>F15</elem><elem>F16</elem><elem>F17</elem><elem>F18</elem>
+      <elem>F19</elem><elem>F20</elem><elem>F21</elem><elem>F22</elem><elem>F23</elem><elem>F24</elem>
+      <elem>F25</elem><elem>F26</elem><elem>F27</elem><elem>F28</elem><elem>F29</elem><elem>F30</elem>
+      <elem>F31</elem><elem>F32</elem>
+      <elem>G1</elem><elem>G2</elem><elem>G3</elem><elem>G4</elem><elem>G5</elem><elem>G6</elem>
+      <elem>G7</elem><elem>G8</elem><elem>G9</elem><elem>G10</elem><elem>G11</elem><elem>G12</elem>
+      <elem>G13</elem><elem>G14</elem><elem>G15</elem><elem>G16</elem><elem>G17</elem><elem>G18</elem>
+      <elem>G19</elem><elem>G20</elem><elem>G21</elem><elem>G22</elem><elem>G23</elem><elem>G24</elem>
+      <elem>G25</elem><elem>G26</elem><elem>G27</elem><elem>G28</elem><elem>G29</elem><elem>G30</elem>
+      <elem>G31</elem><elem>G32</elem>
+      <elem>H1</elem><elem>H2</elem><elem>H3</elem><elem>H4</elem><elem>H5</elem><elem>H6</elem>
+      <elem>H7</elem><elem>H8</elem><elem>H9</elem><elem>H10</elem><elem>H11</elem><elem>H12</elem>
+      <elem>H13</elem><elem>H14</elem><elem>H15</elem><elem>H16</elem><elem>H17</elem><elem>H18</elem>
+      <elem>H19</elem><elem>H20</elem><elem>H21</elem><elem>H22</elem><elem>H23</elem><elem>H24</elem>
+      <elem>H25</elem><elem>H26</elem><elem>H27</elem><elem>H28</elem><elem>H29</elem><elem>H30</elem>
+      <elem>H31</elem><elem>H32</elem>
+      <elem>I1</elem><elem>I2</elem><elem>I3</elem><elem>I4</elem><elem>I5</elem><elem>I6</elem>
+      <elem>I7</elem><elem>I8</elem><elem>I9</elem><elem>I10</elem><elem>I11</elem><elem>I12</elem>
+      <elem>I13</elem><elem>I14</elem><elem>I15</elem><elem>I16</elem><elem>I17</elem><elem>I18</elem>
+      <elem>I19</elem><elem>I20</elem><elem>I21</elem><elem>I22</elem><elem>I23</elem><elem>I24</elem>
+      <elem>I25</elem><elem>I26</elem><elem>I27</elem><elem>I28</elem><elem>I29</elem><elem>I30</elem>
+      <elem>I31</elem><elem>I32</elem>
+      <elem>J1</elem><elem>J2</elem><elem>J3</elem><elem>J4</elem><elem>J5</elem><elem>J6</elem>
+      <elem>J7</elem><elem>J8</elem><elem>J9</elem><elem>J10</elem><elem>J11</elem><elem>J12</elem>
+      <elem>J13</elem><elem>J14</elem><elem>J15</elem><elem>J16</elem><elem>J17</elem><elem>J18</elem>
+      <elem>J19</elem><elem>J20</elem><elem>J21</elem><elem>J22</elem><elem>J23</elem><elem>J24</elem>
+      <elem>J25</elem><elem>J26</elem><elem>J27</elem><elem>J28</elem><elem>J29</elem><elem>J30</elem>
+      <elem>J31</elem><elem>J32</elem>
+      <elem>K1</elem><elem>K2</elem><elem>K3</elem><elem>K4</elem><elem>K5</elem><elem>K6</elem>
+      <elem>K7</elem><elem>K8</elem><elem>K9</elem><elem>K10</elem><elem>K11</elem><elem>K12</elem>
+      <elem>K13</elem><elem>K14</elem><elem>K15</elem><elem>K16</elem><elem>K17</elem><elem>K18</elem>
+      <elem>K19</elem><elem>K20</elem><elem>K21</elem><elem>K22</elem><elem>K23</elem><elem>K24</elem>
+      <elem>K25</elem><elem>K26</elem><elem>K27</elem><elem>K28</elem><elem>K29</elem><elem>K30</elem>
+      <elem>K31</elem><elem>K32</elem>
+      <elem>L1</elem><elem>L2</elem><elem>L3</elem><elem>L4</elem><elem>L5</elem><elem>L6</elem>
+      <elem>L7</elem><elem>L8</elem><elem>L9</elem><elem>L10</elem><elem>L11</elem><elem>L12</elem>
+      <elem>L13</elem><elem>L14</elem><elem>L15</elem><elem>L16</elem><elem>L17</elem><elem>L18</elem>
+      <elem>L19</elem><elem>L20</elem><elem>L21</elem><elem>L22</elem><elem>L23</elem><elem>L24</elem>
+      <elem>L25</elem><elem>L26</elem><elem>L27</elem><elem>L28</elem><elem>L29</elem><elem>L30</elem>
+      <elem>L31</elem><elem>L32</elem>
+      <elem>M1</elem><elem>M2</elem><elem>M3</elem><elem>M4</elem><elem>M5</elem><elem>M6</elem>
+      <elem>M7</elem><elem>M8</elem><elem>M9</elem><elem>M10</elem><elem>M11</elem><elem>M12</elem>
+      <elem>M13</elem><elem>M14</elem><elem>M15</elem><elem>M16</elem><elem>M17</elem><elem>M18</elem>
+      <elem>M19</elem><elem>M20</elem><elem>M21</elem><elem>M22</elem><elem>M23</elem><elem>M24</elem>
+      <elem>M25</elem><elem>M26</elem><elem>M27</elem><elem>M28</elem><elem>M29</elem><elem>M30</elem>
+      <elem>M31</elem><elem>M32</elem>
+      <elem>N1</elem><elem>N2</elem><elem>N3</elem><elem>N4</elem><elem>N5</elem><elem>N6</elem>
+      <elem>N7</elem><elem>N8</elem><elem>N9</elem><elem>N10</elem><elem>N11</elem><elem>N12</elem>
+      <elem>N13</elem><elem>N14</elem><elem>N15</elem><elem>N16</elem><elem>N17</elem><elem>N18</elem>
+      <elem>N19</elem><elem>N20</elem><elem>N21</elem><elem>N22</elem><elem>N23</elem><elem>N24</elem>
+      <elem>N25</elem><elem>N26</elem><elem>N27</elem><elem>N28</elem><elem>N29</elem><elem>N30</elem>
+      <elem>N31</elem><elem>N32</elem>
+      <elem>O1</elem><elem>O2</elem><elem>O3</elem><elem>O4</elem><elem>O5</elem><elem>O6</elem>
+      <elem>O7</elem><elem>O8</elem><elem>O9</elem><elem>O10</elem><elem>O11</elem><elem>O12</elem>
+      <elem>O13</elem><elem>O14</elem><elem>O15</elem><elem>O16</elem><elem>O17</elem><elem>O18</elem>
+      <elem>O19</elem><elem>O20</elem><elem>O21</elem><elem>O22</elem><elem>O23</elem><elem>O24</elem>
+      <elem>O25</elem><elem>O26</elem><elem>O27</elem><elem>O28</elem><elem>O29</elem><elem>O30</elem>
+      <elem>O31</elem><elem>O32</elem>
+    </hp_prop_id>
+    <fh_prop_id>
+      <elem>prop_pt_proton_DD_up_up_seqsource_src_x0y0z0t0</elem>
+    </fh_prop_id>
+  </NamedObject>
+</elem>
+
+    <elem>
+      <annotation>
+      ; BAR3PTFN input file.
+      </annotation>
+
+      <Name>LALIBE_BAR3PTFN</Name>
+      <Frequency>1</Frequency>
+      <Param>
+	<version>7</version>
+        <j_decay>3</j_decay>
+       <currents><elem>S</elem><elem>P</elem><elem>V4</elem><elem>A3</elem></currents>
+       <p2_max>1</p2_max>
+        <h5_file_name>bar3ptfn_HP512.h5</h5_file_name>
+        <path>/testing</path>
+      </Param>
+      <NamedObject>
+        <gauge_id>default_gauge_field</gauge_id>
+        <prop_id>sh_prop_0</prop_id>
+        <seqprops>
+          <elem>
+            <seqprop_id>prop_pt_proton_DD_up_up_seqsource_src_x0y0z0t0</seqprop_id>
+            <gamma_insertion>0</gamma_insertion>
+          </elem>
+       </seqprops>
+      </NamedObject>
+    </elem>
+
+
+
+
+  </InlineMeasurements>
+   <nrow>4 4 4 8</nrow>
+</Param>
+
+<RNG>
+  <Seed>
+    <elem>11</elem>
+    <elem>11</elem>
+    <elem>11</elem>
+    <elem>0</elem>
+  </Seed>
+</RNG>
+
+<Cfg>
+ <cfg_type>WEAK_FIELD</cfg_type>
+ <cfg_file>dummy</cfg_file>
+</Cfg>
+</lalibe>
+

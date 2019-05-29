@@ -1,0 +1,107 @@
+<?xml version="1.0"?>
+<lalibe>
+<annotation>
+;
+; Test input file for lalibe
+;
+</annotation>
+<Param>
+<InlineMeasurements>
+
+<elem>
+  <Name>HDF5_READ_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>PS_prop</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./test_propagator.h5</file_name>
+    <path>/sh_sig2p0_n5</path>
+    <obj_name>PS_prop</obj_name>
+  </File>
+</elem>
+
+<elem>
+  <Name>FH_PROPAGATOR</Name>
+  <FHParams>
+    <currents>
+      <elem>A3</elem>
+      <elem>V4</elem>
+    </currents>
+    <PropagatorParam>
+      <version>10</version>
+      <quarkSpinType>FULL</quarkSpinType>
+      <obsvP>true</obsvP>
+      <numRetries>1</numRetries>
+      <FermionAction>
+        <FermAct>UNPRECONDITIONED_CLOVER</FermAct>
+        <Mass>0.5</Mass>
+        <clovCoeff>1.17</clovCoeff>
+        <FermionBC>
+          <FermBC>SIMPLE_FERMBC</FermBC>
+          <boundary>1 1 1 -1</boundary>
+        </FermionBC>
+      </FermionAction>
+      <InvertParam>
+        <invType>CG_INVERTER</invType>
+        <RsdCG>1.0e-9</RsdCG>
+        <MaxCG>1000</MaxCG>
+      </InvertParam>
+    </PropagatorParam>
+  </FHParams>
+  <NamedObject>
+  <gauge_id>default_gauge_field</gauge_id>
+  <src_prop_id>PS_prop</src_prop_id>
+  <fh_prop_id>
+    <elem>fh_prop_A3</elem>
+    <elem>fh_prop_V4</elem>
+  </fh_prop_id>
+  </NamedObject>
+</elem>
+
+<elem>
+  <Name>HDF5_WRITE_ERASE_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>fh_prop_A3</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./test_fh_propagator.h5</file_name>
+    <path>/PS</path>
+    <obj_name>fh_prop_A3</obj_name>
+  </File>
+</elem>
+<elem>
+  <Name>HDF5_WRITE_ERASE_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>fh_prop_V4</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./test_fh_propagator.h5</file_name>
+    <path>/PS</path>
+    <obj_name>fh_prop_V4</obj_name>
+  </File>
+</elem>
+    
+</InlineMeasurements>
+<nrow>4 4 4 8</nrow>
+</Param>
+
+<RNG>
+  <Seed>
+    <elem>11</elem>
+    <elem>11</elem>
+    <elem>11</elem>
+    <elem>0</elem>
+  </Seed>
+</RNG>
+
+<Cfg>
+  <cfg_type>WEAK_FIELD</cfg_type>
+  <cfg_file>dummy</cfg_file>
+</Cfg>
+</lalibe>

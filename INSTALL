@@ -1,0 +1,31 @@
+
+To compile lalibe, you must specify where chroma is with the following directive:
+
+-DCHROMA_INSTALL=<chroma installation path>
+
+For now, chroma is a dependency of lalibe, although this may change in the future.
+Here is a sample script below for compiling lalibe (assuming the source code is in a folder called src and chroma is compiled in a folder named install).
+
+#!/bin/bash
+#
+#################
+# BUILD LALIBE
+#################
+
+INSTALLDIR=install
+SRCDIR=src
+
+mkdir  ./build_lalibe
+cd ./build_lalibe
+
+export CC=`which mpicc`
+export CXX=`which mpicxx`
+
+CHROMA_DIR=${INSTALLDIR}/chroma
+cmake -DCHROMA_INSTALL=${CHROMA_DIR} -DCMAKE_INSTALL_PREFIX=${INSTALLDIR}/lalibe ${SRCDIR}/lalibe
+
+make
+make install
+
+popd
+

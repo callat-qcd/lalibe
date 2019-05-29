@@ -1,0 +1,305 @@
+<?xml version="1.0"?>
+<lalibe>
+<annotation>
+;
+; Test input file for chroma main program
+;
+</annotation>
+<Param>
+    <InlineMeasurements>
+    <elem>
+      <Name>MAKE_SOURCE</Name>
+      <Frequency>1</Frequency>
+      <Param>
+        <version>6</version>
+        <Source>
+          <version>2</version>
+          <SourceType>POINT_SOURCE</SourceType>
+          <j_decay>3</j_decay>
+          <t_srce>0 0 0 0</t_srce>
+        </Source>
+      </Param>
+      <NamedObject>
+        <gauge_id>default_gauge_field</gauge_id>
+        <source_id>pt_source_0</source_id>
+      </NamedObject>
+    </elem>
+
+    <elem>
+      <Name>PROPAGATOR</Name>
+      <Frequency>1</Frequency>
+      <Param>
+        <version>10</version>
+        <quarkSpinType>FULL</quarkSpinType>
+        <obsvP>false</obsvP>
+        <numRetries>1</numRetries>
+        <FermionAction>
+         <FermAct>UNPRECONDITIONED_CLOVER</FermAct>
+         <Mass>0.5</Mass>
+         <clovCoeff>1.</clovCoeff>
+         <FermionBC>
+           <FermBC>SIMPLE_FERMBC</FermBC>
+           <boundary>1 1 1 -1</boundary>
+         </FermionBC>
+        </FermionAction>
+        <InvertParam>
+          <invType>CG_INVERTER</invType>
+          <RsdCG>1.0e-6</RsdCG>
+          <MaxCG>1000</MaxCG>
+        </InvertParam>
+      </Param>
+      <NamedObject>
+        <gauge_id>default_gauge_field</gauge_id>
+        <source_id>pt_source_0</source_id>
+        <prop_id>pt_prop_0</prop_id>
+      </NamedObject>
+    </elem>
+
+<elem>
+<Name>FH_PROPAGATOR</Name>
+<FHParams>
+<currents><elem>A3</elem><elem>V4</elem></currents>
+<PropagatorParam>
+    <version>10</version>
+    <quarkSpinType>FULL</quarkSpinType>
+    <obsvP>true</obsvP>
+    <numRetries>1</numRetries>
+    <FermionAction>
+      <FermAct>UNPRECONDITIONED_CLOVER</FermAct>
+         <Mass>0.5</Mass>
+         <clovCoeff>1.</clovCoeff>
+         <FermionBC>
+           <FermBC>SIMPLE_FERMBC</FermBC>
+           <boundary>1 1 1 -1</boundary>
+         </FermionBC>
+    </FermionAction>
+        <InvertParam>
+          <invType>CG_INVERTER</invType>
+          <RsdCG>1.0e-6</RsdCG>
+          <MaxCG>1000</MaxCG>
+        </InvertParam>
+</PropagatorParam>
+</FHParams>
+<NamedObject>
+  <gauge_id>default_gauge_field</gauge_id>
+  <src_prop_id>pt_prop_0</src_prop_id>
+  <fh_prop_id><elem>fh_prop_A3</elem> <elem>fh_prop_V4</elem></fh_prop_id>
+</NamedObject>
+</elem>
+
+<elem>
+  <Name>BARYON_CONTRACTIONS</Name>
+  <Frequency>1</Frequency>
+  <BaryonParams>
+   <ng_parity>true</ng_parity>
+   <h5_file_name>lalibe_proton.h5</h5_file_name>
+   <path>/</path>
+   <p2_max>1</p2_max>
+   <particle_list><elem>proton</elem></particle_list>
+  </BaryonParams>
+  <NamedObject>
+    <up_quark>pt_prop_0</up_quark>
+    <down_quark>pt_prop_0</down_quark>
+  </NamedObject>
+</elem>
+
+<elem>
+  <Name>FLAVOR_CHANGING_FH_BARYON_CONTRACTIONS</Name>
+  <Frequency>1</Frequency>
+  <FlavorChangingFHBaryonParams>
+   <ng_parity>true</ng_parity>
+   <current>A3</current>
+   <flavor>UD</flavor>
+   <h5_file_name>lalibe_proton.h5</h5_file_name>
+   <path>/pt</path>
+   <p2_max>0</p2_max>
+   <particle_list><elem>proton_neutron</elem></particle_list>
+  </FlavorChangingFHBaryonParams>
+  <NamedObject>
+    <up_quark>pt_prop_0</up_quark>
+    <down_quark>pt_prop_0</down_quark>
+    <fh_quark>fh_prop_A3</fh_quark>
+  </NamedObject>
+</elem>
+
+<elem>
+  <Name>FLAVOR_CHANGING_FH_BARYON_CONTRACTIONS</Name>
+  <Frequency>1</Frequency>
+  <FlavorChangingFHBaryonParams>
+   <ng_parity>true</ng_parity>
+   <current>V4</current>
+   <flavor>UD</flavor>
+   <h5_file_name>lalibe_proton.h5</h5_file_name>
+   <path>/pt</path>
+   <p2_max>0</p2_max>
+   <particle_list><elem>proton_neutron</elem></particle_list>
+  </FlavorChangingFHBaryonParams>
+  <NamedObject>
+    <up_quark>pt_prop_0</up_quark>
+    <down_quark>pt_prop_0</down_quark>
+    <fh_quark>fh_prop_V4</fh_quark>
+  </NamedObject>
+</elem>
+
+<elem>
+  <Name>ZN_PROPAGATOR</Name>
+  <Frequency>1</Frequency>
+  <ZNParams>
+   <PropagatorParam>
+   <version>10</version>
+   <quarkSpinType>FULL</quarkSpinType>
+   <obsvP>true</obsvP>
+   <numRetries>1</numRetries>
+   <FermionAction>
+     <FermAct>UNPRECONDITIONED_CLOVER</FermAct>
+	<Mass>0.5</Mass>
+	<clovCoeff>1.</clovCoeff>
+	<FermionBC>
+	  <FermBC>SIMPLE_FERMBC</FermBC>
+	  <boundary>1 1 1 -1</boundary>
+	</FermionBC>
+   </FermionAction>
+       <InvertParam>
+	 <invType>CG_INVERTER</invType>
+	 <RsdCG>1.0e-6</RsdCG>
+	 <MaxCG>1000</MaxCG>
+       </InvertParam>
+</PropagatorParam>
+   <ZN>4</ZN>
+   <Seed>
+    <Seed>
+     <elem>1971540</elem>
+     <elem>1691065</elem>
+     <elem>1835011</elem>
+     <elem>1114728</elem>
+     </Seed>
+   </Seed>
+   <starting_vector>1</starting_vector>
+   <ending_vector>8</ending_vector>
+  </ZNParams>
+  <NamedObject>
+   <gauge_id>default_gauge_field</gauge_id>
+   <zn_prop_id>
+    <elem>S1</elem><elem>S2</elem><elem>S3</elem><elem>S4</elem><elem>S5</elem><elem>S6</elem>
+    <elem>S7</elem><elem>S8</elem>
+   </zn_prop_id>
+  </NamedObject>
+</elem>
+
+<elem>
+  <Name>STOCHASTIC_FH_PROPAGATOR</Name>
+  <Frequency>1</Frequency>
+  <StochasticFHParams>
+   <ZN>4</ZN>
+   <currents><elem>A3</elem><elem>V4</elem></currents>
+   <starting_vector>1</starting_vector>
+   <ending_vector>8</ending_vector>
+   <mom_list><elem>0 0 0</elem><elem>0 0 1</elem></mom_list>
+   <Seed><Seed><elem>1971540</elem><elem>1691065</elem><elem>1835011</elem>
+    <elem>1114728</elem></Seed></Seed>
+  </StochasticFHParams>
+  <NamedObject>
+    <gauge_id>default_gauge_field</gauge_id>
+    <src_prop_id>pt_prop_0</src_prop_id>
+    <noise_prop_id><elem>S1</elem><elem>S2</elem><elem>S3</elem><elem>S4</elem><elem>S5</elem><elem>S6</elem><elem>S7</elem><elem>S8</elem></noise_prop_id>
+    <fh_prop_id>
+      <elem>fh_prop_p0_A3</elem><elem>fh_prop_p1_A3</elem><elem>fh_prop_p0_V4</elem><elem>fh_prop_p1_V4</elem>
+    </fh_prop_id>
+  </NamedObject>
+</elem>
+
+<elem>
+  <Name>FLAVOR_CHANGING_FH_BARYON_CONTRACTIONS</Name>
+  <Frequency>1</Frequency>
+  <FlavorChangingFHBaryonParams>
+   <ng_parity>true</ng_parity>
+   <current>A3</current>
+   <flavor>UD</flavor>
+   <h5_file_name>lalibe_proton.h5</h5_file_name>
+   <path>/p0</path>
+   <p2_max>0</p2_max>
+   <particle_list><elem>proton_neutron</elem></particle_list>
+  </FlavorChangingFHBaryonParams>
+  <NamedObject>
+    <up_quark>pt_prop_0</up_quark>
+    <down_quark>pt_prop_0</down_quark>
+    <fh_quark>fh_prop_p0_A3</fh_quark>
+  </NamedObject>
+</elem>
+
+<elem>
+  <Name>FLAVOR_CHANGING_FH_BARYON_CONTRACTIONS</Name>
+  <Frequency>1</Frequency>
+  <FlavorChangingFHBaryonParams>
+   <ng_parity>true</ng_parity>
+   <current>A3</current>
+   <flavor>UD</flavor>
+   <h5_file_name>lalibe_proton.h5</h5_file_name>
+   <path>/p1</path>
+   <p2_max>0</p2_max>
+   <particle_list><elem>proton_neutron</elem></particle_list>
+  </FlavorChangingFHBaryonParams>
+  <NamedObject>
+    <up_quark>pt_prop_0</up_quark>
+    <down_quark>pt_prop_0</down_quark>
+    <fh_quark>fh_prop_p1_A3</fh_quark>
+  </NamedObject>
+</elem>
+
+<elem>
+  <Name>FLAVOR_CHANGING_FH_BARYON_CONTRACTIONS</Name>
+  <Frequency>1</Frequency>
+  <FlavorChangingFHBaryonParams>
+   <ng_parity>true</ng_parity>
+   <current>V4</current>
+   <flavor>UD</flavor>
+   <h5_file_name>lalibe_proton.h5</h5_file_name>
+   <path>/p0</path>
+   <p2_max>0</p2_max>
+   <particle_list><elem>proton_neutron</elem></particle_list>
+  </FlavorChangingFHBaryonParams>
+  <NamedObject>
+    <up_quark>pt_prop_0</up_quark>
+    <down_quark>pt_prop_0</down_quark>
+    <fh_quark>fh_prop_p0_V4</fh_quark>
+  </NamedObject>
+</elem>
+
+<elem>
+  <Name>FLAVOR_CHANGING_FH_BARYON_CONTRACTIONS</Name>
+  <Frequency>1</Frequency>
+  <FlavorChangingFHBaryonParams>
+   <ng_parity>true</ng_parity>
+   <current>V4</current>
+   <flavor>UD</flavor>
+   <h5_file_name>lalibe_proton.h5</h5_file_name>
+   <path>/p1</path>
+   <p2_max>0</p2_max>
+   <particle_list><elem>proton_neutron</elem></particle_list>
+  </FlavorChangingFHBaryonParams>
+  <NamedObject>
+    <up_quark>pt_prop_0</up_quark>
+    <down_quark>pt_prop_0</down_quark>
+    <fh_quark>fh_prop_p1_V4</fh_quark>
+  </NamedObject>
+</elem>
+
+
+  </InlineMeasurements>
+   <nrow>4 4 4 8</nrow>
+</Param>
+
+<RNG>
+  <Seed>
+    <elem>11</elem>
+    <elem>11</elem>
+    <elem>11</elem>
+    <elem>0</elem>
+ </Seed>
+</RNG>
+
+<Cfg>
+ <cfg_type>WEAK_FIELD</cfg_type>
+ <cfg_file>dummy</cfg_file>
+</Cfg>
+</lalibe>
