@@ -18,6 +18,7 @@
 #include "lalibe_bar3ptfn_w.h"
 #include "lalibe_seqsource_w.h"
 #include "coherent_seqsource_w.h"
+#include "NN_LC_prop_w.h"
 
 // UTILITIES
 #include "multi_prop_add.h"
@@ -57,16 +58,17 @@ namespace Chroma
 	success &= LalibeFlavorConservingFHBaryonContractionsEnv::registerAll() ;
 	success &= LalibeFlavorChangingFHBaryonContractionsEnv::registerAll() ;
 	success &= LalibeBaryonContractionsEnv::registerAll() ;
-        success &= LalibeMesonContractionsEnv::registerAll() ;
+      success &= LalibeMesonContractionsEnv::registerAll() ;
 	success &= LalibeFHPropagatorEnv::registerAll() ;
 	success &= LalibeZNPropagatorEnv::registerAll() ;
 	success &= LalibeHPPropagatorEnv::registerAll() ;
 	success &= LalibeBar3ptfnEnv::registerAll() ;
-        success &= LalibeSeqSourceEnv::registerAll() ;
-        success &= LalibeCoherentSeqsourceEnv::registerAll() ;
+      success &= LalibeSeqSourceEnv::registerAll() ;
+      success &= LalibeCoherentSeqsourceEnv::registerAll() ;
+      success &= LalibeNucleonNucleonLinearComboPropagatorEnv::registerAll() ;
 
-        // USEFUL UTILITIES
-        success &= LalibeMultiPropagatorAddEnv::registerAll() ;
+      // USEFUL UTILITIES
+      success &= LalibeMultiPropagatorAddEnv::registerAll() ;
 
 #ifdef BUILD_HDF5
 	success &= LalibeHDF5ReadNamedObjEnv::registerAll();
