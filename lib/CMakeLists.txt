@@ -19,6 +19,11 @@ if(BUILD_HDF5)
   add_definitions(-DBUILD_HDF5)
 endif(BUILD_HDF5)
 
+# FFTW library was found, so turn on source code that needs it.
+if(FFTW_INSTALL)
+  add_definitions(-DBUILD_FFTW)
+endif(FFTW_INSTALL)
+
 # Install the library: liblalibe...liblb for short.
 
 add_library(lb ${LIB_SRC})
