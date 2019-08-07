@@ -23,8 +23,12 @@ Memory management when boosting needs to be looked into.
 //bilinear_gamma above shouldn't be needed once boiler plate is removed.
 
 // Latscat Stuff
+#ifndef CUFFT
 #include "../NN/fourier_cpu.h"
-//There needs to be a switch between cpu and gpu fft later.
+#else
+#include "../NN/fourier_cuda.h"
+#endif
+#include "../NN/NN_LC_w.h"
 
 namespace Chroma
 {
@@ -98,6 +102,11 @@ namespace Chroma
         par.is_mom_max = true;
         par.p2_max = 0;
       }
+      read(paramtop, "contractions_filename", par.contractions_filename); //hdf5 file containing contractions
+      if (paramtop.count("contractions_n_sq") != 0)
+        read(paramtop, "contractions_n_sq", par.contractions_n_sq); //FIXME Description needed here.
+      else
+        par.contractions_n_sq = -1;
     }
 
     void write(XMLWriter& xml, const std::string& path, NNLCPropParams::NNLCProp_t& par)
@@ -111,6 +120,8 @@ namespace Chroma
         write(xml, "p2_max" ,par.p2_max);
       else
         write(xml, "mom_list" ,par.mom_list);
+      write(xml, "contractions_filename", par.contractions_filename); //hdf5 file containing contractions
+      write(xml, "contractions_n_sq", par.contractions_n_sq);         //FIXME Comment needed here as well.
       pop(xml);
     }
 
@@ -227,6 +238,17 @@ namespace Chroma
 #ifdef BUILD_FFTW
       Fourier fft(j_decay);
       Fourier fftblock(j_decay);
+#ifdef PROFILE
+      fft.print_flops(true);
+      fftblock.print_flops(true);
+#endif
+      QDPIO::cout << "done!" << std::endl;
+      ContractionPars contpars;
+      if(params.nnlcparam.contractions_n_sq >= 0)
+        QDPIO::cout << "Truncating output files to n_sq <= " << contpars.nsqmax <<  "!" << std::endl;
+      initTopologies(params.nnlcparam.contractions_filename, params.nnlcparam.contractions_n_sq, j_decay); 
+      //tDir changed to j_decay again in the above line.
+
 #else
       QDPIO::cout << "This measurement only works if we have linked against FFTW. Please rebuild." << std::endl;
 #endif

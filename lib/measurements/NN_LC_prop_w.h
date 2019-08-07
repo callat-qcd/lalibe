@@ -42,6 +42,8 @@ namespace Chroma
         multi1d<multi1d<int>> mom_list;       //list of momenta insertions, optional
         multi2d<int> p_list;                  //momentum list the slow fourier transform needs
         ChromaProp_t prop_param;              //params for next lin solve
+        std::string contractions_filename;    //filename of hdf5 file that contains contraction terms
+        int contractions_n_sq;                //FIXME What comment do I put for this?
       } nnlcparam ;
 
       struct NamedObject_t

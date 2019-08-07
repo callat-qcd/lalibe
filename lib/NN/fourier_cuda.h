@@ -1,3 +1,5 @@
+//Arjun Singh Gambhir
+//Code ported from latscat.
 #ifndef _FOURIER
 #define _FOURIER
 

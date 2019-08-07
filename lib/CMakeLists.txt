@@ -12,6 +12,7 @@ file(GLOB LIB_SRC RELATIVE ${PROJECT_SOURCE_DIR}
     "io/*.cc"
     "numerics/*.cc"
     "momentum/*.cc"
+    "NN/*.cc"
 )
 
 # Build with hdf5 io stuff if the user wants.
