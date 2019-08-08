@@ -102,11 +102,37 @@ namespace Chroma
         par.is_mom_max = true;
         par.p2_max = 0;
       }
+      //Where latscat params start.
       read(paramtop, "contractions_filename", par.contractions_filename); //hdf5 file containing contractions
       if (paramtop.count("contractions_n_sq") != 0)
         read(paramtop, "contractions_n_sq", par.contractions_n_sq); //FIXME Description needed here.
       else
         par.contractions_n_sq = -1;
+      if (paramtop.count("fft_chunksize") != 0)
+        read(paramtop, "fft_chunksize", par.fft_chunksize); //originally the only parameter in FFTPar struct
+      else
+        par.fft_chunksize = 0;
+      if (paramtop.count("fft_tune") != 0)
+        read(paramtop, "fft_tune", par.fft_tune); //tune fft?
+      else
+        par.fft_tune = false;
+      if (paramtop.count("boosts") != 0)
+        read(paramtop, "boosts", par.boosts); //boosts
+      else 
+      {
+        par.boosts.resize(Nd - 1);
+        for (int p = 0; p < (Nd - 1); p++)
+          par.boosts[p] = 0; //The default is no boost, ie populate with zeros.
+      }
+      read(paramtop, "output_filename", par.output_filename); //output file
+      if (paramtop.count("output_stripesize") != 0)
+        read(paramtop, "output_stripesize", par.output_stripesize); //output stripesize; default recommended
+      else
+        par.output_stripesize = -1;
+      if (paramtop.count("dirac_basis") != 0)
+        read(paramtop, "dirac_basis", par.dirac_basis); ////specifies props in dirac basis, this is false by default
+      else
+        par.dirac_basis = false;
     }
 
     void write(XMLWriter& xml, const std::string& path, NNLCPropParams::NNLCProp_t& par)
@@ -120,8 +146,15 @@ namespace Chroma
         write(xml, "p2_max" ,par.p2_max);
       else
         write(xml, "mom_list" ,par.mom_list);
+      //Where latscat params start.
       write(xml, "contractions_filename", par.contractions_filename); //hdf5 file containing contractions
       write(xml, "contractions_n_sq", par.contractions_n_sq);         //FIXME Comment needed here as well.
+      write(xml, "fft_chunksize", par.fft_chunksize);                 //originally the only parameter in FFTPar struct
+      write(xml, "fft_tune", par.fft_chunksize);                      //tune the fft?
+      write(xml, "boosts", par.boosts);                               //boosts
+      write(xml, "output_filename", par.output_filename);             //output filename
+      write(xml, "output_stripesize", par.output_stripesize);         //output stripesize; default recommended
+      write(xml, "dirac_basis", par.dirac_basis);                     //specifies props in dirac basis, this is false by default
       pop(xml);
     }
 
@@ -243,11 +276,21 @@ namespace Chroma
       fftblock.print_flops(true);
 #endif
       QDPIO::cout << "done!" << std::endl;
-      ContractionPars contpars;
+      //ContractionPars contpars;
+      //This struct is not needed anymore either.
       if(params.nnlcparam.contractions_n_sq >= 0)
-        QDPIO::cout << "Truncating output files to n_sq <= " << contpars.nsqmax <<  "!" << std::endl;
+        QDPIO::cout << "Truncating output files to n_sq <= " << params.nnlcparam.contractions_n_sq <<  "!" << std::endl;
       initTopologies(params.nnlcparam.contractions_filename, params.nnlcparam.contractions_n_sq, j_decay); 
       //tDir changed to j_decay again in the above line.
+     
+      //Number of configs reading was done here, but I am going to avoid that altogether.
+      //We will read the config the way all other lalibe measurements do.
+
+      //QDPIO::cout << "Initializing sourcepars to hold the boosts..." << std::flush;
+      //SourcePars sourcepars;
+      //We aren't actually going to use SourcePars since the only param read in is boost.
+      if(params.nnlcparam.fft_chunksize !=0 ) 
+        QDPIO::cout << "Using chunksize " << params.nnlcparam.fft_chunksize << " for the Baryon-Block FFT!" << std::endl;
 
 #else
       QDPIO::cout << "This measurement only works if we have linked against FFTW. Please rebuild." << std::endl;

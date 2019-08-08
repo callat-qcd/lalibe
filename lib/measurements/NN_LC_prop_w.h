@@ -44,6 +44,12 @@ namespace Chroma
         ChromaProp_t prop_param;              //params for next lin solve
         std::string contractions_filename;    //filename of hdf5 file that contains contraction terms
         int contractions_n_sq;                //FIXME What comment do I put for this?
+        unsigned int fft_chunksize;           //originally the only parameter in FFTPar struct
+        bool fft_tune;                        //tune the fft?
+        multi1d<int> boosts;                  //boosts
+        std::string output_filename;          //output file
+        int output_stripesize;                //output stripesize; default recommended
+        bool dirac_basis;                     //specifies props in dirac basis, this is false by default
       } nnlcparam ;
 
       struct NamedObject_t
@@ -64,11 +70,12 @@ namespace Chroma
       bool gfix;
     };*/
 
-    struct FFTPars{
+    /*struct FFTPars{
       unsigned int chunksize_block;
-    };
+    };*/
+    //We'll read this in NN_LC_Prop instead having a single member struct.
 
-    struct InverterPars{
+    /*struct InverterPars{
       GroupXML_t invParamUpLo;
       GroupXML_t invParamUpHi;
       GroupXML_t invParamStrangeLo;
@@ -76,10 +83,11 @@ namespace Chroma
       std::string file;
       unsigned int highPrecFrequency;
       bool do_high;
-    };
+    };*/
+    //I don't think we'll need invert params, because that's not done in this measurement.
 
     //Changed Ullong to ullong. 
-    struct SourcePars{
+    /*struct SourcePars{
       unsigned int nsources;
       ullong startseed;
       Real sigmasq;
@@ -87,17 +95,20 @@ namespace Chroma
       multi1d<int> boost;
       multi2d<int> displacements;
       std::string type;
-    };
+    };*/
+    //Only boost is needed for reading, the other parms will be instantiated as needed.
 
-    struct ContractionPars{
+    /*struct ContractionPars{
       std::string filename;
       int nsqmax;
-    };
+    };*/
+    //Don't need this. This is read in NNLCProp. 
 
-    struct Outputpars{
+    /*struct Outputpars{
       int stripesize;
       std::string path;
-    };
+    };*/
+    //Read these in the main struct as well.
 
     struct FermPars{
       std::string file;
