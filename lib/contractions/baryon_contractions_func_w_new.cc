@@ -41,6 +41,8 @@ namespace Chroma
       { "sigma_star_p", std::make_tuple('s', 'u', 'u')},
       { "sigma_star_z", std::make_tuple('d', 's', 'u')},
       { "sigma_star_m", std::make_tuple('d', 'd', 's')},
+      { "xi_star_z", std::make_tuple('s', 's', 'u')},
+      { "xi_star_m", std::make_tuple('d', 's', 's')},
       { "nucleon_p_np", std::make_tuple('d', 'u', 'u')},
       { "nucleon_z_np", std::make_tuple('d', 'd', 'u')},
       { "omega_m_np", std::make_tuple('s', 's', 's')},
@@ -57,6 +59,8 @@ namespace Chroma
       { "sigma_star_p_np", std::make_tuple('s', 'u', 'u')},
       { "sigma_star_z_np", std::make_tuple('d', 's', 'u')},
       { "sigma_star_m_np", std::make_tuple('d', 'd', 's')},
+      { "xi_star_z_np", std::make_tuple('s', 's', 'u')},
+      { "xi_star_m_np", std::make_tuple('d', 's', 's')},
     };
 
     std::map<std::string, std::map<std::string, SpinElemListType>> elemMap = {
@@ -360,6 +364,50 @@ namespace Chroma
 	    { std::make_tuple(iPair(1,1), iPair(1,1), iPair(1,1)), 2.0 },
 	  } },
 	} },
+	{ "xi_star_z", {
+	  { "upup", {
+	    { std::make_tuple(iPair(0,0), iPair(0,0), iPair(0,0)), 2.0 },
+	  } },
+	  { "up", {
+	    { std::make_tuple(iPair(0,0), iPair(0,0), iPair(1,1)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(0,0), iPair(1,0), iPair(0,1)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(0,0), iPair(0,1), iPair(1,0)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(0,0), iPair(1,1), iPair(0,0)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(0,1), iPair(1,0), iPair(0,0)), 1.3333333333333333 },
+	  } },
+	  { "dn", {
+	    { std::make_tuple(iPair(0,0), iPair(1,1), iPair(1,1)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(0,1), iPair(1,0), iPair(1,1)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(1,0), iPair(1,1), iPair(0,1)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(0,1), iPair(1,1), iPair(1,0)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(1,1), iPair(1,1), iPair(0,0)), 0.6666666666666666 },
+	  } },
+	  { "dndn", {
+	    { std::make_tuple(iPair(1,1), iPair(1,1), iPair(1,1)), 2.0 },
+	  } },
+	} },
+	{ "xi_star_m", {
+	  { "upup", {
+	    { std::make_tuple(iPair(0,0), iPair(0,0), iPair(0,0)), 2.0 },
+	  } },
+	  { "up", {
+	    { std::make_tuple(iPair(1,1), iPair(0,0), iPair(0,0)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(0,1), iPair(0,0), iPair(1,0)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(1,0), iPair(0,0), iPair(0,1)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(0,0), iPair(0,0), iPair(1,1)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(0,0), iPair(0,1), iPair(1,0)), 1.3333333333333333 },
+	  } },
+	  { "dn", {
+	    { std::make_tuple(iPair(1,1), iPair(0,0), iPair(1,1)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(1,1), iPair(0,1), iPair(1,0)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(0,1), iPair(1,0), iPair(1,1)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(1,0), iPair(0,1), iPair(1,1)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(0,0), iPair(1,1), iPair(1,1)), 0.6666666666666666 },
+	  } },
+	  { "dndn", {
+	    { std::make_tuple(iPair(1,1), iPair(1,1), iPair(1,1)), 2.0 },
+	  } },
+	} },
 	{ "nucleon_p_np", {
 	  { "up", {
 	    { std::make_tuple(iPair(3,3), iPair(2,2), iPair(2,2)), 1.0 },
@@ -655,6 +703,50 @@ namespace Chroma
 	    { std::make_tuple(iPair(3,2), iPair(3,3), iPair(2,3)), 1.3333333333333333 },
 	    { std::make_tuple(iPair(2,3), iPair(3,3), iPair(3,2)), 1.3333333333333333 },
 	    { std::make_tuple(iPair(3,3), iPair(3,3), iPair(2,2)), 0.6666666666666666 },
+	  } },
+	  { "dndn", {
+	    { std::make_tuple(iPair(3,3), iPair(3,3), iPair(3,3)), 2.0 },
+	  } },
+	} },
+	{ "xi_star_z_np", {
+	  { "upup", {
+	    { std::make_tuple(iPair(2,2), iPair(2,2), iPair(2,2)), 2.0 },
+	  } },
+	  { "up", {
+	    { std::make_tuple(iPair(2,2), iPair(2,2), iPair(3,3)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(2,2), iPair(3,2), iPair(2,3)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(2,2), iPair(2,3), iPair(3,2)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(2,2), iPair(3,3), iPair(2,2)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(2,3), iPair(3,2), iPair(2,2)), 1.3333333333333333 },
+	  } },
+	  { "dn", {
+	    { std::make_tuple(iPair(2,2), iPair(3,3), iPair(3,3)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(2,3), iPair(3,2), iPair(3,3)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(3,2), iPair(3,3), iPair(2,3)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(2,3), iPair(3,3), iPair(3,2)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(3,3), iPair(3,3), iPair(2,2)), 0.6666666666666666 },
+	  } },
+	  { "dndn", {
+	    { std::make_tuple(iPair(3,3), iPair(3,3), iPair(3,3)), 2.0 },
+	  } },
+	} },
+	{ "xi_star_m_np", {
+	  { "upup", {
+	    { std::make_tuple(iPair(2,2), iPair(2,2), iPair(2,2)), 2.0 },
+	  } },
+	  { "up", {
+	    { std::make_tuple(iPair(3,3), iPair(2,2), iPair(2,2)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(2,3), iPair(2,2), iPair(3,2)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(3,2), iPair(2,2), iPair(2,3)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(2,2), iPair(2,2), iPair(3,3)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(2,2), iPair(2,3), iPair(3,2)), 1.3333333333333333 },
+	  } },
+	  { "dn", {
+	    { std::make_tuple(iPair(3,3), iPair(2,2), iPair(3,3)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(3,3), iPair(2,3), iPair(3,2)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(2,3), iPair(3,2), iPair(3,3)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(3,2), iPair(2,3), iPair(3,3)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(2,2), iPair(3,3), iPair(3,3)), 0.6666666666666666 },
 	  } },
 	  { "dndn", {
 	    { std::make_tuple(iPair(3,3), iPair(3,3), iPair(3,3)), 2.0 },
