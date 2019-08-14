@@ -121,12 +121,19 @@ namespace Chroma
         // now go parse the particle list
       par.particle_list.clear();
 
-      	// small inline function to add all spin components fora given baryon
+      	// small inline function to add all spin components for a given baryon
 	// name to the list
+	// if negative parity is enabled, add those computations too
       auto addFlavor = [&par](const std::string& flavName) {
 	auto spinComponents = get_spin_components(flavName);
 	for (auto aS : spinComponents)
 	  par.particle_list.insert(std::make_pair(flavName, aS));
+
+	if (par.ng_parity) {
+	  auto spinComponents = get_spin_components(flavName+"_np");
+	  for (auto aS : spinComponents)
+	    par.particle_list.insert(std::make_pair(flavName+"_np", aS));
+	}
       };
 
       for(unsigned int iPart = 0; iPart < tmpPartList.size(); iPart++) {
