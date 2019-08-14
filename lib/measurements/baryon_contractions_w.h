@@ -13,9 +13,13 @@
 #include "chromabase.h"
 #include "meas/inline/abs_inline_measurement.h"
 
+#include <set>
+#include <map>
+#include <string>
+
 namespace Chroma 
 { 
-  namespace LalibeBaryonContractionsEnv 
+  namespace LalibeBaryonContractionsEnv
   {
     extern const std::string name;
     bool registerAll();
@@ -40,7 +44,7 @@ namespace Chroma
 	int p2_max;                           //max of momentum transfer squared, optional
 	multi1d<multi1d<int>> mom_list;       //list of momenta insertions, optional
 	multi2d<int> p_list;                  //momentum list the slow fourier transform needs
-	multi1d<std::string> particle_list;   //list of actual particles we gunna make from the contractions yo
+	std::set<std::pair<std::string, std::string>> particle_list;   //list of actual particles we gunna make from the contractions yo
 #ifdef BUILD_HDF5
 	std::string file_name;
 	std::string obj_path;
@@ -50,16 +54,7 @@ namespace Chroma
       struct NamedObject_t
       {
 	//std::string  gauge_id;     //Grab the usual gauge field.
-	std::string  up_quark;        
-	bool is_up;        
-	std::string  down_quark;
-	bool is_down;        
-	std::string  strange_quark;
-	bool is_strange;        
-	std::string  charm_quark;
-	bool is_charm;        
-        //Above are various strings and bools that will identify the quarks and which quarks are present in the input.
-	//This could just be done by checking if these strings are null (and ensuring they are with no input), but I like bools, so whatever.
+	std::map<char, std::string> quark_map;
 
       } named_obj;
 
@@ -80,6 +75,13 @@ namespace Chroma
     private:
       BaryonParams params;
     };
+
+
+    namespace {
+      std::map<std::string, std::vector<std::string>> aliasMap = {
+	{ "octet", {"proton", "lambda_z", "sigma_p", "xi_z"} },
+      };
+    }
 
   } // namespace LalibeBaryonContractionsEnv
 

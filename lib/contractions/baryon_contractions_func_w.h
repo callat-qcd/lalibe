@@ -1,6 +1,5 @@
 /*! 
  *  Functions that do baryon spin and color contractions.
- *  Color is nested inside of spin.
  *  Authors:
  *  Arjun Gambhir
  */
@@ -10,32 +9,31 @@
 
 #include "../momentum/lalibe_sftmom.h"
 
+#include <vector>
+#include <tuple>
+#include <map>
+#include <utility>
+
 namespace Chroma 
-{ 
+{
 
   void rotate_to_Dirac_Basis(LatticePropagator & quark_to_be_rotated);
-  
-  void get_spin_wavefunctions(multi2d<int> & src_spins,       
-			multi2d<int> & snk_spins,       
-			multi1d<Real> & src_weights,  
-			multi1d<Real> & snk_weights, 
-			std::string baryon_name,
-			std::string spin,
-			int parity);
  
-  void color_contraction(LatticeColorMatrix & quark_1,
-			 LatticeColorMatrix & quark_2,
-			 LatticeColorMatrix & quark_3,
+  void color_contraction(const LatticeColorMatrix & quark_1,
+			 const LatticeColorMatrix & quark_2,
+			 const LatticeColorMatrix & quark_3,
 			 LatticeComplex & spin_color_contracted_thing);
 
-  void spin_contraction(LatticePropagator & quark_1,
-                        LatticePropagator & quark_2,
-                        LatticePropagator & quark_3,
-			multi2d<int> & src_spins,       //Indices of length (N_src, 3)
-			multi2d<int> & snk_spins,       //Indices of length (N_snk, 3)
-			multi1d<Real> & src_weights,    //Index of length (N_src) 
-			multi1d<Real> & snk_weights,    //Index of length (N_snk)
-                        LatticeComplex & baryon_contracted_thing);
+  std::tuple<char,char,char> get_flavor_code(const std::string& baryon_name);
+
+  std::vector<std::string> get_spin_components(const std::string& baryon_name);
+
+  void do_contraction(const LatticePropagator & quark_1,
+		      const LatticePropagator & quark_2,
+		      const LatticePropagator & quark_3,
+		      const std::string& baryon_name,
+		      const std::string& spin,
+		      LatticeComplex & baryon_contracted_thing);
 
   void write_correlator(bool full_correlator,
 			bool antiperiodic,
