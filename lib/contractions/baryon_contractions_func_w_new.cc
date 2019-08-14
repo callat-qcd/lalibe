@@ -37,7 +37,10 @@ namespace Chroma
       { "sigma_z", std::tuple<char,char,char>('d', 's', 'u')},
       { "sigma_m", std::tuple<char,char,char>('d', 'd', 's')},
       { "xi_z", std::tuple<char,char,char>('s', 's', 'u')},
-      { "xi_m", std::tuple<char,char,char>('d', 's', 's')}
+      { "xi_m", std::tuple<char,char,char>('d', 's', 's')},
+      { "sigma_star_p", std::make_tuple('s', 'u', 'u')},
+      { "sigma_star_z", std::make_tuple('d', 's', 'u')},
+      { "sigma_star_m", std::make_tuple('d', 'd', 's')},
     };
 
     std::map<std::string, std::map<std::string, SpinElemListType>> elemMap = {
@@ -265,6 +268,80 @@ namespace Chroma
 	    { std::make_tuple(iPair(0,1), iPair(1,0), iPair(1,1)), -1.3333333333333333 },
 	    { std::make_tuple(iPair(1,1), iPair(0,0), iPair(1,1)), 0.6666666666666666 },
 	    { std::make_tuple(iPair(1,1), iPair(0,1), iPair(1,0)), 0.6666666666666666 },
+	  } },
+	} },
+	{ "sigma_star_p", {
+	  { "upup", {
+	    { std::make_tuple(iPair(0,0), iPair(0,0), iPair(0,0)), 2.0 },
+	  } },
+	  { "up", {
+	    { std::make_tuple(iPair(1,1), iPair(0,0), iPair(0,0)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(0,1), iPair(0,0), iPair(1,0)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(1,0), iPair(0,0), iPair(0,1)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(0,0), iPair(0,0), iPair(1,1)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(0,0), iPair(0,1), iPair(1,0)), 1.3333333333333333 },
+	  } },
+	  { "dn", {
+	    { std::make_tuple(iPair(1,1), iPair(0,0), iPair(1,1)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(1,1), iPair(0,1), iPair(1,0)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(0,1), iPair(1,0), iPair(1,1)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(1,0), iPair(0,1), iPair(1,1)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(0,0), iPair(1,1), iPair(1,1)), 0.6666666666666666 },
+	  } },
+	  { "dndn", {
+	    { std::make_tuple(iPair(1,1), iPair(1,1), iPair(1,1)), 2.0 },
+	  } },
+	} },
+	{ "sigma_star_z", {
+	  { "upup", {
+	    { std::make_tuple(iPair(0,0), iPair(0,0), iPair(0,0)), 2.0 },
+	  } },
+	  { "up", {
+	    { std::make_tuple(iPair(0,0), iPair(1,1), iPair(0,0)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(1,0), iPair(0,1), iPair(0,0)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(0,0), iPair(0,1), iPair(1,0)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(0,1), iPair(1,0), iPair(0,0)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(1,1), iPair(0,0), iPair(0,0)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(0,1), iPair(0,0), iPair(1,0)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(0,0), iPair(1,0), iPair(0,1)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(1,0), iPair(0,0), iPair(0,1)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(0,0), iPair(0,0), iPair(1,1)), 0.6666666666666666 },
+	  } },
+	  { "dn", {
+	    { std::make_tuple(iPair(1,1), iPair(1,1), iPair(0,0)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(1,1), iPair(0,1), iPair(1,0)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(0,1), iPair(1,1), iPair(1,0)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(1,1), iPair(1,0), iPair(0,1)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(1,1), iPair(0,0), iPair(1,1)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(0,1), iPair(1,0), iPair(1,1)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(1,0), iPair(1,1), iPair(0,1)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(1,0), iPair(0,1), iPair(1,1)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(0,0), iPair(1,1), iPair(1,1)), 0.6666666666666666 },
+	  } },
+	  { "dndn", {
+	    { std::make_tuple(iPair(1,1), iPair(1,1), iPair(1,1)), 2.0 },
+	  } },
+	} },
+	{ "sigma_star_m", {
+	  { "upup", {
+	    { std::make_tuple(iPair(0,0), iPair(0,0), iPair(0,0)), 2.0 },
+	  } },
+	  { "up", {
+	    { std::make_tuple(iPair(0,0), iPair(0,0), iPair(1,1)), 0.6666666666666666 },
+	    { std::make_tuple(iPair(0,0), iPair(1,0), iPair(0,1)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(0,0), iPair(0,1), iPair(1,0)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(0,0), iPair(1,1), iPair(0,0)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(0,1), iPair(1,0), iPair(0,0)), 1.3333333333333333 },
+	  } },
+	  { "dn", {
+	    { std::make_tuple(iPair(0,0), iPair(1,1), iPair(1,1)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(0,1), iPair(1,0), iPair(1,1)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(1,0), iPair(1,1), iPair(0,1)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(0,1), iPair(1,1), iPair(1,0)), 1.3333333333333333 },
+	    { std::make_tuple(iPair(1,1), iPair(1,1), iPair(0,0)), 0.6666666666666666 },
+	  } },
+	  { "dndn", {
+	    { std::make_tuple(iPair(1,1), iPair(1,1), iPair(1,1)), 2.0 },
 	  } },
 	} },
     };
