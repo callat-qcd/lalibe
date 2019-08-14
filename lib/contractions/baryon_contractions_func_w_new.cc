@@ -25,8 +25,8 @@ namespace Chroma
 
 
     std::map<std::string, std::tuple<char, char, char>> flavMap {
-      { "nucleon_p", std::make_tuple('d', 'u', 'u')},
-      { "nucleon_z", std::make_tuple('d', 'd', 'u')},
+      { "proton", std::make_tuple('d', 'u', 'u')},
+      { "neutron", std::make_tuple('d', 'd', 'u')},
       { "omega_m", std::make_tuple('s', 's', 's')},
       { "delta_pp", std::make_tuple('u', 'u', 'u')},
       { "delta_p", std::make_tuple('d', 'u', 'u')},
@@ -43,8 +43,8 @@ namespace Chroma
       { "sigma_star_m", std::make_tuple('d', 'd', 's')},
       { "xi_star_z", std::make_tuple('s', 's', 'u')},
       { "xi_star_m", std::make_tuple('d', 's', 's')},
-      { "nucleon_p_np", std::make_tuple('d', 'u', 'u')},
-      { "nucleon_z_np", std::make_tuple('d', 'd', 'u')},
+      { "proton_np", std::make_tuple('d', 'u', 'u')},
+      { "neutron_np", std::make_tuple('d', 'd', 'u')},
       { "omega_m_np", std::make_tuple('s', 's', 's')},
       { "delta_pp_np", std::make_tuple('u', 'u', 'u')},
       { "delta_p_np", std::make_tuple('d', 'u', 'u')},
@@ -64,7 +64,7 @@ namespace Chroma
     };
 
     std::map<std::string, std::map<std::string, SpinElemListType>> elemMap = {
-	{ "nucleon_p", {
+	{ "proton", {
 	  { "up", {
 	    { std::make_tuple(iPair(1,1), iPair(0,0), iPair(0,0)), 1.0 },
 	    { std::make_tuple(iPair(0,1), iPair(0,0), iPair(1,0)), -1.0 },
@@ -80,7 +80,7 @@ namespace Chroma
 	    { std::make_tuple(iPair(0,0), iPair(1,1), iPair(1,1)), 1.0 },
 	  } },
 	} },
-	{ "nucleon_z", {
+	{ "neutron", {
 	  { "up", {
 	    { std::make_tuple(iPair(0,0), iPair(1,1), iPair(0,0)), 0.5 },
 	    { std::make_tuple(iPair(0,1), iPair(1,0), iPair(0,0)), 0.5 },
@@ -408,7 +408,7 @@ namespace Chroma
 	    { std::make_tuple(iPair(1,1), iPair(1,1), iPair(1,1)), 2.0 },
 	  } },
 	} },
-	{ "nucleon_p_np", {
+	{ "proton_np", {
 	  { "up", {
 	    { std::make_tuple(iPair(3,3), iPair(2,2), iPair(2,2)), 1.0 },
 	    { std::make_tuple(iPair(2,3), iPair(2,2), iPair(3,2)), -1.0 },
@@ -424,7 +424,7 @@ namespace Chroma
 	    { std::make_tuple(iPair(2,2), iPair(3,3), iPair(3,3)), 1.0 },
 	  } },
 	} },
-	{ "nucleon_z_np", {
+	{ "neutron_np", {
 	  { "up", {
 	    { std::make_tuple(iPair(2,2), iPair(3,3), iPair(2,2)), 0.5 },
 	    { std::make_tuple(iPair(2,3), iPair(3,2), iPair(2,2)), 0.5 },
