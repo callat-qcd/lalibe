@@ -277,7 +277,8 @@ namespace Chroma
       return fIt->second;
     }
     else {
-      QDPIO::cerr << "Grah" << std::endl;
+      QDPIO::cerr << "Did not find flavor_code for "<<baryon_name << std::endl;
+      QDP_abort(1);
     }
   }
 
@@ -285,7 +286,8 @@ namespace Chroma
   std::vector<std::string> get_spin_components(const std::string& baryon_name) {
     auto mIt = elemMap.find(baryon_name);
     if (mIt == elemMap.end()) {
-      QDPIO::cerr << "Grah: " << baryon_name << std::endl;
+      QDPIO::cerr << "Did not find spin elementals for " << baryon_name << std::endl;
+      QDP_abort(1);
     }
 
     std::vector<std::string> retVec;
@@ -363,14 +365,14 @@ namespace Chroma
       // get spin elemental list
     auto bIt = elemMap.find(baryon_name);
     if (bIt == elemMap.end()) {
-      QDPIO::cerr << "Grah" << std::endl;
-      return;
+      QDPIO::cerr << "ERROR: Did not find flavor "<< baryon_name<< std::endl;
+      QDP_abort(1);
     }
 
     auto mIt = bIt->second.find(spin);
     if (mIt == bIt->second.end()) {
-      QDPIO::cerr << "Grah" << std::endl;
-      return;
+      QDPIO::cerr << "ERROR: Did not find spin elementals for " << baryon_name << " " <<spin<< std::endl;
+      QDP_abort(1);
     }
 
     //This should be passed in as zero, but I'll do it here too just to be safe.
