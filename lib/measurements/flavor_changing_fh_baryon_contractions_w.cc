@@ -9,7 +9,7 @@
 
 
 #include "flavor_changing_fh_baryon_contractions_w.h"
-#include "../contractions/baryon_contractions_func_w.h"
+#include "../contractions/proton_contractions_func_w.h"
 #include "meas/inline/abs_inline_measurement_factory.h"
 #include "../momentum/lalibe_sftmom.h"
 #include "meas/inline/io/named_objmap.h"
@@ -309,7 +309,7 @@ namespace Chroma
 	    origin = orig_header.source_header.getTSrce();
 	    //If we need to rotate, we do it now.
 	    if(params.param.rotate_to_Dirac == true)
-	      rotate_to_Dirac_Basis(up_quark_propagator);
+	      LegacyProton::rotate_to_Dirac_Basis(up_quark_propagator);
 	}
 	catch (std::bad_cast)
 	{
@@ -352,7 +352,7 @@ namespace Chroma
 	    origin = orig_header.source_header.getTSrce();
 	    //If we need to rotate, we do it now.
 	    if(params.param.rotate_to_Dirac == true)
-	      rotate_to_Dirac_Basis(down_quark_propagator);
+	      LegacyProton::rotate_to_Dirac_Basis(down_quark_propagator);
 	}
 	catch (std::bad_cast)
 	{
@@ -395,7 +395,7 @@ namespace Chroma
 	    origin = orig_header.source_header.getTSrce();
 	    //If we need to rotate, we do it now.
 	    if(params.param.rotate_to_Dirac == true)
-	      rotate_to_Dirac_Basis(strange_quark_propagator);
+	      LegacyProton::rotate_to_Dirac_Basis(strange_quark_propagator);
 	}
 	catch (std::bad_cast)
 	{
@@ -438,7 +438,7 @@ namespace Chroma
 	    origin = orig_header.source_header.getTSrce();
 	    //If we need to rotate, we do it now.
 	    if(params.param.rotate_to_Dirac == true)
-	      rotate_to_Dirac_Basis(charm_quark_propagator);
+	      LegacyProton::rotate_to_Dirac_Basis(charm_quark_propagator);
 	}
 	catch (std::bad_cast)
 	{
@@ -462,7 +462,7 @@ namespace Chroma
 	  TheNamedObjMap::Instance().get(params.named_obj.fh_quark).getRecordXML(fh_prop_record_xml);
 	  //If we need to rotate, we do it now.
 	  if(params.param.rotate_to_Dirac == true)
-	    rotate_to_Dirac_Basis(fh_quark_propagator);
+	    LegacyProton::rotate_to_Dirac_Basis(fh_quark_propagator);
       }
       catch (std::bad_cast)
       {
@@ -529,8 +529,8 @@ namespace Chroma
 	    snk_spins[1][0] = 1; snk_spins[1][1] = 0; snk_spins[1][2] = 0;
 	    snk_spins[2][0] = 0; snk_spins[2][1] = 1; snk_spins[2][2] = 0;
 	    snk_spins[3][0] = 0; snk_spins[3][1] = 0; snk_spins[3][2] = 1;
-	    spin_contraction(up_quark_propagator, down_quark_propagator, fh_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, proton);
-	    write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
+	    LegacyProton::spin_contraction(up_quark_propagator, down_quark_propagator, fh_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, proton);
+	    LegacyProton::write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
 		"fh_proton_neutron_"+params.param.current+"_"+params.param.flavor, "up",
 #ifdef BUILD_HDF5
 	        params.param.obj_path, h5out, wmode,
@@ -548,8 +548,8 @@ namespace Chroma
 	    snk_spins[1][0] = 1; snk_spins[1][1] = 0; snk_spins[1][2] = 1;
 	    snk_spins[2][0] = 1; snk_spins[2][1] = 1; snk_spins[2][2] = 0;
 	    snk_spins[3][0] = 1; snk_spins[3][1] = 0; snk_spins[3][2] = 1;
-	    spin_contraction(up_quark_propagator, down_quark_propagator, fh_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, proton);
-	    write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
+	    LegacyProton::spin_contraction(up_quark_propagator, down_quark_propagator, fh_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, proton);
+	    LegacyProton::write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
 		"fh_proton_neutron_"+params.param.current+"_"+params.param.flavor, "dn",
 #ifdef BUILD_HDF5
 		params.param.obj_path, h5out, wmode,
@@ -570,8 +570,8 @@ namespace Chroma
 	      snk_spins[1][0] = 3; snk_spins[1][1] = 2; snk_spins[1][2] = 2;
 	      snk_spins[2][0] = 2; snk_spins[2][1] = 3; snk_spins[2][2] = 2;
 	      snk_spins[3][0] = 2; snk_spins[3][1] = 2; snk_spins[3][2] = 3;
-	      spin_contraction(up_quark_propagator, down_quark_propagator, fh_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, proton);
-	      write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
+	      LegacyProton::spin_contraction(up_quark_propagator, down_quark_propagator, fh_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, proton);
+	      LegacyProton::write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
 		  "fh_proton_neutron_np_"+params.param.current+"_"+params.param.flavor, "up",
 #ifdef BUILD_HDF5
 		  params.param.obj_path, h5out, wmode,
@@ -588,8 +588,8 @@ namespace Chroma
 	      snk_spins[1][0] = 3; snk_spins[1][1] = 2; snk_spins[1][2] = 3;
 	      snk_spins[2][0] = 3; snk_spins[2][1] = 3; snk_spins[2][2] = 2;
 	      snk_spins[3][0] = 3; snk_spins[3][1] = 2; snk_spins[3][2] = 3;
-	      spin_contraction(up_quark_propagator, down_quark_propagator, fh_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, proton);
-	      write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
+	      LegacyProton::spin_contraction(up_quark_propagator, down_quark_propagator, fh_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, proton);
+	      LegacyProton::write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
 		  "fh_proton_neutron_np_"+params.param.current+"_"+params.param.flavor, "dn",
 #ifdef BUILD_HDF5
 		  params.param.obj_path, h5out, wmode,

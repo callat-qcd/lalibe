@@ -10,7 +10,7 @@
 
 
 #include "flavor_conserving_fh_baryon_contractions_w.h"
-#include "../contractions/baryon_contractions_func_w.h"
+#include "../contractions/proton_contractions_func_w.h"
 #include "meas/inline/abs_inline_measurement_factory.h"
 #include "../momentum/lalibe_sftmom.h"
 #include "meas/inline/io/named_objmap.h"
@@ -310,7 +310,7 @@ namespace Chroma
 	    origin = orig_header.source_header.getTSrce();
 	    //If we need to rotate, we do it now.
 	    if(params.param.rotate_to_Dirac == true)
-	      rotate_to_Dirac_Basis(up_quark_propagator);
+	      LegacyProton::rotate_to_Dirac_Basis(up_quark_propagator);
 	}
 	catch (std::bad_cast)
 	{
@@ -353,7 +353,7 @@ namespace Chroma
 	    origin = orig_header.source_header.getTSrce();
 	    //If we need to rotate, we do it now.
 	    if(params.param.rotate_to_Dirac == true)
-	      rotate_to_Dirac_Basis(down_quark_propagator);
+	      LegacyProton::rotate_to_Dirac_Basis(down_quark_propagator);
 	}
 	catch (std::bad_cast)
 	{
@@ -396,7 +396,7 @@ namespace Chroma
 	    origin = orig_header.source_header.getTSrce();
 	    //If we need to rotate, we do it now.
 	    if(params.param.rotate_to_Dirac == true)
-	      rotate_to_Dirac_Basis(strange_quark_propagator);
+	      LegacyProton::rotate_to_Dirac_Basis(strange_quark_propagator);
 	}
 	catch (std::bad_cast)
 	{
@@ -439,7 +439,7 @@ namespace Chroma
 	    origin = orig_header.source_header.getTSrce();
 	    //If we need to rotate, we do it now.
 	    if(params.param.rotate_to_Dirac == true)
-	      rotate_to_Dirac_Basis(charm_quark_propagator);
+	      LegacyProton::rotate_to_Dirac_Basis(charm_quark_propagator);
 	}
 	catch (std::bad_cast)
 	{
@@ -463,7 +463,7 @@ namespace Chroma
 	  TheNamedObjMap::Instance().get(params.named_obj.fh_quark).getRecordXML(fh_prop_record_xml);
 	  //If we need to rotate, we do it now.
 	  if(params.param.rotate_to_Dirac == true)
-	    rotate_to_Dirac_Basis(fh_quark_propagator);
+	    LegacyProton::rotate_to_Dirac_Basis(fh_quark_propagator);
       }
       catch (std::bad_cast)
       {
@@ -529,29 +529,29 @@ namespace Chroma
 	      && params.param.flavor == "UU")
 	  {
 	    QDPIO::cout<<"Starting Feynman-Hellmann UU proton contraction..."<<std::endl;
-	    get_spin_wavefunctions(src_spins, snk_spins, src_weights, snk_weights, "proton", "up", 0);
+	    LegacyProton::get_spin_wavefunctions(src_spins, snk_spins, src_weights, snk_weights, "proton", "up", 0);
 	    //The fh quark can replace either up quark, that's how it's done below.
-	    spin_contraction(fh_quark_propagator, up_quark_propagator, down_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
+	    LegacyProton::spin_contraction(fh_quark_propagator, up_quark_propagator, down_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
 	    //Here we add this one diagram to the total (twice as many terms as before).
 	    //Note: spin_contraction resets baryon every time it's called.
 	    fh_baryon = baryon;
-	    spin_contraction(up_quark_propagator, fh_quark_propagator, down_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
+	    LegacyProton::spin_contraction(up_quark_propagator, fh_quark_propagator, down_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
 	    fh_baryon += baryon;
-	    write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
+	    LegacyProton::write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
 		"fh_proton_"+params.param.current+"_"+params.param.flavor, "up",
 #ifdef BUILD_HDF5
 		params.param.obj_path, h5out, wmode,
 #endif
 		t_0, Nt, origin, ft, fh_baryon);
-	    get_spin_wavefunctions(src_spins, snk_spins, src_weights, snk_weights, "proton", "dn", 0);
+	    LegacyProton::get_spin_wavefunctions(src_spins, snk_spins, src_weights, snk_weights, "proton", "dn", 0);
 	    //The fh quark can replace either up quark, that's how it's done below.
-	    spin_contraction(fh_quark_propagator, up_quark_propagator, down_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
+	    LegacyProton::spin_contraction(fh_quark_propagator, up_quark_propagator, down_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
 	    //Here we add this one diagram to the total (twice as many terms before).
 	    //Note: spin_contraction resets proton every time it's called.
 	    fh_baryon = baryon;
-	    spin_contraction(up_quark_propagator, fh_quark_propagator, down_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
+	    LegacyProton::spin_contraction(up_quark_propagator, fh_quark_propagator, down_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
 	    fh_baryon += baryon;
-	    write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
+	    LegacyProton::write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
 		"fh_proton_"+params.param.current+"_"+params.param.flavor, "dn",
 #ifdef BUILD_HDF5
 		params.param.obj_path, h5out, wmode,
@@ -559,29 +559,29 @@ namespace Chroma
 		t_0, Nt, origin, ft, fh_baryon);
 	    if(params.param.ng_parity == true)
 	    {
-	      get_spin_wavefunctions(src_spins, snk_spins, src_weights, snk_weights, "proton", "up", 1);
+	      LegacyProton::get_spin_wavefunctions(src_spins, snk_spins, src_weights, snk_weights, "proton", "up", 1);
 	      //The fh quark can replace either up quark, that's how it's done below.
-	      spin_contraction(fh_quark_propagator, up_quark_propagator, down_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
+	      LegacyProton::spin_contraction(fh_quark_propagator, up_quark_propagator, down_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
 	      //Here we add this one diagram to the total (twice as many terms before).
 	      //Note: spin_contraction resets proton every time it's called.
 	      fh_baryon = baryon;
-	      spin_contraction(up_quark_propagator, fh_quark_propagator, down_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
+	      LegacyProton::spin_contraction(up_quark_propagator, fh_quark_propagator, down_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
 	      fh_baryon += baryon;
-	      write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
+	      LegacyProton::write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
 		  "fh_proton_np_"+params.param.current+"_"+params.param.flavor, "up",
 #ifdef BUILD_HDF5
 		  params.param.obj_path, h5out, wmode,
 #endif
 		  t_0, Nt, origin, ft, fh_baryon);
-	      get_spin_wavefunctions(src_spins, snk_spins, src_weights, snk_weights, "proton", "dn", 1);
+	      LegacyProton::get_spin_wavefunctions(src_spins, snk_spins, src_weights, snk_weights, "proton", "dn", 1);
 	      //The fh quark can replace either up quark, that's how it's done below.
-	      spin_contraction(fh_quark_propagator, up_quark_propagator, down_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
+	      LegacyProton::spin_contraction(fh_quark_propagator, up_quark_propagator, down_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
 	      //Here we add this one diagram to the total (twice as many terms before).
 	      //Note: spin_contraction resets proton every time it's called.
 	      fh_baryon = baryon;
-	      spin_contraction(up_quark_propagator, fh_quark_propagator, down_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
+	      LegacyProton::spin_contraction(up_quark_propagator, fh_quark_propagator, down_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
 	      fh_baryon += baryon;
-	      write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
+	      LegacyProton::write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
 		  "fh_proton_np_"+params.param.current+"_"+params.param.flavor, "dn",
 #ifdef BUILD_HDF5
 		  params.param.obj_path, h5out, wmode,
@@ -594,21 +594,21 @@ namespace Chroma
 	      && params.param.flavor == "DD")
 	  {
 	    QDPIO::cout<<"Starting Feynman-Hellmann DD proton contraction..."<<std::endl;
-	    get_spin_wavefunctions(src_spins, snk_spins, src_weights, snk_weights, "proton", "up", 0);
+	    LegacyProton::get_spin_wavefunctions(src_spins, snk_spins, src_weights, snk_weights, "proton", "up", 0);
 	    //The fh down quark replaces the down quark
-	    spin_contraction(up_quark_propagator, up_quark_propagator, fh_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
+	    LegacyProton::spin_contraction(up_quark_propagator, up_quark_propagator, fh_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
 	    fh_baryon = baryon;
-	    write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
+	    LegacyProton::write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
 		"fh_proton_"+params.param.current+"_"+params.param.flavor, "up",
 #ifdef BUILD_HDF5
 		params.param.obj_path, h5out, wmode,
 #endif
 		t_0, Nt, origin, ft, fh_baryon);
-	    get_spin_wavefunctions(src_spins, snk_spins, src_weights, snk_weights, "proton", "dn", 0);
+	    LegacyProton::get_spin_wavefunctions(src_spins, snk_spins, src_weights, snk_weights, "proton", "dn", 0);
 	    //The fh down quark replaces the down quark
-	    spin_contraction(up_quark_propagator, up_quark_propagator, fh_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
+	    LegacyProton::spin_contraction(up_quark_propagator, up_quark_propagator, fh_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
 	    fh_baryon = baryon;
-	    write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
+	    LegacyProton::write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
 		"fh_proton_"+params.param.current+"_"+params.param.flavor, "dn",
 #ifdef BUILD_HDF5
 		params.param.obj_path, h5out, wmode,
@@ -616,21 +616,21 @@ namespace Chroma
 		t_0, Nt, origin, ft, fh_baryon);
 	    if(params.param.ng_parity == true)
 	    {
-	      get_spin_wavefunctions(src_spins, snk_spins, src_weights, snk_weights, "proton", "up", 1);
+	      LegacyProton::get_spin_wavefunctions(src_spins, snk_spins, src_weights, snk_weights, "proton", "up", 1);
 	      //The fh down quark replaces the down quark
-	      spin_contraction(up_quark_propagator, up_quark_propagator, fh_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
+	      LegacyProton::spin_contraction(up_quark_propagator, up_quark_propagator, fh_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
 	      fh_baryon = baryon;
-	      write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
+	      LegacyProton::write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
 		  "fh_proton_np_"+params.param.current+"_"+params.param.flavor, "up",
 #ifdef BUILD_HDF5
 		  params.param.obj_path, h5out, wmode,
 #endif
 		  t_0, Nt, origin, ft, fh_baryon);
-	      get_spin_wavefunctions(src_spins, snk_spins, src_weights, snk_weights, "proton", "dn", 1);
+	      LegacyProton::get_spin_wavefunctions(src_spins, snk_spins, src_weights, snk_weights, "proton", "dn", 1);
 	      //The fh down quark replaces the down quark
-	      spin_contraction(up_quark_propagator, up_quark_propagator, fh_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
+	      LegacyProton::spin_contraction(up_quark_propagator, up_quark_propagator, fh_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
 	      fh_baryon = baryon;
-	      write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
+	      LegacyProton::write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
 		  "fh_proton_np_"+params.param.current+"_"+params.param.flavor, "dn",
 #ifdef BUILD_HDF5
 		  params.param.obj_path, h5out, wmode,

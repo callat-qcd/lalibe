@@ -9,7 +9,6 @@
 #include "HP_fh_prop_w.h"
 #include "stochastic_four_quark_fh_prop_w.h"
 #include "baryon_contractions_w.h"
-#include "baryon_contractions_w_new.h"
 #include "meson_contractions_w.h"
 #include "flavor_conserving_fh_baryon_contractions_w.h"
 #include "flavor_changing_fh_baryon_contractions_w.h"
@@ -58,7 +57,6 @@ namespace Chroma
 	success &= LalibeFlavorConservingFHBaryonContractionsEnv::registerAll() ;
 	success &= LalibeFlavorChangingFHBaryonContractionsEnv::registerAll() ;
 	success &= LalibeBaryonContractionsEnv::registerAll() ;
-	success &= LalibeBaryonContractionsNewEnv::registerAll() ;
         success &= LalibeMesonContractionsEnv::registerAll() ;
 	success &= LalibeFHPropagatorEnv::registerAll() ;
 	success &= LalibeZNPropagatorEnv::registerAll() ;
