@@ -21,7 +21,7 @@
 
 namespace Chroma
 {
-  namespace LalibeBaryonContractionsEnv
+  namespace LalibeBaryonContractionsNewEnv
   {
     namespace
     {
@@ -171,15 +171,23 @@ namespace Chroma
 
       //read(inputtop, "gauge_id" , input.gauge_id);
       //Logic to read quark propagators (whichever ones are present.)
+      //  xmlQuarkMapper map internal character identifiers to the expected
+      //  XML tag
       std::vector<char> quark_flavs { 'u', 'd', 's', 'c' };
+      std::map<char, std::string> xmlQuarkMapper = {
+	      {'u', "up_quark"},
+	      {'d', "down_quark"},
+	      {'s', "strange_quark"},
+	      {'c', "charm_quark"}
+      };
 
       for (auto aFlav : quark_flavs) {
-	if (inputtop.count(aFlav+"_quark") != 0)
+	if (inputtop.count(xmlQuarkMapper[aFlav]) != 0)
 	{
 	  std::string tmpName;
-	  read(inputtop, aFlav+"_quark" ,tmpName);
+	  read(inputtop, xmlQuarkMapper[aFlav], tmpName);
 	  input.quark_map[aFlav] = tmpName;
-	  QDPIO::cout<<"I found an "<<aFlav<<" quark, here is its id: "<<input.quark_map[aFlav]<<std::endl;
+	  QDPIO::cout<<"I found a "<<aFlav<<" quark, here is its id: "<<input.quark_map[aFlav]<<std::endl;
 	}
 	else
 	{
@@ -193,11 +201,17 @@ namespace Chroma
       push(xml, path);
       //write(xml, "gauge_id" , input.gauge_id);
       std::vector<char> quark_flavs { 'u', 'd', 's', 'c' };
+      std::map<char, std::string> xmlQuarkMapper = {
+	      {'u', "up_quark"},
+	      {'d', "down_quark"},
+	      {'s', "strange_quark"},
+	      {'c', "charm_quark"}
+      };
 
       for (auto aFlav : quark_flavs) {
 	auto qIt = input.quark_map.find(aFlav);
 	if (qIt != input.quark_map.end())
-	  write(xml, aFlav+"_quark", qIt->second);
+	  write(xml, xmlQuarkMapper[aFlav], qIt->second);
       }
       pop(xml);
     }
@@ -263,6 +277,10 @@ namespace Chroma
       int t_0;
       multi1d<int> origin;
 
+        // if we read more than one propagator, check that origin, t_0 and
+	// j_decay match between them
+      bool checkFlag = false;
+
       for (auto aFlav : quark_flavs) {
 	auto qIt = params.named_obj.quark_map.find(aFlav);
 	if (qIt != params.named_obj.quark_map.end()) {
@@ -292,9 +310,29 @@ namespace Chroma
 	    {
 	      QDPIO::cout<<"What type of weird propagator did you give me? I can't find the right tag to get j_decay, source location, and whatnot...exiting..."<<std::endl;
 	    }
-	    j_decay = orig_header.source_header.j_decay;
-	    t_0 = orig_header.source_header.t_source;
-	    origin = orig_header.source_header.getTSrce();
+	      // set info
+	    if (!checkFlag) {
+	      j_decay = orig_header.source_header.j_decay;
+	      t_0 = orig_header.source_header.t_source;
+	      origin = orig_header.source_header.getTSrce();
+	    }
+	      // check info
+	    else {
+	      if (j_decay != orig_header.source_header.j_decay) {
+		QDPIO::cerr << "j_decay doesn't match between propagators" << std::endl;
+		QDP_abort(1);
+	      }
+	      if (t_0 != orig_header.source_header.t_source) {
+		QDPIO::cerr << "t_source doesn't match between propagators" << std::endl;
+		QDP_abort(1);
+	      }
+	      for (unsigned int iC = 0; iC < origin.size(); ++iC) {
+		if (origin[iC] != orig_header.source_header.getTSrce()[iC]) {
+		  QDPIO::cerr << "origin doesn't match between propagators" << std::endl;
+		  QDP_abort(1);
+		}
+	      }
+	    } // check of origin, t0, j_decay between props
 	    //If we need to rotate, we do it now.
 	    if(params.param.rotate_to_Dirac == true)
 	      rotate_to_Dirac_Basis(prop_map[aFlav]);
@@ -310,6 +348,10 @@ namespace Chroma
 	      << e << std::endl;
 	    QDP_abort(1);
 	  }
+
+	    // we've read the first header; from now on compare that remaining
+	    // props have matching origin
+	  checkFlag = true;
 	} // check flavor
       } // flavor loop
 
@@ -342,15 +384,10 @@ namespace Chroma
 
       for (auto aProp : reqProps) {
 	if (prop_map.find(aProp) == prop_map.end()) {
-	  QDPIO::cerr << "Graah " << aProp << std::endl;
+	  QDPIO::cerr << "Could not find required propagator for "<<aProp<<" quark"<<std::endl;
 	  QDP_abort(1);
 	}
       }
-
-      // START TODO
-      // 	Replace Grah's with aborts here and in the contraction routine
-      // 	Before the check above, write snippet to populate the particles to be computed
-      // 	Rewrite the stuff below with new computation keys
 
       //If flavor check has passed, now we loop through particles and do the contractions.
       for (auto aParticle : params.param.particle_list)

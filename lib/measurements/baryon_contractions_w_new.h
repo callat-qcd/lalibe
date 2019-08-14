@@ -19,7 +19,7 @@
 
 namespace Chroma 
 { 
-  namespace LalibeBaryonContractionsEnv 
+  namespace LalibeBaryonContractionsNewEnv 
   {
     extern const std::string name;
     bool registerAll();
