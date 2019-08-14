@@ -16,6 +16,8 @@
 #include "meas/inline/io/named_objmap.h"
 #include "io/qprop_io.h"
 
+#include <set>
+
 
 namespace Chroma
 {
@@ -113,7 +115,39 @@ namespace Chroma
 	  par.p2_max = 0;
       }
 
-      read(paramtop, "particle_list", par.particle_list);
+      multi1d<std::string> tmpPartList;
+      read(paramtop, "particle_list", tmpPartList);
+
+        // now go parse the particle list
+      par.particle_list.clear();
+
+      	// small inline function to add all spin components for a given baryon
+	// name to the list
+	// if negative parity is enabled, add those computations too
+      auto addFlavor = [&par](const std::string& flavName) {
+	auto spinComponents = get_spin_components(flavName);
+	for (auto aS : spinComponents)
+	  par.particle_list.insert(std::make_pair(flavName, aS));
+
+	if (par.ng_parity) {
+	  auto spinComponents = get_spin_components(flavName+"_np");
+	  for (auto aS : spinComponents)
+	    par.particle_list.insert(std::make_pair(flavName+"_np", aS));
+	}
+      };
+
+      for(unsigned int iPart = 0; iPart < tmpPartList.size(); iPart++) {
+
+	  // go look if this 'particle' is an alias for a group of particles
+	auto alIt = aliasMap.find(tmpPartList[iPart]);
+        if (alIt == aliasMap.end())
+	  addFlavor(tmpPartList[iPart]);
+	else {
+	  for (auto aFl : alIt->second)
+	    addFlavor(aFl);
+	}
+      }
+
     }
 
 
@@ -133,7 +167,7 @@ namespace Chroma
 	write(xml, "p2_max" ,par.p2_max);
       else
 	write(xml, "mom_list" ,par.mom_list);
-      write(xml, "particle_list", par.particle_list);
+      //write(xml, "particle_list", par.particle_list);
 
       pop(xml);
     }
@@ -144,49 +178,28 @@ namespace Chroma
 
       //read(inputtop, "gauge_id" , input.gauge_id);
       //Logic to read quark propagators (whichever ones are present.)
-      if (inputtop.count("up_quark") != 0)
-      {
-	read(inputtop, "up_quark" ,input.up_quark);
-	QDPIO::cout<<"I found an up quark, here is its id: "<<input.up_quark<<std::endl;
-	input.is_up = true;
-      }
-      else
-      {
-	  QDPIO::cout<<"I couldn't find an up quark, hope you don't need it for the inputted baryon contractions. "<<std::endl;
-	  input.is_up = false;
-      }
-      if (inputtop.count("down_quark") != 0)
-      {
-	read(inputtop, "down_quark" ,input.down_quark);
-	QDPIO::cout<<"I found a down quark, here is its id: "<<input.down_quark<<std::endl;
-	input.is_down = true;
-      }
-      else
-      {
-	  QDPIO::cout<<"I couldn't find a down quark, hope you don't need it for the inputted baryon contractions. "<<std::endl;
-	  input.is_down = false;
-      }
-      if (inputtop.count("strange_quark") != 0)
-      {
-	read(inputtop, "strange_quark" ,input.up_quark);
-	QDPIO::cout<<"I found an strange quark, here is its id: "<<input.strange_quark<<std::endl;
-	input.is_strange = true;
-      }
-      else
-      {
-	  QDPIO::cout<<"I couldn't find a strange quark, hope you don't need it for the inputted baryon contractions. "<<std::endl;
-	  input.is_strange = false;
-      }
-      if (inputtop.count("charm_quark") != 0)
-      {
-	read(inputtop, "charm_quark" ,input.charm_quark);
-	QDPIO::cout<<"I found an charm quark, here is its id: "<<input.charm_quark<<std::endl;
-	input.is_charm = true;
-      }
-      else
-      {
-	  QDPIO::cout<<"I couldn't find a charm quark, hope you don't need it for the inputted baryon contractions. "<<std::endl;
-	  input.is_charm = false;
+      //  xmlQuarkMapper map internal character identifiers to the expected
+      //  XML tag
+      std::vector<char> quark_flavs { 'u', 'd', 's', 'c' };
+      std::map<char, std::string> xmlQuarkMapper = {
+	      {'u', "up_quark"},
+	      {'d', "down_quark"},
+	      {'s', "strange_quark"},
+	      {'c', "charm_quark"}
+      };
+
+      for (auto aFlav : quark_flavs) {
+	if (inputtop.count(xmlQuarkMapper[aFlav]) != 0)
+	{
+	  std::string tmpName;
+	  read(inputtop, xmlQuarkMapper[aFlav], tmpName);
+	  input.quark_map[aFlav] = tmpName;
+	  QDPIO::cout<<"I found a "<<aFlav<<" quark, here is its id: "<<input.quark_map[aFlav]<<std::endl;
+	}
+	else
+	{
+	    QDPIO::cout<<"I couldn't find an "<<aFlav<<" quark, hope you don't need it for the inputted baryon contractions. "<<std::endl;
+	}
       }
     }
 
@@ -194,14 +207,19 @@ namespace Chroma
     {
       push(xml, path);
       //write(xml, "gauge_id" , input.gauge_id);
-      if(input.is_up == true)
-	write(xml, "up_quark" ,input.up_quark);
-      if(input.is_down == true)
-	write(xml, "down_quark" ,input.down_quark);
-      if(input.is_strange == true)
-	write(xml, "strange_quark" ,input.strange_quark);
-      if(input.is_charm == true)
-	write(xml, "charm_quark" ,input.charm_quark);
+      std::vector<char> quark_flavs { 'u', 'd', 's', 'c' };
+      std::map<char, std::string> xmlQuarkMapper = {
+	      {'u', "up_quark"},
+	      {'d', "down_quark"},
+	      {'s', "strange_quark"},
+	      {'c', "charm_quark"}
+      };
+
+      for (auto aFlav : quark_flavs) {
+	auto qIt = input.quark_map.find(aFlav);
+	if (qIt != input.quark_map.end())
+	  write(xml, xmlQuarkMapper[aFlav], qIt->second);
+      }
       pop(xml);
     }
 
@@ -258,192 +276,92 @@ namespace Chroma
       QDPIO::cout<<"Baryon contractions starting..."<<std::endl;
 
       //Grab all the propagators that are given.
-      XMLReader up_prop_file_xml, up_prop_record_xml;
-      LatticePropagator up_quark_propagator;
-      XMLReader down_prop_file_xml, down_prop_record_xml;
-      LatticePropagator down_quark_propagator;
-      XMLReader strange_prop_file_xml, strange_prop_record_xml;
-      LatticePropagator strange_quark_propagator;
-      XMLReader charm_prop_file_xml, charm_prop_record_xml;
-      LatticePropagator charm_quark_propagator;
+      std::vector<char> quark_flavs { 'u', 'd', 's', 'c' };
+      std::map<char, LatticePropagator> prop_map;
       //Need origin, j_decay, and t0 for fourier transform!
       //Need j_decay of bc to know what comes with a minus sign.
       int j_decay;
       int t_0;
       multi1d<int> origin;
 
-      if(params.named_obj.is_up == true)
-      {
-	QDPIO::cout << "Attempting to read up propagator" << std::endl;
-	try
-	{
-	    up_quark_propagator = TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.up_quark);
-	    TheNamedObjMap::Instance().get(params.named_obj.up_quark).getFileXML(up_prop_file_xml);
-	    TheNamedObjMap::Instance().get(params.named_obj.up_quark).getRecordXML(up_prop_record_xml);
-	    //Get the origin  and j_decay for the FT, this assumes all quarks have the same origin.
-	    MakeSourceProp_t  orig_header;
-	    if (up_prop_record_xml.count("/Propagator") != 0)
-	    {
-	      QDPIO::cout<<"Up quark propagator is unsmeared, reading from Propagator tag..."<<std::endl;
-	      read(up_prop_record_xml, "/Propagator", orig_header);
-	    }
-	    else if (up_prop_record_xml.count("/SinkSmear") != 0)
-	    {
-	      QDPIO::cout<<"Up quark propagator is smeared, reading from SinkSmear tag..."<<std::endl;
-	      read(up_prop_record_xml, "/SinkSmear", orig_header);
-	    }
-	    else
-	    {
-	      QDPIO::cout<<"What type of weird propagator did you give me? I can't find the right tag to get j_decay, source location, and whatnot...exiting..."<<std::endl;
-	    }
-	    j_decay = orig_header.source_header.j_decay;
-	    t_0 = orig_header.source_header.t_source;
-	    origin = orig_header.source_header.getTSrce();
-	    //If we need to rotate, we do it now.
-	    if(params.param.rotate_to_Dirac == true)
-	      rotate_to_Dirac_Basis(up_quark_propagator);
-	}
-	catch (std::bad_cast)
-	{
-	    QDPIO::cerr << name << ": caught dynamic cast error" << std::endl;
-	    QDP_abort(1);
-	}
-	catch (const std::string& e)
-	{
-	    QDPIO::cerr << name << ": error reading src prop_header: "
-		<< e << std::endl;
-	    QDP_abort(1);
-	}
-      }
+        // if we read more than one propagator, check that origin, t_0 and
+	// j_decay match between them
+      bool checkFlag = false;
 
-      if(params.named_obj.is_down == true)
-      {
-	QDPIO::cout << "Attempting to read down propagator" << std::endl;
-	try
-	{
-	    down_quark_propagator = TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.down_quark);
-	    TheNamedObjMap::Instance().get(params.named_obj.down_quark).getFileXML(down_prop_file_xml);
-	    TheNamedObjMap::Instance().get(params.named_obj.down_quark).getRecordXML(down_prop_record_xml);
-	    //Get the origin  and j_decay for the FT, this assumes all quarks have the same origin.
-	    MakeSourceProp_t  orig_header;
-	    if (down_prop_record_xml.count("/Propagator") != 0)
-	    {
-	      QDPIO::cout<<"Down quark propagator is unsmeared, reading from Propagator tag..."<<std::endl;
-	      read(down_prop_record_xml, "/Propagator", orig_header);
-	    }
-	    else if (down_prop_record_xml.count("/SinkSmear") != 0)
-	    {
-	      QDPIO::cout<<"Down quark propagator is smeared, reading from SinkSmear tag..."<<std::endl;
-	      read(down_prop_record_xml, "/SinkSmear", orig_header);
-	    }
-	    else
-	    {
-	      QDPIO::cout<<"What type of weird propagator did you give me? I can't find the right tag to get j_decay, source location, and whatnot...exiting..."<<std::endl;
-	    }
-	    j_decay = orig_header.source_header.j_decay;
-	    origin = orig_header.source_header.getTSrce();
-	    //If we need to rotate, we do it now.
-	    if(params.param.rotate_to_Dirac == true)
-	      rotate_to_Dirac_Basis(down_quark_propagator);
-	}
-	catch (std::bad_cast)
-	{
-	    QDPIO::cerr << name << ": caught dynamic cast error" << std::endl;
-	    QDP_abort(1);
-	}
-	catch (const std::string& e)
-	{
-	    QDPIO::cerr << name << ": error reading src prop_header: "
-		<< e << std::endl;
-	    QDP_abort(1);
-	}
-      }
+      for (auto aFlav : quark_flavs) {
+	auto qIt = params.named_obj.quark_map.find(aFlav);
+	if (qIt != params.named_obj.quark_map.end()) {
 
-      if(params.named_obj.is_strange == true)
-      {
-	QDPIO::cout << "Attempting to read strange propagator" << std::endl;
-	try
-	{
-	    strange_quark_propagator = TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.strange_quark);
-	    TheNamedObjMap::Instance().get(params.named_obj.strange_quark).getFileXML(strange_prop_file_xml);
-	    TheNamedObjMap::Instance().get(params.named_obj.strange_quark).getRecordXML(strange_prop_record_xml);
-	    //Get the origin  and j_decay for the FT, this assumes all quarks have the same origin.
-	    MakeSourceProp_t  orig_header;
-	    if (strange_prop_record_xml.count("/Propagator") != 0)
-	    {
-	      QDPIO::cout<<"Strange quark propagator is unsmeared, reading from Propagator tag..."<<std::endl;
-	      read(strange_prop_record_xml, "/Propagator", orig_header);
-	    }
-	    else if (strange_prop_record_xml.count("/SinkSmear") != 0)
-	    {
-	      QDPIO::cout<<"Strange quark propagator is smeared, reading from SinkSmear tag..."<<std::endl;
-	      read(strange_prop_record_xml, "/SinkSmear", orig_header);
-	    }
-	    else
-	    {
-	      QDPIO::cout<<"What type of weird propagator did you give me? I can't find the right tag to get j_decay, source location, and whatnot...exiting..."<<std::endl;
-	    }
-	    j_decay = orig_header.source_header.j_decay;
-	    origin = orig_header.source_header.getTSrce();
-	    //If we need to rotate, we do it now.
-	    if(params.param.rotate_to_Dirac == true)
-	      rotate_to_Dirac_Basis(strange_quark_propagator);
-	}
-	catch (std::bad_cast)
-	{
-	    QDPIO::cerr << name << ": caught dynamic cast error" << std::endl;
-	    QDP_abort(1);
-	}
-	catch (const std::string& e)
-	{
-	    QDPIO::cerr << name << ": error reading src prop_header: "
-		<< e << std::endl;
-	    QDP_abort(1);
-	}
-      }
+	  QDPIO::cout << "Attempting to read "<<aFlav<<" propagator" << std::endl;
 
-      if(params.named_obj.is_charm == true)
-      {
-	QDPIO::cout << "Attempting to read charm propagator" << std::endl;
-	try
-	{
-	    charm_quark_propagator = TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.charm_quark);
-	    TheNamedObjMap::Instance().get(params.named_obj.charm_quark).getFileXML(charm_prop_file_xml);
-	    TheNamedObjMap::Instance().get(params.named_obj.charm_quark).getRecordXML(charm_prop_record_xml);
+	  try
+	  {
+	    prop_map[aFlav] = TheNamedObjMap::Instance().getData<LatticePropagator>(qIt->second);
+
+	    XMLReader prop_file_xml, prop_record_xml;
+	    TheNamedObjMap::Instance().get(qIt->second).getFileXML(prop_file_xml);
+	    TheNamedObjMap::Instance().get(qIt->second).getRecordXML(prop_record_xml);
 	    //Get the origin  and j_decay for the FT, this assumes all quarks have the same origin.
 	    MakeSourceProp_t  orig_header;
-	    if (charm_prop_record_xml.count("/Propagator") != 0)
+	    if (prop_record_xml.count("/Propagator") != 0)
 	    {
-	      QDPIO::cout<<"Charm quark propagator is unsmeared, reading from Propagator tag..."<<std::endl;
-	      read(charm_prop_record_xml, "/Propagator", orig_header);
+	      QDPIO::cout<<aFlav<<" quark propagator is unsmeared, reading from Propagator tag..."<<std::endl;
+	      read(prop_record_xml, "/Propagator", orig_header);
 	    }
-	    else if (charm_prop_record_xml.count("/SinkSmear") != 0)
+	    else if (prop_record_xml.count("/SinkSmear") != 0)
 	    {
-	      QDPIO::cout<<"Charm quark propagator is smeared, reading from SinkSmear tag..."<<std::endl;
-	      read(charm_prop_record_xml, "/SinkSmear", orig_header);
+	      QDPIO::cout<<aFlav<<" quark propagator is smeared, reading from SinkSmear tag..."<<std::endl;
+	      read(prop_record_xml, "/SinkSmear", orig_header);
 	    }
 	    else
 	    {
 	      QDPIO::cout<<"What type of weird propagator did you give me? I can't find the right tag to get j_decay, source location, and whatnot...exiting..."<<std::endl;
 	    }
-	    j_decay = orig_header.source_header.j_decay;
-	    origin = orig_header.source_header.getTSrce();
+	      // set info
+	    if (!checkFlag) {
+	      j_decay = orig_header.source_header.j_decay;
+	      t_0 = orig_header.source_header.t_source;
+	      origin = orig_header.source_header.getTSrce();
+	    }
+	      // check info
+	    else {
+	      if (j_decay != orig_header.source_header.j_decay) {
+		QDPIO::cerr << "j_decay doesn't match between propagators" << std::endl;
+		QDP_abort(1);
+	      }
+	      if (t_0 != orig_header.source_header.t_source) {
+		QDPIO::cerr << "t_source doesn't match between propagators" << std::endl;
+		QDP_abort(1);
+	      }
+	      for (unsigned int iC = 0; iC < origin.size(); ++iC) {
+		if (origin[iC] != orig_header.source_header.getTSrce()[iC]) {
+		  QDPIO::cerr << "origin doesn't match between propagators" << std::endl;
+		  QDP_abort(1);
+		}
+	      }
+	    } // check of origin, t0, j_decay between props
 	    //If we need to rotate, we do it now.
 	    if(params.param.rotate_to_Dirac == true)
-	      rotate_to_Dirac_Basis(charm_quark_propagator);
-	}
-	catch (std::bad_cast)
-	{
+	      rotate_to_Dirac_Basis(prop_map[aFlav]);
+	  }
+	  catch (std::bad_cast)
+	  {
 	    QDPIO::cerr << name << ": caught dynamic cast error" << std::endl;
 	    QDP_abort(1);
-	}
-	catch (const std::string& e)
-	{
+	  }
+	  catch (const std::string& e)
+	  {
 	    QDPIO::cerr << name << ": error reading src prop_header: "
-		<< e << std::endl;
+	      << e << std::endl;
 	    QDP_abort(1);
-	}
-      }
+	  }
+
+	    // we've read the first header; from now on compare that remaining
+	    // props have matching origin
+	  checkFlag = true;
+	} // check flavor
+      } // flavor loop
+
 
       //Initialize FT stuff here, whether this is used or not below is another story...
       LalibeSftMom ft = params.param.is_mom_max ? LalibeSftMom(params.param.p2_max, origin, false, j_decay)
@@ -462,68 +380,45 @@ namespace Chroma
 
       //Next we do the contractions for the specified particles.
       //Loop over list of particles and check that all the necessary flavors are present.
-      for(int particle_index = 0; particle_index < params.param.particle_list.size(); particle_index++)
+      std::set<char> reqProps;
+      for(auto aParticle : params.param.particle_list)
       {
-	if(params.param.particle_list[particle_index] == "proton")
-	{
-	  QDPIO::cout<<"Particle number "<<(particle_index+1)<<" is the proton."<<std::endl;
-	  QDPIO::cout<<"Checking to make sure we have the correct quark propagators to compute the proton."<<std::endl;
-	  if(params.named_obj.is_up == true && params.named_obj.is_down == true)
-	    QDPIO::cout<<"Found up and down quarks for the proton. "<<std::endl;
-	  else
-	  {
-	    QDPIO::cout<<"I couldn't find the quark flavors necessary to construct the proton."<<std::endl;
-	    QDP_abort(1);
-	  }
+	auto flavCode = get_flavor_code(aParticle.first);
+	reqProps.insert(std::get<0>(flavCode));
+	reqProps.insert(std::get<1>(flavCode));
+	reqProps.insert(std::get<2>(flavCode));
+      }
+
+      for (auto aProp : reqProps) {
+	if (prop_map.find(aProp) == prop_map.end()) {
+	  QDPIO::cerr << "Could not find required propagator for "<<aProp<<" quark"<<std::endl;
+	  QDP_abort(1);
 	}
       }
+
       //If flavor check has passed, now we loop through particles and do the contractions.
-      for(int particle_index = 0; particle_index < params.param.particle_list.size(); particle_index++)
+      for (auto aParticle : params.param.particle_list)
       {
+	QDPIO::cout<<"Starting "<<aParticle.first<<" "<<aParticle.second<<" contraction..."<<std::endl;
+
+	auto flavCode = get_flavor_code(aParticle.first);
+
 	LatticeComplex baryon = zero;
-	multi2d<int> snk_spins;
-	multi2d<int> src_spins;
-	multi1d<Real> snk_weights;
-	multi1d<Real> src_weights;
-	if(params.param.particle_list[particle_index] == "proton")
-	{
-	  QDPIO::cout<<"Starting proton contraction..."<<std::endl;
-	  get_spin_wavefunctions(src_spins, snk_spins, src_weights, snk_weights, "proton", "up", 0);
-	  spin_contraction(up_quark_propagator, up_quark_propagator, down_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
-	  write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
-	      "proton", "up",
+
+	do_contraction(prop_map[std::get<0>(flavCode)],
+	    	       prop_map[std::get<1>(flavCode)],
+		       prop_map[std::get<2>(flavCode)],
+		       aParticle.first,
+		       aParticle.second,
+		       baryon);
+
+	write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
+	    aParticle.first, aParticle.second,
 #ifdef BUILD_HDF5
-	      params.param.obj_path, h5out, wmode,
+	    params.param.obj_path, h5out, wmode,
 #endif
-	      t_0, Nt, origin, ft, baryon);
-	  get_spin_wavefunctions(src_spins, snk_spins, src_weights, snk_weights, "proton", "dn", 0);
-	  spin_contraction(up_quark_propagator, up_quark_propagator, down_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
-	  write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
-	      "proton", "dn",
-#ifdef BUILD_HDF5
-	      params.param.obj_path, h5out, wmode,
-#endif
-	      t_0, Nt, origin, ft, baryon);
-	  if(params.param.ng_parity == true)
-	  {
-	    get_spin_wavefunctions(src_spins, snk_spins, src_weights, snk_weights, "proton", "up", 1);
-	    spin_contraction(up_quark_propagator, up_quark_propagator, down_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
-	    write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
-		"proton_np", "up",
-#ifdef BUILD_HDF5
-		  params.param.obj_path, h5out, wmode,
-#endif
-		  t_0, Nt, origin, ft, baryon);
-	    get_spin_wavefunctions(src_spins, snk_spins, src_weights, snk_weights, "proton", "dn", 1);
-	    spin_contraction(up_quark_propagator, up_quark_propagator, down_quark_propagator, src_spins, snk_spins, src_weights, snk_weights, baryon);
-	    write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
-		"proton_np", "dn",
-#ifdef BUILD_HDF5
-		params.param.obj_path, h5out, wmode,
-#endif
-		t_0, Nt, origin, ft, baryon);
-	  }
-	}
+	    t_0, Nt, origin, ft, baryon);
+
       }
 
 #ifdef BUILD_HDF5
