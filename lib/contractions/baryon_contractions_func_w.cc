@@ -2,7 +2,8 @@
  *  Functions that do baryon spin and color contractions.
  *  Color is nested inside of spin.
  *  Authors:
- *  Arjun Gambhir
+ *  Ben Hoerz
+ *  Andre Walker-Loud
  */
 
 #include "baryon_contractions_func_w.h"
