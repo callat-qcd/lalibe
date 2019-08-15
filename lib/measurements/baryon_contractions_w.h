@@ -78,9 +78,10 @@ namespace Chroma
 
 
     namespace {
-      std::map<std::string, std::vector<std::string>> aliasMap = {
-	{ "octet", {"proton", "lambda_z", "sigma_p", "xi_z"} },
-      };
+        std::map<std::string, std::vector<std::string>> aliasMap = {
+            { "octet",    {"proton", "lambda_z", "sigma_p", "xi_z"} },
+            { "decuplet", {"delta_pp", "sigma_star_p", "xi_star_z", "omega_m"} },
+        };
     }
 
   } // namespace LalibeBaryonContractionsEnv
