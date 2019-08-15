@@ -4,8 +4,8 @@ LALIBE
 **Developers:**  
 Arjun Gambhir  
 David Brantley  
-Jason Chang
-Ben Hörz
+Jason Chang  
+Ben Hörz  
 Henry Monge-Camacho  
 Pavlos Vranas  
 André Walker-Loud
