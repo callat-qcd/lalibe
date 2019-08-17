@@ -50,6 +50,8 @@ namespace Chroma
         std::string output_filename;          //output file
         int output_stripesize;                //output stripesize; default recommended
         bool dirac_basis;                     //specifies props in dirac basis, this is false by default
+        multi1d<GroupXML_t> sink_xml;         //used for Thorsten's sink construction, TODO: replace this with Chroma's SINK_SMEAR
+        //FIXME: Not sure if the way I read sink_xml will work for a multi1d. 
       } nnlcparam ;
 
       struct NamedObject_t

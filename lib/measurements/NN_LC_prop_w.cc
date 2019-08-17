@@ -15,12 +15,13 @@ Memory management when boosting needs to be looked into.
 #include "fermact.h"
 #include "actions/ferm/fermacts/fermact_factory_w.h"
 #include "util/info/unique_id.h"
+#include "io/xml_group_reader.h"
 
 // Lalibe Stuff
 #include "../momentum/lalibe_sftmom.h"
 #include "NN_LC_prop_w.h"
 #include "../matrix_elements/bilinear_gamma.h"
-//bilinear_gamma above shouldn't be needed once boiler plate is removed.
+//TODO: bilinear_gamma above shouldn't be needed once boiler plate is removed.
 
 // Latscat Stuff
 #ifndef CUFFT
@@ -61,6 +62,20 @@ namespace Chroma
     void read(XMLReader& xml, const std::string& path, NNLCPropParams::NNLCProp_t& par)
     {
       XMLReader paramtop(xml, path);
+
+      //Thorsten's sink types read here.
+      //TODO: Change this to completely use chroma's sink smearing.
+      XMLReader xml_tmp(paramtop, "sink");
+      
+      XMLBufferWriter xml_out;
+      push(xml_out,"sink");
+      xml_out << xml_tmp;
+      pop(xml_out);
+      
+      XMLReader xml_in(xml_out);
+      par.sink_xml = readXMLGroup(xml_in, "/sink", "combo"); //Thorsten's sink smearing
+
+      //FH prop params are below here.
       read(paramtop, "currents" ,par.currents  ); //list of currents
       /*read(paramtop, "t0"      ,par.t0     );   //t0 of input prop
       if (paramtop.count("j_decay") != 0)
@@ -130,7 +145,7 @@ namespace Chroma
       else
         par.output_stripesize = -1;
       if (paramtop.count("dirac_basis") != 0)
-        read(paramtop, "dirac_basis", par.dirac_basis); ////specifies props in dirac basis, this is false by default
+        read(paramtop, "dirac_basis", par.dirac_basis); //specifies props in dirac basis, this is false by default
       else
         par.dirac_basis = false;
     }
@@ -155,6 +170,8 @@ namespace Chroma
       write(xml, "output_filename", par.output_filename);             //output filename
       write(xml, "output_stripesize", par.output_stripesize);         //output stripesize; default recommended
       write(xml, "dirac_basis", par.dirac_basis);                     //specifies props in dirac basis, this is false by default
+      //Sink stuff is a GroupXML, we are not writing it.
+      //write(xml, "sink_type", par.sink_xml);                          //sink info
       pop(xml);
     }
 
@@ -291,6 +308,33 @@ namespace Chroma
       //We aren't actually going to use SourcePars since the only param read in is boost.
       if(params.nnlcparam.fft_chunksize !=0 ) 
         QDPIO::cout << "Using chunksize " << params.nnlcparam.fft_chunksize << " for the Baryon-Block FFT!" << std::endl;
+
+      //Do FFT tuning if it's enabled; comment below comes from latscat.
+      // This should probably be put closer to the other fft specification.  Is there a reason it cannot?
+      if(params.nnlcparam.fft_tune)
+      {
+        QDPIO::cout << "Tuning FFT for better performance..." << std::flush;
+        StopWatch swatch_fftune;
+        swatch_fftune.reset();
+        swatch_fftune.start();
+        fftblock.tune(sizeof(HalfBaryonblock),true);
+        swatch_fftune.stop();
+        QDPIO::cout << "done! Time " << swatch_fftune.getTimeInSeconds() << std::endl;
+      }
+
+      //Parsing sinks code goes here in the original latscat. 
+      //I am going to let the sink construction measurement handle that.
+      //TODO: Use chroma's smearing to do this. Already done in our c3pt code, will do this on second pass.
+      QDPIO::cout << "Parsing sinks..." << std::endl;
+      multi1d<sink*>   sinks(params.nnlcparam.sink_xml.size());
+      multi1d<Complex> weights(params.nnlcparam.sink_xml.size());
+      for(int s=0; s<params.nnlcparam.sink_xml.size(); s++){
+        // QDPIO::cout << "Parsing sink " << s << " ... " << std::flush;
+        parseSink(params.nnlcparam.sink_xml[s],sinks[s],weights[s],fft,j_decay);
+        //Last param above used to be latpars.tDir.
+        // QDPIO::cout << sinks[s]->type() << std::endl;
+      }
+      QDPIO::cout << "Found " << sinks.size() << " sinks." << std::endl; 
 
 #else
       QDPIO::cout << "This measurement only works if we have linked against FFTW. Please rebuild." << std::endl;
