@@ -14,6 +14,7 @@ f = h5.File(known_path+'/test_propagator.h5')
 ps_prop = f['sh_sig2p0_n5/PS_prop'][()]
 f.close()
 
+# Rotate from Degrand-Rossi to Dirac-Pauli basis
 ps_DP = np.einsum('ik,tzyxklab,lj->tzyxijab',Uadj,ps_prop,U)
 print(known_path+'/test_propagator.h5/sh_sig2p0_n5/PS_prop shape')
 print(ps_DP.shape)
