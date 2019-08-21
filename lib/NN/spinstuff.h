@@ -3,8 +3,6 @@
 #ifndef _SPINSTUFF
 #define _SPINSTUFF
 
-#include <string>
-
 #include "chromabase.h"
 //We include chroma types this way.
 

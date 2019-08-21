@@ -47,7 +47,8 @@ namespace Chroma
         int contractions_n_sq;                //FIXME What comment do I put for this?
         unsigned int fft_chunksize;           //originally the only parameter in FFTPar struct
         bool fft_tune;                        //tune the fft?
-        multi1d<int> boosts;                  //boosts
+        //multi1d<int> boosts;                //boosts; this will only give one boost...not what we want
+        multi1d< multi1d<int> > boosts;       //boosts
         std::string output_filename;          //output file
         int output_stripesize;                //output stripesize; default recommended
         bool dirac_basis;                     //specifies props in dirac basis, this is false by default

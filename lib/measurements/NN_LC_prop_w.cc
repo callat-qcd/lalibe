@@ -34,6 +34,8 @@ Memory management when boosting needs to be looked into.
 #include "../NN/NN_LC_w.h"
 #include "../NN/spinstuff.h"
 #include "../NN/transform.h"
+#include "../NN/checkpointstuff.h"
+#include "../NN/momstuff.h"
 
 namespace Chroma
 {
@@ -206,6 +208,37 @@ namespace Chroma
       pop(xml);
     }
 
+    //This is a function from latscat that should just be local to this translation unit. 
+    //I'll just keep it here.
+    std::string boost_string(const multi1d<int> &boost){
+        std::string boostdir("boost_");
+        for(unsigned int d=0; d<(Nd-1); d++){
+            if(boost[d]>=0) boostdir+="p";
+            else boostdir+="m";
+            boostdir+=dirlist[d]+std::to_string(abs(boost[d]));
+        }
+        if(boost.size() > (Nd-1) && boost[Nd-1] !=0){
+            if(boost[Nd-1]>=0) boostdir+="p";
+            else boostdir+="m";
+            boostdir+=dirlist[Nd-1]+std::to_string(abs(boost[Nd-1]));
+        }
+        return boostdir;
+    }
+    
+    //Similar category for this function. This comes from utils.cc, I don't want to take all the other stuff from there.
+    //This is an isolated copy.
+    const std::string getTimestamp() {
+      time_t     now = time(0);
+      struct tm  tstruct;
+      char       buf[80];
+      tstruct = *localtime(&now);
+      strftime(buf, sizeof(buf), "%Y-%m-%d-%X", &tstruct);
+      std::string result(buf);
+      result.erase(std::remove(result.begin(), result.end(), ':'), result.end());
+    
+      return result;
+    }
+
     // Param stuff
     NNLCPropParams::NNLCPropParams()
     {
@@ -286,6 +319,9 @@ namespace Chroma
 #endif
       //Stuff about LatticePars is read next, this is already read in our main function.
       //Layout creation/setup is done next, chroma handles this for us.
+
+      //For now, this measurement is only going to crunch stuff if we have built with hdf5.
+#ifdef BUILD_HDF5
       
       //set up fourier stuff:   
       QDPIO::cout << "Setting up Communicators for FFT..." << std::flush;
@@ -448,7 +484,8 @@ namespace Chroma
     }
     QDPIO::cout << "... sinks refreshed." << std::endl;
 
-    //Next, would be the checkpointing stuff, but I am not porting that over...
+    //Checkpointing isn't suppose to be supported, I include the bare minimum here...
+    checkpoint chk(params.nnlcparam.output_filename+".NN_w.chk",params.nnlcparam.output_stripesize);
     
     QDPIO::cout << "Creating timers..." << std::flush;
     // TODO: make timings more meaningful?
@@ -511,9 +548,185 @@ namespace Chroma
         prop_1_34[i] = gamma5 * prop_1[i] * gamma5;
     }
 
+    /********************************************************
+    *                                                       *
+    *   LOOP OVER BOOSTS                                    *
+    *                                                       *
+    ********************************************************/
+    for(unsigned int b=0; b < params.nnlcparam.boosts.size(); b++){
+        multi1d<int> boost = params.nnlcparam.boosts[b];
+        std::string boostdir=boost_string(boost);
 
+        momentum mom(params.nnlcparam.boosts[b]);
+
+        QDPIO::cout << mom << "    " << boostdir << std::endl;
+
+        chk.create_directory(boostdir);
+        chk.close();
+
+        LatticeComplex phases=get_phases(mom,j_decay,+1);
+
+        swatch_pdisp.start();
+        QDPIO::cout << "Computing contractions..." << std::endl;
+        // if displacement between sources of uprop_p{1,2} is nonzero:
+        QDPIO::cout << "    Doing displaced only." << std::endl;
+        QDPIO::cout << "    For now, if you want local, just pass the same propagator twice." << std::endl;
+        contract(tmplatcomp_P, tmplatmats, prop_0, prop_1, Nup[0].get_gamma(0), phases, fftblock, false, weights);
+        QDPIO::cout << "    Contractions done!" << std::endl;
+
+        QDPIO::cout << "Computing contractions with negative parity blocks ..." << std::endl;
+        contract(tmplatcomp_P_34, tmplatmats_34, prop_0_34, prop_1_34, Nup[0].get_gamma(0), phases, fftblock, false, weights);
+        QDPIO::cout << "    done!" << std::endl;
+
+
+        QDPIO::cout << "Writing!" << std::endl;
+
+        chk.open();
+        chk.set_consistency(false);
+
+        //QDPIO::cout << "Skipping the single proton." << std::endl;
+        /*******************************************
+         * SINGLE PROTON
+         *******************************************/
+        if(b==0){
+            QDPIO::cout << "Single proton." << std::endl;
+            //positive parity proton
+            token=zero;
+            token+=/* sourcefact * tmpprefact * */ tshiftmap(tmplatcomp_P,true);
+            swatch_io_write.start();
+            chk.set_parameter("proton1",token);
+            swatch_io_write.stop();
+
+            //negative parity proton
+            token=zero;
+            token+=/* sourcefact * tmpprefact * */ tshiftmap(tmplatcomp_P_34,true);
+            swatch_io_write.start();
+            chk.set_parameter("proton1_34",token);
+            swatch_io_write.stop();
+        }
+    
+        //TODO: This print comes from latscat, but it also serves as a placeholder to extend this measurement and make it
+        //more general in a second or third pass.
+        QDPIO::cout << "Skipping the local sources." << std::endl;
+        
+        for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=tmplatmats.begin(); it!=tmplatmats.end(); ++it){
+            std::string idstring=it->first;
+            if(idstring.find("loc")!=std::string::npos) continue;
+
+            size_t firstpos=idstring.find("_");
+            size_t secondpos=idstring.find(firstpos);
+            std::string conttype=idstring.substr(0,firstpos);
+            std::transform(conttype.begin(),conttype.end(),conttype.begin(),::tolower);
+
+            std::string srcspin=idstring.substr(firstpos+1,secondpos);
+            std::string srcspinval(&srcspin[srcspin.size()-1]);
+            srcspin=srcspin.substr(0,srcspin.size()-1);
+
+            for(std::map<std::string,HalfSpinMatrix>::iterator innerit=projectors.begin(); innerit!=projectors.end(); ++innerit){
+                std::string inneridstring=innerit->first;
+                std::string snkspin=inneridstring.substr(0,inneridstring.size()-1);
+                if(snkspin!=srcspin) continue;
+                std::string snkspinval(&inneridstring[inneridstring.size()-1]);
+
+                std::string corrname=conttype+"corr"+"_"+srcspin+"_"+snkspinval+"_"+srcspinval+"_"+displacedir; //s[0]; // 0 = mu hardcoded for this version.
+                token=zero;
+                // TODO src always is 0 for this version!!
+                // if(src==0) token=zero;
+                // else{
+                //     swatch_io_read.start();
+                //     chk.get_parameter(boostdir+"/"+corrname,token);
+                //     swatch_io_read.stop();
+                // }
+                token+=/* sourcefact * tmpprefact * */ tshiftmap(LatticeComplex(trace((innerit->second)*(it->second))));
+                swatch_io_write.start();
+                chk.set_parameter(boostdir+"/"+corrname,token);
+                swatch_io_write.stop();
+            }
+        }
+        
+        // other-parity (34 entries)
+        for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=tmplatmats_34.begin(); it!=tmplatmats_34.end(); ++it){
+            std::string idstring=it->first;
+            if(idstring.find("loc")!=std::string::npos) continue;
+
+            size_t firstpos=idstring.find("_");
+            size_t secondpos=idstring.find(firstpos);
+            std::string conttype=idstring.substr(0,firstpos);
+            std::transform(conttype.begin(),conttype.end(),conttype.begin(),::tolower);
+
+            std::string srcspin=idstring.substr(firstpos+1,secondpos);
+            std::string srcspinval(&srcspin[srcspin.size()-1]);
+            srcspin=srcspin.substr(0,srcspin.size()-1);
+
+            for(std::map<std::string,HalfSpinMatrix>::iterator innerit=projectors.begin(); innerit!=projectors.end(); ++innerit){
+                std::string inneridstring=innerit->first;
+                std::string snkspin=inneridstring.substr(0,inneridstring.size()-1);
+                if(snkspin!=srcspin) continue;
+                std::string snkspinval(&inneridstring[inneridstring.size()-1]);
+
+                std::string corrname=conttype+"corr"+"_"+srcspin+"_"+snkspinval+"_"+srcspinval+"_"+displacedir; //s[0]; // 0 = mu hardcoded for this version.
+                token=zero;
+                // TODO src always is 0 for this version!!
+                // if(src==0) token=zero;
+                // else{
+                //     swatch_io_read.start();
+                //     chk.get_parameter(boostdir+"/"+corrname,token);
+                //     swatch_io_read.stop();
+                // }
+                token+=/* sourcefact * tmpprefact * */ tshiftmap(LatticeComplex(trace((innerit->second)*(it->second))));
+                swatch_io_write.start();
+                chk.set_parameter(boostdir+"/"+corrname+"_34",token);
+                swatch_io_write.stop();
+            }
+        }
+        
+        //state
+        chk.set_parameter("mucurrent",static_cast<unsigned int>(0+1)); // 0 = mu hardcoded for this version.
+        // if((mu+1)<sourcepars.displacements.nrows()) chk.set_consistency(true);
+        chk.set_consistency(true);  // can hardcode THIS too, because mu is always 0!
+        chk.close();
+        swatch_pdisp.stop();
+
+/*#ifndef NO_SIGNAL_HANDLERS
+        sighand::exit_code_on_abort();
+#endif*/
+        //This signal handling stuff is not necessary. I don't want the baggage of Thorsten's specialized XML readexs.
+
+        QDPIO::cout << "NN-corr-disp: time=" << swatch_pdisp.getTimeInSeconds() << std::endl;
+        swatch_pdisp.reset();
+        // if(src!=0) QDPIO::cout << "NN-corr-io-read: time=" << swatch_io_read.getTimeInSeconds() << std::endl;
+        QDPIO::cout << "NN-corr-io-write: time=" << swatch_io_write.getTimeInSeconds() << std::endl;
+        swatch_io_read.reset();
+        swatch_io_write.reset();
+    
+    } //This is manually here to close loop while porting.
+    /********************************************************
+    *                                                       *
+    *   END LOOP OVER BOOSTS                                *
+    *                                                       *
+    ********************************************************/
+
+    //move the checkpoint file:
+    std::string timestamp=getTimestamp();
+    rename(std::string(params.nnlcparam.output_filename+".NN_w.chk").c_str(),std::string(params.nnlcparam.output_filename).c_str());
+
+    //This is where the end of the loop over configurations went in latscat, obviously don't need that here.
+    
+    //clear baryon blocks:
+    clearTopologies();
+    
+    //This is where latscat's swatch_everything stops. I am going to use this one instead.
+
+    snoop.stop();
+    QDPIO::cout << LalibeNucleonNucleonLinearComboPropagatorEnv::name << ": total time = " << snoop.getTimeInSeconds() << " secs" << std::endl;
+    QDPIO::cout << LalibeNucleonNucleonLinearComboPropagatorEnv::name<< ": ran successfully" << std::endl;
+    END_CODE();
 #else
       QDPIO::cout << "This measurement only works if we have linked against FFTW. Please rebuild." << std::endl;
+#endif
+
+#else
+      QDPIO::cout << "This measurement only works if we have enabled HDF5. Please rebuild." << std::endl;
 #endif
      
       //Everything beyond this is from the old file...will eventually be deleted.
