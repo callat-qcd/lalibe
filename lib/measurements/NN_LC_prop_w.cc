@@ -30,6 +30,7 @@ Memory management when boosting needs to be looked into.
 #include "../NN/fourier_cuda.h"
 #endif
 #include "../NN/NN_LC_w.h"
+#include "../NN/spinstuff.h"
 
 namespace Chroma
 {
@@ -179,18 +180,26 @@ namespace Chroma
     void read(XMLReader& xml, const std::string& path, NNLCPropParams::NamedObject_t& input)
     {
       XMLReader inputtop(xml, path);
+      //We'll need the gauge even after the rest of this section gets deleted.
       read(inputtop, "gauge_id"     , input.gauge_id);
       read(inputtop, "src_prop_id"  , input.src_prop_id);
       read(inputtop, "fh_prop_id"   , input.fh_prop_id);
+      //Where latscat params start.
+      read(inputtop, "prop0_id"     , input.prop0_id);
+      read(inputtop, "prop1_id"     , input.prop1_id);
     }
 
     //! NamedObject output
     void write(XMLWriter& xml, const std::string& path, const NNLCPropParams::NamedObject_t& input)
     {
       push(xml, path);
+      //We'll need the gauge even after the rest of this section gets deleted.
       write(xml, "gauge_id"     , input.gauge_id    );
       write(xml, "src_prop_id"  , input.src_prop_id     );
       write(xml, "fh_prop_id"   , input.fh_prop_id);
+      //Where latscat params start.
+      write(xml, "prop0_id"     , input.prop0_id);
+      write(xml, "prop1_id"     , input.prop1_id);
       pop(xml);
     }
 
@@ -335,6 +344,95 @@ namespace Chroma
         // QDPIO::cout << sinks[s]->type() << std::endl;
       }
       QDPIO::cout << "Found " << sinks.size() << " sinks." << std::endl; 
+
+      multi1d<int> pos0(Nd), pos1(Nd), disp(Nd);
+      //latscat reads a bunch of prop stuff from XML after this, I am going to directly extract it instead.
+      //Read/set up prop 0.
+      XMLReader prop0_file_xml, prop0_record_xml;
+      LatticePropagator propagator0;
+      //From earlier latscat code I have set j_decay to Nd -1, so not reading it here.
+      QDPIO::cout << "Attempt to read propagator 0" << std::endl;
+      try
+      {
+        propagator0 = TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.prop0_id);
+        TheNamedObjMap::Instance().get(params.named_obj.prop0_id).getFileXML(prop0_file_xml);
+        TheNamedObjMap::Instance().get(params.named_obj.prop0_id).getRecordXML(prop0_record_xml);
+        //This all assumes the incoming propagator is coming from a makesource, otherwise we are in a ton of trouble ~_~.
+        MakeSourceProp_t  orig_header;
+        read(prop0_record_xml, "/Propagator", orig_header);
+        pos0 = orig_header.source_header.getTSrce();
+      }
+      catch (std::bad_cast)
+      {
+        QDPIO::cerr << name << ": caught dynamic cast error" << std::endl;
+        QDP_abort(1);
+      }
+      catch (const std::string& e)
+      {
+        QDPIO::cerr << name << ": error reading src prop_header: "
+            << e << std::endl;
+        QDP_abort(1);
+      }
+      //Now read/set up prop 1.
+      XMLReader prop1_file_xml, prop1_record_xml;
+      LatticePropagator propagator1;
+      //From earlier latscat code I have set j_decay to Nd -1, so not reading it here.
+      QDPIO::cout << "Attempt to read propagator 0" << std::endl;
+      try
+      {
+        propagator1 = TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.prop1_id);
+        TheNamedObjMap::Instance().get(params.named_obj.prop1_id).getFileXML(prop1_file_xml);
+        TheNamedObjMap::Instance().get(params.named_obj.prop1_id).getRecordXML(prop1_record_xml);
+        //This all assumes the incoming propagator is coming from a makesource, otherwise we are in a ton of trouble ~_~.
+        MakeSourceProp_t  orig_header;
+        read(prop1_record_xml, "/Propagator", orig_header);
+        pos1 = orig_header.source_header.getTSrce();
+      }
+      catch (std::bad_cast)
+      {
+        QDPIO::cerr << name << ": caught dynamic cast error" << std::endl;
+        QDP_abort(1);
+      }
+      catch (const std::string& e)
+      {
+        QDPIO::cerr << name << ": error reading src prop_header: "
+            << e << std::endl;
+        QDP_abort(1);
+      }
+      //Now back to latscat logic of calculating displacements and stuff.
+      QDPIO::cout << "    Propagator 0: " << params.named_obj.prop0_id << std::endl;
+      QDPIO::cout << "        Location: "; for(int i = 0; i<Nd; i++){ QDPIO::cout << pos0[i] << " " ;}; QDPIO::cout << std::endl;
+      QDPIO::cout << "    Propagator 1: " << params.named_obj.prop1_id << std::endl;
+      QDPIO::cout << "        Location: "; for(int i = 0; i<Nd; i++){ QDPIO::cout << pos1[i] << " " ;}; QDPIO::cout << std::endl;
+
+      disp = pos1 - pos0;
+      QDPIO::cout << "    Displacement: "; for(int i = 0; i<Nd; i++){ QDPIO::cout << disp[i] << " " ;}; QDPIO::cout << std::endl;
+      for(unsigned int d=0; d<Nd; d++){
+          QDPIO::cout << disp[d] << "%" << Layout::lattSize()[d] ;
+          disp[d] = (disp[d] + Layout::lattSize()[d]) % Layout::lattSize()[d];
+          QDPIO::cout << " --> " << disp[d] ;
+          if(disp[d] > Layout::lattSize()[d]/2){ disp[d] = disp[d] - Layout::lattSize()[d]; }
+          QDPIO::cout << " --> " << disp[d] << std::endl;
+      }
+      QDPIO::cout << "    Real Displacement: "; for(int i = 0; i<Nd; i++){ QDPIO::cout << disp[i] << " " ;}; QDPIO::cout << std::endl;
+      
+    // //displacements
+    std::string displacedir;
+    for(unsigned int d=0; d<Nd; d++){
+        if(disp[d] >= 0) displacedir+="p";
+        else displacedir+="m";
+        displacedir+=dirlist[d]+std::to_string(abs(disp[d]));
+
+    }
+    
+    // TODO: it would be better to make these more object-oriented.
+    //relevant spin projectors, in DP rep
+    //These are comments from latscat.
+    std::map<std::string,HalfSpinMatrix> projectors;
+    projectors["SING0"]=getHalfProjector("SING0");
+    projectors["TRIPP"]=getHalfProjector("TRIPP1");
+    projectors["TRIP0"]=getHalfProjector("TRIP0");
+    projectors["TRIPM"]=getHalfProjector("TRIPM1");
 
 #else
       QDPIO::cout << "This measurement only works if we have linked against FFTW. Please rebuild." << std::endl;

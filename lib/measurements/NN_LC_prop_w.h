@@ -42,6 +42,7 @@ namespace Chroma
         multi1d<multi1d<int>> mom_list;       //list of momenta insertions, optional
         multi2d<int> p_list;                  //momentum list the slow fourier transform needs
         ChromaProp_t prop_param;              //params for next lin solve
+        //This is where latscat params start.
         std::string contractions_filename;    //filename of hdf5 file that contains contraction terms
         int contractions_n_sq;                //FIXME What comment do I put for this?
         unsigned int fft_chunksize;           //originally the only parameter in FFTPar struct
@@ -56,9 +57,14 @@ namespace Chroma
 
       struct NamedObject_t
       {
+        //Gauge field likely needed for latscat from this section.
         std::string                     gauge_id;
         std::string                     src_prop_id;
         multi1d<std::string>            fh_prop_id;
+        //This is where latscat params start.
+        std::string                     prop0_id;
+        std::string                     prop1_id;
+        //For now, this will only support 2 propagators, but in the future this could be extended.
 
       } named_obj;
     };
