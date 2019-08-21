@@ -33,16 +33,6 @@ namespace Chroma
 
       // only same flavor bilinear operators are used
       struct NNLCProp_t{
-        multi1d<std::string> currents;        //list of currents
-        //int  t0;                            //t0 of input prop
-        //int j_decay;                        //orthogonal direction of FT
-        //Apparently I can read these things from a src prop.
-        bool is_mom_max;                      //keeps track of which momentum mode we are using
-        int p2_max;                           //max of momentum transfer squared, optional
-        multi1d<multi1d<int>> mom_list;       //list of momenta insertions, optional
-        multi2d<int> p_list;                  //momentum list the slow fourier transform needs
-        ChromaProp_t prop_param;              //params for next lin solve
-        //This is where latscat params start.
         std::string contractions_filename;    //filename of hdf5 file that contains contraction terms
         int contractions_n_sq;                //FIXME What comment do I put for this?
         unsigned int fft_chunksize;           //originally the only parameter in FFTPar struct
@@ -60,9 +50,6 @@ namespace Chroma
       {
         //Gauge field likely needed for latscat from this section.
         std::string                     gauge_id;
-        std::string                     src_prop_id;
-        multi1d<std::string>            fh_prop_id;
-        //This is where latscat params start.
         std::string                     prop0_id;
         std::string                     prop1_id;
         //For now, this will only support 2 propagators, but in the future this could be extended.
@@ -119,12 +106,13 @@ namespace Chroma
     };*/
     //Read these in the main struct as well.
 
-    struct FermPars{
+    //This struct was apparently never used???
+    /*struct FermPars{
       std::string file;
       multi1d<int> boundary;
       GroupXML_t strange_pars;
       GroupXML_t up_pars;
-    };
+    };*/
    
     //Linkage chroma hack was here in the original, not needed now.
     

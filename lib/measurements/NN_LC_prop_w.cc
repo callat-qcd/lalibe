@@ -81,49 +81,6 @@ namespace Chroma
       XMLReader xml_in(xml_out);
       par.sink_xml = readXMLGroup(xml_in, "/sink", "combo"); //Thorsten's sink smearing
 
-      //FH prop params are below here.
-      read(paramtop, "currents" ,par.currents  ); //list of currents
-      /*read(paramtop, "t0"      ,par.t0     );   //t0 of input prop
-      if (paramtop.count("j_decay") != 0)
-        read(paramtop, "j_decay" ,par.j_decay  ); //orthogoal direction of FT
-      else{
-        par.j_decay = Nd - 1;
-        QDPIO::cout << "j_decay not specified - setting default j_decay = " <<
-        par.j_decay << std::endl;
-        }*/
-      read(paramtop, "PropagatorParam" ,par.prop_param ); //params for next lin solve
-      if (paramtop.count("p2_max") != 0)
-      {
-        read(paramtop, "p2_max" ,par.p2_max);
-        QDPIO::cout<<"Reading momenta centered around the origin with a max of "<<par.p2_max<<std::endl;
-        par.is_mom_max = true;
-      }
-      else if (paramtop.count("mom_list") != 0)
-      {
-        read(paramtop, "mom_list" ,par.mom_list);
-        QDPIO::cout<<"Using custom momentum list."<<std::endl;
-        par.is_mom_max = false;
-        //Assumes the length is 3 for the inner dimension.
-        for(int iter = 0; iter < par.mom_list.size(); iter++)
-          QDPIO::cout<<"Momentum px: "<<par.mom_list[iter][0]<<" py: "<<par.mom_list[iter][1]<<" pz: "<<par.mom_list[iter][2]<<std::endl;
-        
-        //nested multi1d to multi2d
-        par.p_list.resize(par.mom_list.size(), Nd -1);
-        for(int mom = 0; mom < par.mom_list.size(); mom++)
-        {
-          par.p_list[mom][0] = par.mom_list[mom][0];
-          par.p_list[mom][1] = par.mom_list[mom][1];
-          par.p_list[mom][2] = par.mom_list[mom][2];
-        }
-      }
-
-      else
-      {
-        QDPIO::cout << "No momentum specified, setting FT to zero-momentum transfer only. "<<std::endl;
-        par.is_mom_max = true;
-        par.p2_max = 0;
-      }
-      //Where latscat params start.
       read(paramtop, "contractions_filename", par.contractions_filename); //hdf5 file containing contractions
       if (paramtop.count("contractions_n_sq") != 0)
         read(paramtop, "contractions_n_sq", par.contractions_n_sq); //FIXME Description needed here.
@@ -159,15 +116,6 @@ namespace Chroma
     void write(XMLWriter& xml, const std::string& path, NNLCPropParams::NNLCProp_t& par)
     {
       push(xml, path);
-      write(xml, "currents" ,par.currents); //list of currents
-      //write(xml, "t0"      ,par.t0     ); //t0 of input prop
-      //write(xml, "j_decay" ,par.j_decay); //orthogoal direction of FT
-      write(xml, "PropagatorParam" ,par.prop_param); //params for next lin solve
-      if(par.is_mom_max == true)
-        write(xml, "p2_max" ,par.p2_max);
-      else
-        write(xml, "mom_list" ,par.mom_list);
-      //Where latscat params start.
       write(xml, "contractions_filename", par.contractions_filename); //hdf5 file containing contractions
       write(xml, "contractions_n_sq", par.contractions_n_sq);         //FIXME Comment needed here as well.
       write(xml, "fft_chunksize", par.fft_chunksize);                 //originally the only parameter in FFTPar struct
@@ -185,11 +133,7 @@ namespace Chroma
     void read(XMLReader& xml, const std::string& path, NNLCPropParams::NamedObject_t& input)
     {
       XMLReader inputtop(xml, path);
-      //We'll need the gauge even after the rest of this section gets deleted.
       read(inputtop, "gauge_id"     , input.gauge_id);
-      read(inputtop, "src_prop_id"  , input.src_prop_id);
-      read(inputtop, "fh_prop_id"   , input.fh_prop_id);
-      //Where latscat params start.
       read(inputtop, "prop0_id"     , input.prop0_id);
       read(inputtop, "prop1_id"     , input.prop1_id);
     }
@@ -198,11 +142,7 @@ namespace Chroma
     void write(XMLWriter& xml, const std::string& path, const NNLCPropParams::NamedObject_t& input)
     {
       push(xml, path);
-      //We'll need the gauge even after the rest of this section gets deleted.
       write(xml, "gauge_id"     , input.gauge_id    );
-      write(xml, "src_prop_id"  , input.src_prop_id     );
-      write(xml, "fh_prop_id"   , input.fh_prop_id);
-      //Where latscat params start.
       write(xml, "prop0_id"     , input.prop0_id);
       write(xml, "prop1_id"     , input.prop1_id);
       pop(xml);
@@ -715,12 +655,8 @@ namespace Chroma
     //clear baryon blocks:
     clearTopologies();
     
-    //This is where latscat's swatch_everything stops. I am going to use this one instead.
+    //This is where latscat's swatch_everything stops. I am going to use the timer that's printed at the end.
 
-    snoop.stop();
-    QDPIO::cout << LalibeNucleonNucleonLinearComboPropagatorEnv::name << ": total time = " << snoop.getTimeInSeconds() << " secs" << std::endl;
-    QDPIO::cout << LalibeNucleonNucleonLinearComboPropagatorEnv::name<< ": ran successfully" << std::endl;
-    END_CODE();
 #else
       QDPIO::cout << "This measurement only works if we have linked against FFTW. Please rebuild." << std::endl;
 #endif
@@ -729,117 +665,6 @@ namespace Chroma
       QDPIO::cout << "This measurement only works if we have enabled HDF5. Please rebuild." << std::endl;
 #endif
      
-      //Everything beyond this is from the old file...will eventually be deleted.
-      // Read "src" quark propagator
-      XMLReader prop_file_xml, prop_record_xml;
-      LatticePropagator quark_propagator;
-      int t0;
-      //Because of latscat code, I have commented out the declaration of j_decay.
-      //int j_decay;
-      //Need origin for fourier transform!
-      multi1d<int> origin;
-      //We need this stuff to call quarkprop, it's pretty dumb, but I haven't found a way around it...
-      QDPIO::cout << "Attempt to read forward propagator" << std::endl;
-      try
-      {
-        quark_propagator = TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.src_prop_id);
-        TheNamedObjMap::Instance().get(params.named_obj.src_prop_id).getFileXML(prop_file_xml);
-        TheNamedObjMap::Instance().get(params.named_obj.src_prop_id).getRecordXML(prop_record_xml);
-        //This all assumes the incoming propagating is coming from a makesource, otherwise we are in a ton of trouble ~_~.
-        MakeSourceProp_t  orig_header;
-        read(prop_record_xml, "/Propagator", orig_header);
-        j_decay = orig_header.source_header.j_decay;
-        t0      = orig_header.source_header.t_source;
-        origin = orig_header.source_header.getTSrce();
-      }
-      catch (std::bad_cast)
-      {
-        QDPIO::cerr << name << ": caught dynamic cast error" << std::endl;
-        QDP_abort(1);
-      }
-      catch (const std::string& e)
-      {
-        QDPIO::cerr << name << ": error reading src prop_header: "
-            << e << std::endl;
-        QDP_abort(1);
-      }
-
-      // Initialize FT stuff based on which type of momentum mode was selected.
-      // This assumes j_decay is the orthogonal direction: typically Nd - 1.
-      LalibeSftMom ft = params.nnlcparam.is_mom_max ? LalibeSftMom(params.nnlcparam.p2_max, origin, false, j_decay)
-          : LalibeSftMom(params.nnlcparam.p_list, origin, j_decay);
-      // Make an action and all other stuff needed for a solver.
-
-      typedef LatticeFermion T;
-      typedef multi1d<LatticeColorMatrix> P;
-      typedef multi1d<LatticeColorMatrix> Q;
-
-
-      std::istringstream xml_action(params.nnlcparam.prop_param.fermact.xml);
-      XMLReader action_reader(xml_action);
-      Handle<FermionAction<T, P, Q>> action(TheFermionActionFactory::Instance().createObject(params.nnlcparam.prop_param.fermact.id, action_reader, params.nnlcparam.prop_param.fermact.path));
-      Handle<FermState<T, P, Q>> action_state(action->createState(u));
-      QDPIO::cout<<"Our action and fermion state are doing A-okay so far."<<std::endl;
-      //Handle<SystemSolver<LatticeFermion>> solver = action->qprop(action_state, params.nnlcparam.prop_param.invParam);
-      //Above is for a single fermion, but we want to loop over spin/color and solve for the full propagator.
-
-      int ncg_had = 0; //This appears in the propagator task, I am just copying it here.
-
-      LatticePropagator fh_prop_src = quark_propagator;
-      LatticePropagator fh_prop_solution;
-
-      QDPIO::cout << "NUCLEON_NUCLEON_LINEAR_COMBO_PROPAGATOR: N_currents " << params.nnlcparam.currents.size() << std::endl;
-      for(int current_index = 0; current_index < params.nnlcparam.currents.size(); current_index++)
-      {
-        std::string present_current = params.nnlcparam.currents[current_index];
-        QDPIO::cout << "FH_PROPAGATOR: current " << present_current << std::endl;
-        fh_prop_solution = zero;
-        // WE SHOULD MAKE THIS A FACTORY
-        Bilinear_Gamma(present_current, fh_prop_src, quark_propagator, u);
-        //Momentum loop
-        for(int mom = 0; mom < ft.numMom(); mom++)
-        {
-          multi1d<int> momenta = ft.numToMom(mom);
-          QDPIO::cout << "Injecting momentum - px: "<<std::to_string(momenta[0])<<" py: "+std::to_string(momenta[1])<<" pz: "+std::to_string(momenta[2])<<std::endl;
-          fh_prop_src = ft[mom]*fh_prop_src;
-          //Now, we do the actual solve.
-          action->quarkProp(fh_prop_solution, xml_out, fh_prop_src, t0, j_decay, action_state,
-              params.nnlcparam.prop_param.invParam,
-              params.nnlcparam.prop_param.quarkSpinType,
-              params.nnlcparam.prop_param.obsvP, ncg_had);
-          
-          push(xml_out,"Relaxation_Iterations");
-          write(xml_out, "ncg_had", ncg_had);
-          pop(xml_out);
-
-          QDPIO::cout << "Writing propagator info, cause why not?" << std::endl;
-          XMLBufferWriter file_xml;
-          push(file_xml, "propagator");
-          write(file_xml, "id", uniqueId());  // NOTE: new ID form
-          pop(file_xml);
-  
-          //If ths src is not from make source these thing is not going to work...
-          XMLBufferWriter record_xml;
-          MakeSourceProp_t  orig_header;
-          read(prop_record_xml, "/Propagator", orig_header);
-          Propagator_t  new_header;   // note, abandoning state_info
-          new_header.prop_header   = params.nnlcparam.prop_param;
-          new_header.source_header = orig_header.source_header;
-          new_header.gauge_header  = orig_header.gauge_header;
-          write(record_xml, "Propagator", new_header);
-
-          // Pass the propagator info to the Named Object Buffer.
-          // Looping over currents and momenta, momenta is inner most index
-          // current_id = flattened index running over both these indices
-          std::string current_id = params.named_obj.fh_prop_id[ft.numMom()*current_index + mom];
-          TheNamedObjMap::Instance().create<LatticePropagator>(current_id);
-          TheNamedObjMap::Instance().getData<LatticePropagator>(current_id) = fh_prop_solution;
-          TheNamedObjMap::Instance().get(current_id).setFileXML(file_xml);
-          TheNamedObjMap::Instance().get(current_id).setRecordXML(record_xml);
-          QDPIO::cout<<"YAAAY! We finished current: "<<current_id<<std::endl;
-        }
-      }
-
       snoop.stop();
       QDPIO::cout << LalibeNucleonNucleonLinearComboPropagatorEnv::name << ": total time = " << snoop.getTimeInSeconds() << " secs" << std::endl;
       QDPIO::cout << LalibeNucleonNucleonLinearComboPropagatorEnv::name<< ": ran successfully" << std::endl;
