@@ -79,7 +79,10 @@ namespace Chroma
       pop(xml_out);
       
       XMLReader xml_in(xml_out);
-      par.sink_xml = readXMLGroup(xml_in, "/sink", "combo"); //Thorsten's sink smearing
+      //par.sink_xml = readXMLGroup(xml_in, "/sink", "combo"); //Thorsten's sink smearing
+      //Since sink_xml is a multi1d of XMLGroups, we need to array instead.
+      par.sink_xml = readXMLArrayGroup(xml_in, "/sink", "sink_type"); //Thorsten's sink smearing
+      QDPIO::cout<<par.sink_xml.size()<<" sinks successfully read."<<std::endl;
 
       read(paramtop, "contractions_filename", par.contractions_filename); //hdf5 file containing contractions
       if (paramtop.count("contractions_n_sq") != 0)
@@ -94,14 +97,7 @@ namespace Chroma
         read(paramtop, "fft_tune", par.fft_tune); //tune fft?
       else
         par.fft_tune = false;
-      if (paramtop.count("boosts") != 0)
-        read(paramtop, "boosts", par.boosts); //boosts
-      else 
-      {
-        par.boosts.resize(Nd - 1);
-        for (int p = 0; p < (Nd - 1); p++)
-          par.boosts[p] = 0; //The default is no boost, ie populate with zeros.
-      }
+      read(paramtop, "boosts", par.boosts); //boosts
       read(paramtop, "output_filename", par.output_filename); //output file
       if (paramtop.count("output_stripesize") != 0)
         read(paramtop, "output_stripesize", par.output_stripesize); //output stripesize; default recommended
