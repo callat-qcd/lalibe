@@ -507,7 +507,11 @@ namespace Chroma
         // if displacement between sources of uprop_p{1,2} is nonzero:
         QDPIO::cout << "    Doing displaced only." << std::endl;
         QDPIO::cout << "    For now, if you want local, just pass the same propagator twice." << std::endl;
+#if QDP_NC == 3
         contract(tmplatcomp_P, tmplatmats, prop_0, prop_1, Nup[0].get_gamma(0), phases, fftblock, false, weights);
+#else
+        QDPIO::cout<<"Contractions not yet implemented for NC!=3."<<std::endl;
+#endif
         QDPIO::cout << "    Contractions done!" << std::endl;
 
         QDPIO::cout << "Computing contractions with negative parity blocks ..." << std::endl;
@@ -541,8 +545,7 @@ namespace Chroma
             swatch_io_write.stop();
         }
     
-        //TODO: This print comes from latscat, but it also serves as a placeholder to extend this measurement and make it
-        //more general in a second or third pass.
+        //TODO: This print comes from latscat, but it also serves as a placeholder to extend this measurement and make it more general in a second or third pass.
         QDPIO::cout << "Skipping the local sources." << std::endl;
         
         for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=tmplatmats.begin(); it!=tmplatmats.end(); ++it){
