@@ -2,12 +2,13 @@
 #include "meas/inline/abs_inline_measurement_factory.h"
 //#include "meas/inline/make_xml_file.h"
 #include "meas/inline/io/named_objmap.h"
-//#include "util/info/proginfo.h"
+#include "util/info/proginfo.h"
 //#include "actions/gauge/gaugestates/gauge_createstate_aggregate.h"
 //#include "../external/external_field.h"
 //#include "meas/glue/mesplq.h"
-//#include "util/gauge/unit_check.h"
+#include "util/gauge/unit_check.h"
 
+using namespace std;
 
 namespace Chroma 
 { 
@@ -178,13 +179,13 @@ namespace Chroma
     }
     catch( std::bad_cast ) 
     {
-      QDPIO::cerr << InlineProductFieldEnv::name << ": caught dynamic cast error" 
+      QDPIO::cerr << LalibeQEDMProductFieldEnv::name << ": caught dynamic cast error" 
 		  << endl;
       QDP_abort(1);
     }
     catch (const string& e) 
     {
-      QDPIO::cerr << InlineProductFieldEnv::name << ": map call failed: " << e 
+      QDPIO::cerr << LalibeQEDMProductFieldEnv::name << ": map call failed: " << e 
 		  << endl;
       QDP_abort(1);
     }
@@ -200,7 +201,7 @@ namespace Chroma
     push(xml_out, "product_field");
     write(xml_out, "update_no", update_no);
 
-    QDPIO::cout << InlineProductFieldEnv::name << ": modification by external U(1) field" << endl;
+    QDPIO::cout << LalibeQEDMProductFieldEnv::name << ": modification by external U(1) field" << endl;
 
     QDPIO::cout << endl << "     Gauge group: SU(" << Nc << ")" << endl;
 
@@ -276,12 +277,12 @@ namespace Chroma
     pop(xml_out);  // external_field
 
     snoop.stop();
-    QDPIO::cout << InlineProductFieldEnv::name << ": total time = "
+    QDPIO::cout << LalibeQEDMProductFieldEnv::name << ": total time = "
 		<< snoop.getTimeInSeconds() 
 		<< " secs"<<endl
 		<< "  IO time: " << swatch.getTimeInSeconds()<<" secs"<<endl;
 
-    QDPIO::cout << InlineProductFieldEnv::name << ": ran successfully" << endl;
+    QDPIO::cout << LalibeQEDMProductFieldEnv::name << ": ran successfully" << endl;
 
     END_CODE();
   } 					 
