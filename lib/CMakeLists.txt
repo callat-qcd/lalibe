@@ -13,6 +13,7 @@ file(GLOB LIB_SRC RELATIVE ${PROJECT_SOURCE_DIR}
     "numerics/*.cc"
     "momentum/*.cc"
     "NN/*.cc"
+    "stochastic_laph/*.cc"
 )
 
 # Build with hdf5 io stuff if the user wants.
