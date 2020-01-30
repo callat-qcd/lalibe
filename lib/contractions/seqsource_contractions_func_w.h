@@ -19,10 +19,6 @@
 
 namespace Chroma
 {
-    void rotate_to_Dirac_Basis(LatticePropagator & quark_to_be_rotated);
-
-    void rotate_from_Dirac_Basis(LatticePropagator & quark_to_be_rotated);
-
     SpinMatrix protonDiquarkSpin(int parity);
 
     SpinMatrix protonSpinUp(int parity);

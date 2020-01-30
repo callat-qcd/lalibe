@@ -55,19 +55,6 @@ namespace Chroma
     };
     */
 
-    void rotate_to_Dirac_Basis(LatticePropagator & quark_to_be_rotated)
-    {
-        //copied from Chroma
-        SpinMatrix U = DiracToDRMat();
-        quark_to_be_rotated = adj(U)*quark_to_be_rotated*U;
-    }
-
-    void rotate_from_Dirac_Basis(LatticePropagator & quark_to_be_rotated)
-    {
-        SpinMatrix U = DiracToDRMat();
-        quark_to_be_rotated = U*quark_to_be_rotated*adj(U);
-    }
-
     SpinMatrix protonDiquarkSpin(int parity)
     {
         SpinMatrix g_one = 0.0;
