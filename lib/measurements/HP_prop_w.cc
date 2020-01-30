@@ -26,8 +26,7 @@ OUTPUT
 
 // Lalibe Stuff
 #include "HP_prop_w.h"
-//#include "../numerics/binaryRecursiveColoring.h"
-#include "../numerics/binaryRecursiveColoring_v2.h"
+#include "../numerics/binaryRecursiveColoring.h"
 
 namespace Chroma
 {
