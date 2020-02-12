@@ -70,7 +70,7 @@ namespace Chroma
             read(inputtop, "gauge_id"     , input.gauge_id);
             read(inputtop, "source_id"  , input.src_id);
             read(inputtop, "prop_id"   , input.prop_id);
-	    read(inputtop, "shifted_prop_id"   , input.prop_id);
+	    read(inputtop, "shifted_prop_id"   , input.shifted_prop_id);
         }
 
         //! NamedObject output
@@ -80,7 +80,7 @@ namespace Chroma
             write(xml, "gauge_id"     , input.gauge_id    );
             write(xml, "source_id"  , input.src_id     );
             write(xml, "prop_id"   , input.prop_id);
-	    write(xml, "shifted_prop_id"   , input.prop_id);
+	    write(xml, "shifted_prop_id"   , input.shifted_prop_id);
             pop(xml);
         }
 
