@@ -5,7 +5,7 @@ Arjun Gambhir
 INPUT
     Source
 OUTPUT
-    Propagator solved by shifting spin/color indices of first solution.
+    Propagator solved by gauge transporting other prop.
 */
 
 // Chroma Stuff
@@ -17,25 +17,26 @@ OUTPUT
 #include "actions/ferm/fermacts/fermact_factory_w.h"
 #include "util/info/unique_id.h"
 #include "util/ferm/transf.h"
+#include "meas/smear/displacement.h"
 
 // Lalibe Stuff
-#include "shifted_spacetime_prop_w.h"
+#include "gauge_transported_prop_w.h"
 
 namespace Chroma
 {
-    namespace LalibeShiftedSpaceTimePropagatorEnv
+    namespace LalibeGaugeTransportedPropagatorEnv
     {
         namespace
         {
             AbsInlineMeasurement* createMeasurement(XMLReader& xml_in,
                 const std::string& path)
             {
-                return new InlineMeas(ShiftedSpaceTimeParams(xml_in, path));
+                return new InlineMeas(GaugeTransportedParams(xml_in, path));
             }
             //! Local registration flag
             bool registered = false;
         }
-        const std::string name = "SHIFTED_SPACETIME_PROPAGATOR";
+        const std::string name = "GAUGE_TRANSPORTED_PROPAGATOR";
 
         //! Register all the factories
         bool registerAll()
@@ -49,13 +50,13 @@ namespace Chroma
             return success;
         }
 
-        void read(XMLReader& xml, const std::string& path, ShiftedSpaceTimeParams::ShiftedSpaceTimeProp_t& par)
+        void read(XMLReader& xml, const std::string& path, GaugeTransportedParams::GaugeTransportedProp_t& par)
         {
             XMLReader paramtop(xml, path);
 	    read(paramtop, "PropagatorParam" ,par.prop_param ); //params for next lin solve
         }
 
-        void write(XMLWriter& xml, const std::string& path, ShiftedSpaceTimeParams::ShiftedSpaceTimeProp_t& par)
+        void write(XMLWriter& xml, const std::string& path, GaugeTransportedParams::GaugeTransportedProp_t& par)
         {
             push(xml, path);
 	    write(xml, "PropagatorParam" ,par.prop_param); //params for next lin solve
@@ -64,33 +65,33 @@ namespace Chroma
         }
 
         //! NamedObject input
-        void read(XMLReader& xml, const std::string& path, ShiftedSpaceTimeParams::NamedObject_t& input)
+        void read(XMLReader& xml, const std::string& path, GaugeTransportedParams::NamedObject_t& input)
         {
             XMLReader inputtop(xml, path);
             read(inputtop, "gauge_id"     , input.gauge_id);
             read(inputtop, "source_id"  , input.src_id);
             read(inputtop, "prop_id"   , input.prop_id);
-	    read(inputtop, "shifted_prop_id"   , input.shifted_prop_id);
+	    read(inputtop, "gauge_transported_prop_id"   , input.shifted_prop_id);
         }
 
         //! NamedObject output
-        void write(XMLWriter& xml, const std::string& path, const ShiftedSpaceTimeParams::NamedObject_t& input)
+        void write(XMLWriter& xml, const std::string& path, const GaugeTransportedParams::NamedObject_t& input)
         {
             push(xml, path);
             write(xml, "gauge_id"     , input.gauge_id    );
             write(xml, "source_id"  , input.src_id     );
             write(xml, "prop_id"   , input.prop_id);
-	    write(xml, "shifted_prop_id"   , input.shifted_prop_id);
+	    write(xml, "gauge_transported_prop_id"   , input.shifted_prop_id);
             pop(xml);
         }
 
         // Param stuff
-        ShiftedSpaceTimeParams::ShiftedSpaceTimeParams()
+        GaugeTransportedParams::GaugeTransportedParams()
         {
             frequency = 0;
         }
 
-        ShiftedSpaceTimeParams::ShiftedSpaceTimeParams(XMLReader& xml_in, const std::string& path)
+        GaugeTransportedParams::GaugeTransportedParams(XMLReader& xml_in, const std::string& path)
         {
             try
             {
@@ -101,7 +102,7 @@ namespace Chroma
                     frequency = 1;
 
                 // Parameters for source construction
-                read(paramtop, "ShiftedSpaceTimeParams", shiftedstparam);
+                read(paramtop, "GaugeTransportedParams", gtparam);
 
                 // Read in the NamedObject info
                 read(paramtop, "NamedObject", named_obj);
@@ -114,10 +115,10 @@ namespace Chroma
             }
         }
 
-        void ShiftedSpaceTimeParams::writeXML(XMLWriter& xml_out, const std::string& path)
+        void GaugeTransportedParams::writeXML(XMLWriter& xml_out, const std::string& path)
         {
             push(xml_out, path);
-            write(xml_out, "ShiftedSpaceTimeParams", shiftedstparam);
+            write(xml_out, "GaugeTransportedParams", gtparam);
             write(xml_out, "NamedObject", named_obj);
             pop(xml_out);
         }
@@ -129,7 +130,7 @@ namespace Chroma
             StopWatch snoop;
             snoop.reset();
             snoop.start();
-            QDPIO::cout << "SHIFTED_SPACETIME_PROPAGATOR: start" << std::endl;
+            QDPIO::cout << "GAUGE_TRANSPORTED_PROPAGATOR: start" << std::endl;
 
             // Test and grab a reference to the gauge field
             XMLBufferWriter gauge_xml;
@@ -141,13 +142,13 @@ namespace Chroma
             }
             catch( std::bad_cast )
             {
-                QDPIO::cerr << LalibeShiftedSpaceTimePropagatorEnv::name
+                QDPIO::cerr << LalibeGaugeTransportedPropagatorEnv::name
                     << ": caught dynamic cast error" << std::endl;
                 QDP_abort(1);
             }
             catch (const std::string& e)
             {
-                QDPIO::cerr << LalibeShiftedSpaceTimePropagatorEnv::name
+                QDPIO::cerr << LalibeGaugeTransportedPropagatorEnv::name
                     << ": map call failed: " << e << std::endl;
                 QDP_abort(1);
             }
@@ -201,13 +202,13 @@ namespace Chroma
 	    }
 	    catch( std::bad_cast )
 	    {
-		QDPIO::cerr << LalibeShiftedSpaceTimePropagatorEnv::name
+		QDPIO::cerr << LalibeGaugeTransportedPropagatorEnv::name
 		    << ": caught dynamic cast error" << std::endl;
 		QDP_abort(1);
 	    }
 	    catch (const std::string& e)
 	    {
-		QDPIO::cerr << LalibeShiftedSpaceTimePropagatorEnv::name
+		QDPIO::cerr << LalibeGaugeTransportedPropagatorEnv::name
 		    << ": map call failed: " << e << std::endl;
 		QDP_abort(1);
 	    }
@@ -250,13 +251,13 @@ namespace Chroma
 	    }
 	    catch( std::bad_cast )
 	    {
-		QDPIO::cerr << LalibeShiftedSpaceTimePropagatorEnv::name
+		QDPIO::cerr << LalibeGaugeTransportedPropagatorEnv::name
 		    << ": caught dynamic cast error" << std::endl;
 		QDP_abort(1);
 	    }
 	    catch (const std::string& e)
 	    {
-		QDPIO::cerr << LalibeShiftedSpaceTimePropagatorEnv::name
+		QDPIO::cerr << LalibeGaugeTransportedPropagatorEnv::name
 		    << ": map call failed: " << e << std::endl;
 		QDP_abort(1);
 	    }
@@ -264,9 +265,9 @@ namespace Chroma
 	    //
 	    // Initialize fermion action
 	    //
-	    std::istringstream  xml_s(params.shiftedstparam.prop_param.fermact.xml);
+	    std::istringstream  xml_s(params.gtparam.prop_param.fermact.xml);
 	    XMLReader  fermacttop(xml_s);
-	    QDPIO::cout << "FermAct = " << params.shiftedstparam.prop_param.fermact.id << std::endl;
+	    QDPIO::cout << "FermAct = " << params.gtparam.prop_param.fermact.id << std::endl;
 
 
             StopWatch swatch;
@@ -280,14 +281,14 @@ namespace Chroma
 
             // Generic Wilson-Type stuff
             Handle< FermionAction<T,P,Q> >
-	    S_f(TheFermionActionFactory::Instance().createObject(params.shiftedstparam.prop_param.fermact.id,
+	    S_f(TheFermionActionFactory::Instance().createObject(params.gtparam.prop_param.fermact.id,
 							         fermacttop,
-							         params.shiftedstparam.prop_param.fermact.path));
+							         params.gtparam.prop_param.fermact.path));
 
            Handle< FermState<T,P,Q> > state(S_f->createState(u));
 
            Handle< SystemSolver<LatticeFermion> > PP = S_f->qprop(state,
-							          params.shiftedstparam.prop_param.invParam);
+							          params.gtparam.prop_param.invParam);
       
            QDPIO::cout << "Suitable factory found: compute the quark prop" << std::endl;
 
@@ -299,14 +300,7 @@ namespace Chroma
 		   int num_shifts = prop_origin[mu] - shifted_prop_origin[mu];
 
 		   QDPIO::cout<<"For direction "<<mu<<" there are "<<num_shifts<<" shifts."<<std::endl;
-		   auto dir = FORWARD;
-		   if (num_shifts < 0)
-		   {
-		     dir = BACKWARD;
-		     num_shifts = -num_shifts;
-		   }
-		   for (int i = 0; i < num_shifts; i++)
-		     shifted_quark_propagator = shift(shifted_quark_propagator,dir,mu);
+		   displacement(u, shifted_quark_propagator, num_shifts, mu);
 	   }
 
            for(int color_source(0);color_source<Nc;color_source++){
@@ -349,7 +343,7 @@ namespace Chroma
                read(src_record_xml, "/MakeSource", orig_header);
 
                Propagator_t  new_header;   // note, abandoning state_info
-               new_header.prop_header   = params.shiftedstparam.prop_param;
+               new_header.prop_header   = params.gtparam.prop_param;
                new_header.source_header = orig_header.source_header;
                new_header.gauge_header  = orig_header.gauge_header;
                write(record_xml, "Propagator", new_header);  
@@ -360,7 +354,7 @@ namespace Chroma
                read(src_record_xml, "/SequentialSource", orig_header);
 
                SequentialProp_t  new_header;   // note, abandoning state_info
-               new_header.seqprop_header   = params.shiftedstparam.prop_param;
+               new_header.seqprop_header   = params.gtparam.prop_param;
                new_header.sink_header      = orig_header.sink_header;
                new_header.seqsource_header = orig_header.seqsource_header;
                new_header.forward_props    = orig_header.forward_props;
@@ -378,21 +372,21 @@ namespace Chroma
            }
            catch (std::bad_cast)
            {
-             QDPIO::cerr << LalibeShiftedSpaceTimePropagatorEnv::name << ": caught dynamic cast error" 
+             QDPIO::cerr << LalibeGaugeTransportedPropagatorEnv::name << ": caught dynamic cast error" 
              	    << std::endl;
              QDP_abort(1);
            }
            catch (const std::string& e) 
            {
-             QDPIO::cerr << LalibeShiftedSpaceTimePropagatorEnv::name << ": error extracting prop_header: " << e << std::endl;
+             QDPIO::cerr << LalibeGaugeTransportedPropagatorEnv::name << ": error extracting prop_header: " << e << std::endl;
              QDP_abort(1);
            }
 
            snoop.stop();
-           QDPIO::cout << LalibeShiftedSpaceTimePropagatorEnv::name << ": total time = " << snoop.getTimeInSeconds() << " secs" << std::endl;
-           QDPIO::cout << LalibeShiftedSpaceTimePropagatorEnv::name<< ": ran successfully" << std::endl;
+           QDPIO::cout << LalibeGaugeTransportedPropagatorEnv::name << ": total time = " << snoop.getTimeInSeconds() << " secs" << std::endl;
+           QDPIO::cout << LalibeGaugeTransportedPropagatorEnv::name<< ": ran successfully" << std::endl;
            END_CODE();
 
 	}
-    }// LalibeShiftedSpaceTimePropagatorEnv
+    }// LalibeGaugeTransportedPropagatorEnv
   };

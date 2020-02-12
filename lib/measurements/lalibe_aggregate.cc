@@ -20,6 +20,7 @@
 #include "coherent_seqsource_w.h"
 #include "shifted_spincolor_prop_w.h"
 #include "shifted_spacetime_prop_w.h"
+#include "gauge_transported_prop_w.h"
 
 // UTILITIES
 #include "multi_prop_add.h"
@@ -68,6 +69,7 @@ namespace Chroma
         success &= LalibeCoherentSeqsourceEnv::registerAll() ;
 	success &= LalibeShiftedSpinColorPropagatorEnv::registerAll() ;
 	success &= LalibeShiftedSpaceTimePropagatorEnv::registerAll() ;
+	success &= LalibeGaugeTransportedPropagatorEnv::registerAll() ;
 
         // USEFUL UTILITIES
         success &= LalibeMultiPropagatorAddEnv::registerAll() ;
