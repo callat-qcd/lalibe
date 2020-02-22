@@ -1,5 +1,5 @@
-/*
-ns that perform the contraction of quarks into the two-pion system.
+/*!
+ *  Functions that perform the contraction of quarks into the two-pion system.
  *  Based on qqbar_w.cc in Chroma
  *  Color is nested inside of spin.
  *  Authors:
@@ -7,6 +7,11 @@ ns that perform the contraction of quarks into the two-pion system.
  *  Andre Walker-Loud
  *  Ben Horz
  */
+
+//S_u(x, y)  = quark_prop_1
+//S_d(x, y)  = quark_prop_2
+//S_u(x, y') = quark_prop_3
+//S_d(x, y') = quark_prop_4
 
 #include "chromabase.h"
 #include "pipi_scattering.h"
@@ -70,37 +75,32 @@ namespace Chroma
 			SftMom phases2(mom_list_2, j_decay);
 			int Nt = phases1.numSubsets();
 
-			compute_qqbar(Q1, quark_prop_1, quark_prop_1, phases1, t0);
+			compute_qqbar(Q1, quark_prop_2, quark_prop_1, phases1, t0);
 			
 			DComplex trans_Q_to_P;
-			//DComplex origin_fix;
+			DComplex origin_fix;
 			Double orgin_phases;
+			multi1d<int> fix_mom1, fix_mom2;
+
 			P1 = Q1; // To be added, the relation is a ratio of two phase summation
 
-			multi3d<DComplex> correlator1, correlator2, correlator3, correlator4;
+			// Initialize the correlator function
+			correlator = zero;
 
 			// Loop over all ps, p's and time
 			for (int mom_num1 = 0; mom_num1 < phases1.numMom(); ++mom_num1)
 				for (int mom_num2 = 0; mom_num2 < phases2.numMom(); ++mom_num2)
 					for (int t = 0; t < Nt; ++t)
 					{
-						correlator1[mom_num1][mom_num2][t] += trace(Q1[mom_num1][t] * Gamma(G5)) * trace(P1[mom_num2][t] * Gamma(G5));
+						correlator[mom_num1][mom_num2][t] += trace(Q1[mom_num1][t] * Gamma(G5)) * trace(P1[mom_num2][t] * Gamma(G5)) - trace(Q1[mom_num1][t] * Gamma(G5) * P1[mom_num2][t] * Gamma(G5)) - trace(Q1[mom_num1][t] * Gamma(G5) * P1[mom_num2][t] * Gamma(G5)) + trace(Q1[mom_num1][t] * Gamma(G5)) * trace(P1[mom_num2][t] * Gamma(G5));
 
-						correlator2[mom_num1][mom_num2][t] -= trace(Q1[mom_num1][t] * Gamma(G5) * P1[mom_num2][t] * Gamma(G5)); // I use - because of the minus sign picked up by Grossman numbers
-
-						correlator3[mom_num1][mom_num2][t] -= trace(Q1[mom_num1][t] * Gamma(G5) * P1[mom_num2][t] * Gamma(G5));
-
-						correlator4[mom_num1][mom_num2][t] += trace(Q1[mom_num1][t] * Gamma(G5)) * trace(P1[mom_num2][t] * Gamma(G5));
-
-						correlator[mom_num1][mom_num2][t] += correlator1[mom_num1][mom_num2][t] + correlator2[mom_num1][mom_num2][t] + correlator3[mom_num1][mom_num2][t] + correlator4[mom_num1][mom_num2][t];
 						// Fix the origin
 						orgin_phases = 0;
-						multi1d<int> fix_mom1, fix_mom2;
 						fix_mom1 = phases1.numToMom(mom_num1);
 						fix_mom2 = phases2.numToMom(mom_num2);
 						for (int p_comp = 0; p_comp < mom_list.size3(); ++p_comp)
 							orgin_phases += fix_mom1[p_comp] * origin_list[0][p_comp] + fix_mom2[p_comp] * origin_list[1][p_comp];
-						DComplex origin_fix = cmplx(cos(orgin_phases), sin(orgin_phases));
+						origin_fix = cmplx(cos(orgin_phases), sin(orgin_phases));
 						correlator[mom_num1][mom_num2][t] *= origin_fix;
 					}
 		}
@@ -112,41 +112,42 @@ namespace Chroma
 			SftMom phases2(mom_list_2, j_decay);
 			int Nt = phases1.numSubsets();
 
-			compute_qqbar(Q1, quark_prop_1, quark_prop_1, phases1, t0);
-			compute_qqbar(P1, quark_prop_2, quark_prop_2, phases2, t0);
-			compute_qqbar(Q2, quark_prop_1, quark_prop_3, phases1, t0);
-			compute_qqbar(P2, quark_prop_2, quark_prop_4, phases2, t0);
-			compute_qqbar(Q3, quark_prop_3, quark_prop_1, phases1, t0);
-			compute_qqbar(P3, quark_prop_4, quark_prop_2, phases2, t0);
-			compute_qqbar(Q4, quark_prop_3, quark_prop_3, phases1, t0);
-			compute_qqbar(P4, quark_prop_4, quark_prop_4, phases2, t0);
+			compute_qqbar(Q1, quark_prop_2, quark_prop_1, phases1, t0);
+			compute_qqbar(P1, quark_prop_4, quark_prop_3, phases2, t0);
+			compute_qqbar(Q2, quark_prop_2, quark_prop_3, phases1, t0);
+			compute_qqbar(P2, quark_prop_4, quark_prop_1, phases2, t0);
 
-			//DComplex origin_fix;
+			//compute_qqbar(Q3, quark_prop_4, quark_prop_1, phases1, t0);
+			//compute_qqbar(P3, quark_prop_2, quark_prop_3, phases2, t0);
+			//compute_qqbar(Q4, quark_prop_4, quark_prop_3, phases1, t0);
+			//compute_qqbar(P4, quark_prop_2, quark_prop_1, phases2, t0);
+
+			// The above Q3 to P4 can be deduced from the first four. So really we only need to compute four of the eight qqbar blocks
+			Q3 = P2; // A constant to be added
+			P3 = Q2;
+			Q4 = P1;
+			P4 = Q1;
+
+			DComplex origin_fix;
 			Double orgin_phases;
+			multi1d<int> fix_mom1, fix_mom2;
 
-			multi3d<DComplex> correlator1, correlator2, correlator3, correlator4;
+			// Initialize the correlator function
+			correlator = zero;
 
 			for (int mom_num1 = 0; mom_num1 < phases1.numMom(); ++mom_num1)
 				for (int mom_num2 = 0; mom_num2 < phases2.numMom(); ++mom_num2)
 					for (int t = 0; t < Nt; ++t)
 					{
-						correlator1[mom_num1][mom_num2][t] += trace(Q1[mom_num1][t] * Gamma(G5)) * trace(P1[mom_num2][t] * Gamma(G5));
+						correlator[mom_num1][mom_num2][t] += trace(Q1[mom_num1][t] * Gamma(G5)) * trace(P1[mom_num2][t] * Gamma(G5)) - trace(Q2[mom_num1][t] * Gamma(G5) * P2[mom_num2][t] * Gamma(G5)) - trace(Q3[mom_num1][t] * Gamma(G5) * P3[mom_num2][t] * Gamma(G5)) + trace(Q4[mom_num1][t] * Gamma(G5)) * trace(P4[mom_num2][t] * Gamma(G5));
 
-						correlator2[mom_num1][mom_num2][t] -= trace(Q2[mom_num1][t] * Gamma(G5) * P2[mom_num2][t] * Gamma(G5)); // I use - because of the minus sign picked up by Grossman numbers
-
-						correlator3[mom_num1][mom_num2][t] -= trace(Q3[mom_num1][t] * Gamma(G5) * P3[mom_num2][t] * Gamma(G5));
-
-						correlator4[mom_num1][mom_num2][t] += trace(Q4[mom_num1][t] * Gamma(G5)) * trace(P4[mom_num2][t] * Gamma(G5));
-
-						correlator[mom_num1][mom_num2][t] += correlator1[mom_num1][mom_num2][t] + correlator2[mom_num1][mom_num2][t] + correlator3[mom_num1][mom_num2][t] + correlator4[mom_num1][mom_num2][t];
 						// Fix the origin
 						orgin_phases = 0;
-						multi1d<int> fix_mom1, fix_mom2;
 						fix_mom1 = phases1.numToMom(mom_num1);
 						fix_mom2 = phases2.numToMom(mom_num2);
 						for (int p_comp = 0; p_comp < mom_list.size3(); ++p_comp)
 							orgin_phases += fix_mom1[p_comp] * origin_list[0][p_comp] + fix_mom2[p_comp] * origin_list[1][p_comp];
-						DComplex origin_fix = cmplx(cos(orgin_phases), sin(orgin_phases));
+						origin_fix = cmplx(cos(orgin_phases), sin(orgin_phases));
 						correlator[mom_num1][mom_num2][t] *= origin_fix;
 					}
 
