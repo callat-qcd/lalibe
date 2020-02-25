@@ -54,12 +54,13 @@ namespace Chroma
 		// Separate the mom_list
 		multi2d<int> mom_list_1, mom_list_2;
 		for (int p_num = 0; p_num < mom_list.size1(); ++p_num)
-			for (int p_comp = 0; p_comp < mom_list.size3(); ++p_comp)
+			for (int p_comp = 0; p_comp < mom_list.size3(); ++p_comp) // mom_list.size3() = 3
 			{
 				mom_list_1[p_num][p_comp] = mom_list[p_num][0][p_comp];
 				mom_list_2[p_num][p_comp] = mom_list[p_num][1][p_comp];
 			}
 
+		// Judge if the origin is the same
 		bool same_origin = true;
 		for (int o_comp = 0; o_comp < origin_list.size2(); ++o_comp)
 			if (origin_list[0][o_comp] != origin_list[1][o_comp])
@@ -82,7 +83,12 @@ namespace Chroma
 			Double orgin_phases;
 			multi1d<int> fix_mom1, fix_mom2;
 
-			P1 = Q1; // To be added, the relation is a ratio of two phase summation
+			// Derive P1 from Q1
+			for (int p_num_P = 0; p_num_P < mom_list.size1(); ++p_num_P)
+				for (int p_num_Q = 0; p_num_Q < mom_list.size1(); ++p_num_Q)
+					if (mom_list_2[p_num_P][0] == mom_list_1[p_num_Q][0] && mom_list_2[p_num_P][1] == mom_list_1[p_num_Q][1] && mom_list_2[p_num_P][2] == mom_list_1[p_num_Q][2])
+						for (int t = 0; t < Nt; ++t)
+							P1[p_num_P][t] = Q1[p_num_Q][t];
 
 			// Initialize the correlator function
 			correlator = zero;
@@ -123,10 +129,30 @@ namespace Chroma
 			//compute_qqbar(P4, quark_prop_2, quark_prop_1, phases2, t0);
 
 			// The above Q3 to P4 can be deduced from the first four. So really we only need to compute four of the eight qqbar blocks
-			Q3 = P2; // A constant to be added
-			P3 = Q2;
-			Q4 = P1;
-			P4 = Q1;
+			//Q3 = P2; // A constant to be added
+			//P3 = Q2;
+			//Q4 = P1;
+			//P4 = Q1;
+
+			// P3 from Q2, P4 from Q1
+			for (int p_num_P = 0; p_num_P < mom_list.size1(); ++p_num_P)
+				for (int p_num_Q = 0; p_num_Q < mom_list.size1(); ++p_num_Q)
+					if (mom_list_2[p_num_P][0] == mom_list_1[p_num_Q][0] && mom_list_2[p_num_P][1] == mom_list_1[p_num_Q][1] && mom_list_2[p_num_P][2] == mom_list_1[p_num_Q][2])
+						for (int t = 0; t < Nt; ++t)
+						{
+							P3[p_num_P][t] = Q2[p_num_Q][t];
+							P4[p_num_P][t] = Q1[p_num_Q][t];
+						}
+
+			// Q3 from P2, Q4 from P1
+			for (int p_num_Q = 0; p_num_Q < mom_list.size1(); ++p_num_Q)
+				for (int p_num_P = 0; p_num_P < mom_list.size1(); ++p_num_P)
+					if (mom_list_2[p_num_P][0] == mom_list_1[p_num_Q][0] && mom_list_2[p_num_P][1] == mom_list_1[p_num_Q][1] && mom_list_2[p_num_P][2] == mom_list_1[p_num_Q][2])
+						for (int t = 0; t < Nt; ++t)
+						{
+							Q3[p_num_Q][t] = P2[p_num_P][t];
+							Q4[p_num_Q][t] = P1[p_num_P][t];
+						}
 
 			DComplex origin_fix;
 			Double orgin_phases;
