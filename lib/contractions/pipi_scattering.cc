@@ -7,6 +7,20 @@
  *  Andre Walker-Loud
  *  Ben Horz
  */
+// Mathematically, the correlation function is
+//                  _____
+//                  \      -i(px+p'x')                   +     +
+// Cππ(p,p',t)   = >    e           < 0 | π(x)π(x')π(y')π(y) | 0 >
+//                  /
+//                  -----
+//                   x,x'
+
+// In this program, we implement the calculation with the following formula
+// C(p,p',t) = 
+//    tr(Q1(p,y,y) * g5)*tr(P1(p',y',y') * g5)
+//  - tr(Q2(p,y,y') * g5 * P2(p',y',y) * g5)
+//  - tr(Q3(p,y',y) * g5 * P3(p',y,y') * g5)
+//  + tr(Q4(p,y',y') * g5)*tr(P4(p',y,y) * g5)
 
 //S_u(x, y)  = quark_prop_1
 //S_d(x, y)  = quark_prop_2
