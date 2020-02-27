@@ -28,7 +28,7 @@
 //S_d(x, y') = quark_prop_4
 
 #include "chromabase.h"
-#include "pipi_scattering.h"
+#include "pipi_scattering_func_w.h"
 #include "../../../chroma/lib/meas/hadron/qqbar_w.cc"
 #include <math.h>
 
