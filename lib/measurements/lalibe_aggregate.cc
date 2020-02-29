@@ -19,6 +19,7 @@
 #include "lalibe_seqsource_w.h"
 #include "coherent_seqsource_w.h"
 #include "NN_LC_prop_w.h"
+#include "laph_smearing_prop_w.h"
 
 // UTILITIES
 #include "multi_prop_add.h"
@@ -66,6 +67,7 @@ namespace Chroma
       success &= LalibeSeqSourceEnv::registerAll() ;
       success &= LalibeCoherentSeqsourceEnv::registerAll() ;
       success &= LalibeNucleonNucleonLinearComboPropagatorEnv::registerAll() ;
+      success &= LalibeLaphSmearingPropagatorEnv::registerAll() ;
 
       // USEFUL UTILITIES
       success &= LalibeMultiPropagatorAddEnv::registerAll() ;
