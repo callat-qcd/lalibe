@@ -10,12 +10,17 @@
  * Do pipi scattering and write out the two-point correlator in hdf5
  */
 
-// Deleted:
-//if (paramtop.count("rotate_to_Dirac") != 0)
-//else if (paramtop.count("mom_list") != 0)
-//			
-//			write(xml, "rotate_to_Dirac", par.rotate_to_Dirac);
-//When write, 			if (par.is_mom_max == true)
+ // Deleted:
+ //if (paramtop.count("rotate_to_Dirac") != 0)
+ //else if (paramtop.count("mom_list") != 0)
+ //			
+ //			write(xml, "rotate_to_Dirac", par.rotate_to_Dirac);
+ //When write, 			if (par.is_mom_max == true)
+ //			SftMom ft(params.param.p2_max, j_decay);
+//LalibeSftMom ft = params.param.is_mom_max ? LalibeSftMom(params.param.p2_max, origin, false, j_decay)
+//: LalibeSftMom(params.param.p_list, origin, j_decay);
+ //if (full_correlator == true)
+// delete full_correlator
 
 
 #include "pipi_scattering_w.h"
@@ -67,12 +72,11 @@ namespace Chroma
 
 			//We set output_full_correlator to true if no momentum is specified.
 			read(paramtop, "p2_max", par.p2_max);
-			par.output_full_correlator = false;
 			QDPIO::cout << "Reading momenta centered around the origin with a max of " << par.p2_max << std::endl;
 			read(paramtop, "particle_list", par.particle_list);
 		}
 
-		void write(XMLWriter& xml, const std::string& path, const PipiParams::Param_t& par){}
+		void write(XMLWriter& xml, const std::string& path, const PipiParams::Param_t& par) {}
 
 		void read(XMLReader& xml, const std::string& path, PipiParams::NamedObject_t& input)
 		{
@@ -129,7 +133,7 @@ namespace Chroma
 
 		}
 
-		void write(XMLWriter& xml, const std::string& path, const PipiParams::NamedObject_t& input){}
+		void write(XMLWriter& xml, const std::string& path, const PipiParams::NamedObject_t& input) {}
 
 
 		PipiParams::PipiParams()
@@ -161,7 +165,7 @@ namespace Chroma
 		}
 
 		void
-			PipiParams::writeXML(XMLWriter& xml_out, const std::string& path){}
+			PipiParams::writeXML(XMLWriter& xml_out, const std::string& path) {}
 
 
 		void  InlineMeas::operator()(unsigned long update_no, XMLWriter& xml_out)
@@ -188,7 +192,7 @@ namespace Chroma
 			//Need j_decay of bc to know what comes with a minus sign.
 			int j_decay;
 			int t_0;
-			multi1d<int> origin;
+			multi2d<int> origin;
 
 			if (params.named_obj.is_prop_1 == true)
 			{
@@ -362,8 +366,6 @@ namespace Chroma
 				}
 			}
 
-			//Initialize FT stuff here, whether this is used or not below is another story...
-			SftMom ft(params.param.p2_max, j_decay);
 
 			//Here's Nt, we need this.
 			int Nt = Layout::lattSize()[j_decay];
@@ -392,17 +394,60 @@ namespace Chroma
 						QDPIO::cout << "Found all four quarks for the two pions. Starting calculation..." << std::endl;
 
 
-						multi3d<DComplex> correlator; // To be changed
+						CorrelatorType::Correlator correlator_out;
 
-						pipi_correlator(correlator, quark_propagator_1, quark_propagator_2, quark_propagator_3, quark_propagator_4, mom_list, origin_list, t0, j_decay);
+						pipi_correlator(correlator_out, quark_propagator_1, quark_propagator_2, quark_propagator_3, quark_propagator_4, origin, params.param.p2_max, t_0, j_decay);
 
 						// Write out the correlator.
-						write_correlator(params.param.output_full_correlator,
-							"piplus",
+						
+						//Temp variable for writing below.
+						DComplex temp_element;
+
+						//Move the h5 pushing here, since all momentum keys will be written in the same general path.
 #ifdef BUILD_HDF5
-							params.param.obj_path, h5out, wmode,
+						std::string correlator_path = path + "/" + "pipi" + "/x" + std::to_string(origin[0]) + "_y" + std::to_string(origin[1]) + "_z" + std::to_string(origin[2]) + "_t" + std::to_string(origin[3]);
+						h5writer.push(correlator_path);
+#else
+						std::string correlator_path = "pipi" + "_x" + std::to_string(origin[0]) + "_y" + std::to_string(origin[1]) + "_z" + std::to_string(origin[2]) + "_t" + std::to_string(origin[3]);
 #endif
-							t_0, Nt, origin, ft, piplus);
+
+						std::map<CorrelatorType::momenta_pair, multi1d<DComplex>>::iterator iter;
+						for (iter = correlator_out.begin(); iter != correlator_out.end(); iter++)
+						{
+							//One more temp variable instanited inside loop (once again for writing.)
+							multi1d<DComplex> pipi_correlator;
+							pipi_correlator.resize(Nt);
+							std::tuple<int, int, int> momenta1, momenta2;
+							momenta1 = std::get<0>(iter->first);
+							momenta2 = std::get<1>(iter->first);
+#ifndef BUILD_HDF5
+							std::string correlator_path_mom = correlator_path + "_px" + std::to_string(std::get<0>(momenta1)) + "_py" + std::to_string(std::get<1>(momenta1)) + "_pz" + std::to_string(std::get<2>(momenta1)) + "_p'x" + std::to_string(std::get<0>(momenta2)) + "_p'y" + std::to_string(std::get<1>(momenta2)) + "_p'z" + std::to_string(std::get<2>(momenta2));
+							TextFileWriter file_out(correlator_path_mom);
+#endif
+							for (int t = 0; t < Nt; t++)
+							{
+								temp_element = iter->second[t];
+								int t_relative = t - t_0;
+								if (t_relative < 0)
+									t_relative += Nt;
+
+#ifndef BUILD_HDF5
+								file_out << temp_element << "\n";
+#endif
+								pipi_correlator[t_relative] = temp_element;
+							}
+#ifndef BUILD_HDF5
+							file_out.close();
+#else
+							//Change the name of string compred to 4d output so general correlator path is the same.
+							std::string correlator_path_mom = correlator_path + "/px" + std::to_string(std::get<0>(momenta1)) + "_py" + std::to_string(std::get<1>(momenta1)) + "_pz" + std::to_string(std::get<2>(momenta1)) + "_p'x" + std::to_string(std::get<0>(momenta2)) + "_p'y" + std::to_string(std::get<1>(momenta2)) + "_p'z" + std::to_string(std::get<2>(momenta2));
+
+							h5writer.write(correlator_path_mom, pipi_correlator, h5mode);
+							h5writer.writeAttribute(correlator_path_mom, "is_shifted", 1, h5mode);
+							h5writer.cd("/");
+#endif
+						}
+
 					}
 					else
 						QDPIO::cout << "Sorry, I couldn't find all four quark. Skipping the pipi scattering..." << std::endl;
