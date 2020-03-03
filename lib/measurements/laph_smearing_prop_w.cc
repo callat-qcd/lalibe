@@ -1,6 +1,7 @@
 /*
 Authors
 Arjun Gambhir
+Ben Horz
 
 INPUT
     Propagator or Source
@@ -174,7 +175,7 @@ namespace Chroma
 		else if (prop_record_xml.count("/MakeSource") != 0)
 		{
 		    makesourceP = true;
-		    SequentialSource_t   orig_header;
+		    MakeSourceProp_t  orig_header;
 		    read(prop_record_xml, "/MakeSource", orig_header);
 		}
 		else
@@ -212,6 +213,8 @@ namespace Chroma
 	    QDPIO::cout << "Reading "<< evecs_length << " eigenvectors completed in " 
 		<< read_snoop.getTimeInSeconds() << " seconds." << std::endl;
 
+	    // Arjun's more inefficient implementation commented out below.
+	    /*
 	    //LatticeFermion prop_ferm = zero;
 	    LatticeFermion evec_ferm = zero;
 	    LatticePropagator laph_prop = zero;
@@ -236,6 +239,7 @@ namespace Chroma
 		  QDPIO::cout << "Projecting vector " << vec_index << std::endl;
 		  for(int eigenvec_spin_source=0; eigenvec_spin_source < Ns; eigenvec_spin_source++){
 		      // Brute force way of doing the spin identity, find a shortcut once this is verified.
+		      evec_ferm = zero;
 		      CvToFerm(evecs[vec_index], evec_ferm, eigenvec_spin_source);
 		      for(int color_source(0);color_source<Nc;color_source++){
 			  for(int spin_source=0; spin_source < Ns; spin_source++){
@@ -254,7 +258,8 @@ namespace Chroma
 		for(int spin_source=0; spin_source < Ns; spin_source++){
 		    FermToProp(laph_ferm[spin_source + color_source*Ns], laph_prop, color_source, spin_source);
 		}
-	    }
+	    }*/
+	    // Ben's implementation.
 	    LatticePropagator smearedProp = zero;
 	    for (unsigned int srcSpin=0; srcSpin<4; ++srcSpin) {
 	      for (unsigned int snkSpin=0; snkSpin<4; ++snkSpin) {
@@ -276,7 +281,8 @@ namespace Chroma
 		pokeSpin(smearedProp, tmp, snkSpin, srcSpin);
 	      }
 	    }
-	    LatticePropagator diff = smearedProp - laph_prop;
+	    // Difference test also commented out.
+	    /*LatticePropagator diff = smearedProp - laph_prop;
 	    for(int color_source(0);color_source<Nc;color_source++){
 		for(int spin_source=0; spin_source < Ns; spin_source++){
 		    LatticeFermion temp = zero;
@@ -284,7 +290,7 @@ namespace Chroma
 		    QDPIO::cout<<" Diff Norm 2 spin: "<<spin_source<<" color: "<<color_source<<" "
 			<<innerProduct(temp, temp)<<std::endl;
 		}
-	    }
+	    }*/
 	      
 	    // Not even needed since xml record is not being modified in any way.
 	    /*if (propagatorP)
@@ -302,7 +308,9 @@ namespace Chroma
 	      }*/
 
 	    TheNamedObjMap::Instance().create<LatticePropagator>(params.named_obj.laph_prop_id);
-	    TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.laph_prop_id) = laph_prop;
+	    //TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.laph_prop_id) = laph_prop;
+	    // Hand in Ben's prop now.
+	    TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.laph_prop_id) = smearedProp;
 	    TheNamedObjMap::Instance().get(params.named_obj.laph_prop_id).setFileXML(prop_file_xml);
 	    TheNamedObjMap::Instance().get(params.named_obj.laph_prop_id).setRecordXML(prop_record_xml);
 
