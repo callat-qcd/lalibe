@@ -33,9 +33,9 @@ message("Here are the chroma ld flags I found: " ${CHROMA_LD_FLAGS})
 message("Here are the chroma libs I found: " ${CHROMA_LIBS})
 
 #These lines are usually not needed, but may be useful for debugging purposes.
-#find_package(MPI REQUIRED)
-#include_directories(${MPI_INCLUDE_PATH})
-#message("Here is where I think mpi is:  " ${MPI_INCLUDE_PATH})
+find_package(MPI REQUIRED)
+include_directories(${MPI_INCLUDE_PATH})
+message("Here is where I think mpi is:  " ${MPI_INCLUDE_PATH})
 #set(CMAKE_CXX_COMPILE_FLAGS ${CMAKE_CXX_COMPILE_FLAGS} ${MPI_COMPILE_FLAGS})
 #set(CMAKE_CXX_LINK_FLAGS ${CMAKE_CXX_LINK_FLAGS} ${MPI_LINK_FLAGS})
 #message("Here is what I think the mpi compile flags should be: " ${MPI_COMPILE_FLAGS})
