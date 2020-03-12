@@ -192,7 +192,7 @@ namespace Chroma
             //Need j_decay of bc to know what comes with a minus sign.
             int j_decay;
             int t_0;
-            multi1d<int> origin;
+            multi2d<int> origin(2,4);
 
             if (params.named_obj.is_prop_1 == true)
             {
@@ -221,7 +221,7 @@ namespace Chroma
 
                     j_decay = orig_header.source_header.j_decay;
                     t_0 = orig_header.source_header.t_source;
-                    origin = orig_header.source_header.getTSrce();
+                    origin[0] = orig_header.source_header.getTSrce();
 
                 }
                 catch (std::bad_cast)
@@ -264,7 +264,10 @@ namespace Chroma
 
                     j_decay = orig_header.source_header.j_decay;
                     t_0 = orig_header.source_header.t_source;
-                    origin = orig_header.source_header.getTSrce();
+                    if (orig_header.source_header.getTSrce() != origin[0])
+                    {
+                        QDPIO::cout << "The origin of the first two propagators are different, you idot, I'm gonna speak Chinese. 你个傻逼." << std::endl;
+                    }
 
                 }
                 catch (std::bad_cast)
@@ -307,7 +310,7 @@ namespace Chroma
 
                     j_decay = orig_header.source_header.j_decay;
                     t_0 = orig_header.source_header.t_source;
-                    origin = orig_header.source_header.getTSrce();
+                    origin[1] = orig_header.source_header.getTSrce();
 
                 }
                 catch (std::bad_cast)
@@ -350,8 +353,10 @@ namespace Chroma
 
                     j_decay = orig_header.source_header.j_decay;
                     t_0 = orig_header.source_header.t_source;
-                    origin = orig_header.source_header.getTSrce();
-
+                    if (orig_header.source_header.getTSrce() != origin[1])
+                    {
+                        QDPIO::cout << "The origin of the last two propagators are different, you idot, I'm gonna speak Chinese. 你个傻逼." << std::endl;
+                    }
                 }
                 catch (std::bad_cast)
                 {
@@ -365,7 +370,6 @@ namespace Chroma
                     QDP_abort(1);
                 }
             }
-
 
             //Here's Nt, we need this.
             int Nt = Layout::lattSize()[j_decay];
@@ -389,52 +393,46 @@ namespace Chroma
                 {
                     QDPIO::cout << "Particle number " << (particle_index + 1) << " is the piplus." << std::endl;
                     QDPIO::cout << "Checking to make sure we have the correct quark propagators to compute the piplus." << std::endl;
-                    if (params.named_obj.is_prop_1 == true && params.named_obj.is_prop_2 == true && params.named_obj.is_prop_3 == true && params.named_obj.is_prop_4 == true)
+                    //if (params.named_obj.is_prop_1 == true && params.named_obj.is_prop_2 == true && params.named_obj.is_prop_3 == true && params.named_obj.is_prop_4 == true)
                     {
                         QDPIO::cout << "Found all four quarks for the two pions. Starting calculation..." << std::endl;
 
 
                         CorrelatorType::Correlator correlator_out;
-            
-                        multi2d<int> origin_reshaped;
 
-                        for (int i = 0; i < 3; ++i)
-                        {
-                            origin_reshaped[0][i] = origin[i];
-                            origin_reshaped[1][i] = origin[i+3];
-                        }
+                        pipi_correlator(correlator_out, quark_propagator_1, quark_propagator_2, quark_propagator_3, quark_propagator_4, origin, params.param.p2_max, t_0, j_decay);
 
-                        pipi_correlator(correlator_out, quark_propagator_1, quark_propagator_2, quark_propagator_3, quark_propagator_4, origin_reshaped, params.param.p2_max, t_0, j_decay);
+                        QDPIO::cout << "Calculation finished. Starting to write HDF5..." << std::endl;
 
                         // Write out the correlator.
-                        
+
                         //Temp variable for writing below.
                         DComplex temp_element;
 
                         //Move the h5 pushing here, since all momentum keys will be written in the same general path.
 #ifdef BUILD_HDF5
-                        std::string correlator_path = path + "/" + "pipi" + "/x" + std::to_string(origin[0]) + "_y" + std::to_string(origin[1]) + "_z" + std::to_string(origin[2]) + "_t" + std::to_string(origin[3]) + "_x'" + std::to_string(origin[4]) + "_y'" + std::to_string(origin[5]) + "_z'" + std::to_string(origin[6]) + "_t'" + std::to_string(origin[7]);
+                        std::string correlator_path = params.param.obj_path + "/" + "pipi" + "/x" + std::to_string(origin[0][0]) + "_y" + std::to_string(origin[0][1]) + "_z" + std::to_string(origin[0][2]) + "_t" + std::to_string(origin[0][3]) + "_xprime" + std::to_string(origin[1][0]) + "_yprime" + std::to_string(origin[1][1]) + "_zprime" + std::to_string(origin[1][2]) + "_tprime" + std::to_string(origin[1][3]);
 #else
-                        std::string testname="pipi";
-                        std::string correlator_path = testname + "_x" + std::to_string(origin[0]) + "_y" + std::to_string(origin[1]) + "_z" + std::to_string(origin[2]) + "_t" + std::to_string(origin[3]) + "_x'" + std::to_string(origin[4]) + "_y'" + std::to_string(origin[5]) + "_z'" + std::to_string(origin[6]) + "_t'" + std::to_string(origin[7]);
+                        std::string pipi_string_name="pipi";
+                        std::string correlator_path = pipi_string_name + "_x" + std::to_string(origin[0][0]) + "_y" + std::to_string(origin[0][1]) + "_z" + std::to_string(origin[0][2]) + "_t" + std::to_string(origin[0][3]) + "_xprime" + std::to_string(origin[1][0]) + "_yprime" + std::to_string(origin[1][1]) + "_zprime" + std::to_string(origin[1][2]) + "_tprime" + std::to_string(origin[1][3]);
 #endif
-
                         std::map<CorrelatorType::momenta_pair, multi1d<DComplex>>::iterator iter;
                         for (iter = correlator_out.begin(); iter != correlator_out.end(); iter++)
                         {
                             //One more temp variable instanited inside loop (once again for writing.)
-                            multi1d<DComplex> pipi_correlator;
-                            pipi_correlator.resize(Nt);
+                            multi1d<DComplex> pipi_correlator_towrite;
+                            pipi_correlator_towrite.resize(Nt);
                             std::tuple<int, int, int> momenta1, momenta2;
                             momenta1 = std::get<0>(iter->first);
                             momenta2 = std::get<1>(iter->first);
 #ifndef BUILD_HDF5
-                            std::string correlator_path_mom = correlator_path + "_px" + std::to_string(std::get<0>(momenta1)) + "_py" + std::to_string(std::get<1>(momenta1)) + "_pz" + std::to_string(std::get<2>(momenta1)) + "_p'x" + std::to_string(std::get<0>(momenta2)) + "_p'y" + std::to_string(std::get<1>(momenta2)) + "_p'z" + std::to_string(std::get<2>(momenta2));
+                            std::string correlator_path_mom = correlator_path + "_px" + std::to_string(std::get<0>(momenta1)) + "_py" + std::to_string(std::get<1>(momenta1)) + "_pz" + std::to_string(std::get<2>(momenta1)) + "_pprimex" + std::to_string(std::get<0>(momenta2)) + "_pprimey" + std::to_string(std::get<1>(momenta2)) + "_pprimez" + std::to_string(std::get<2>(momenta2));
                             TextFileWriter file_out(correlator_path_mom);
 #endif
                             for (int t = 0; t < Nt; t++)
                             {
                                 temp_element = iter->second[t];
+
                                 int t_relative = t - t_0;
                                 if (t_relative < 0)
                                     t_relative += Nt;
@@ -442,28 +440,33 @@ namespace Chroma
 #ifndef BUILD_HDF5
                                 file_out << temp_element << "\n";
 #endif
-                                pipi_correlator[t_relative] = temp_element;
+                                pipi_correlator_towrite[t_relative] = temp_element;
                             }
 #ifndef BUILD_HDF5
                             file_out.close();
 #else
                             //Change the name of string compred to 4d output so general correlator path is the same.
-                            std::string correlator_path_mom = correlator_path + "/px" + std::to_string(std::get<0>(momenta1)) + "_py" + std::to_string(std::get<1>(momenta1)) + "_pz" + std::to_string(std::get<2>(momenta1)) + "_p'x" + std::to_string(std::get<0>(momenta2)) + "_p'y" + std::to_string(std::get<1>(momenta2)) + "_p'z" + std::to_string(std::get<2>(momenta2));
+                            std::string correlator_path_mom = correlator_path + "/px" + std::to_string(std::get<0>(momenta1)) + "_py" + std::to_string(std::get<1>(momenta1)) + "_pz" + std::to_string(std::get<2>(momenta1)) + "_pprimex" + std::to_string(std::get<0>(momenta2)) + "_pprimey" + std::to_string(std::get<1>(momenta2)) + "_pprimez" + std::to_string(std::get<2>(momenta2));
+              QDPIO::cout << "/* Before writing!!!!! */" << '\n';
+QDPIO::cout << correlator_path_mom << '\n';
+                            h5out.write(correlator_path_mom, pipi_correlator_towrite, wmode);
+              QDPIO::cout << "/* After writing!!!!! */" << '\n';
 
-                            h5writer.write(correlator_path_mom, pipi_correlator, h5mode);
-                            h5writer.writeAttribute(correlator_path_mom, "is_shifted", 1, h5mode);
-                            h5writer.cd("/");
+                            h5out.writeAttribute(correlator_path_mom, "is_shifted", 1, wmode);
+                            h5out.cd("/");
 #endif
                         }
 
                     }
-                    else
-                        QDPIO::cout << "Sorry, I couldn't find all four quark. Skipping the pipi scattering..." << std::endl;
+                    //else
+                      //  QDPIO::cout << "Sorry, I couldn't find all four quark. Skipping the pipi scattering..." << std::endl;
                 }
 
             }
 
 #ifdef BUILD_HDF5
+QDPIO::cout << "/* 123456!!!!! */" << '\n';
+
             h5out.cd("/");
             h5out.close();
 #endif
@@ -483,5 +486,3 @@ namespace Chroma
     }
 
 }
-
-
