@@ -412,6 +412,7 @@ namespace Chroma
                         //Move the h5 pushing here, since all momentum keys will be written in the same general path.
 #ifdef BUILD_HDF5
                         std::string correlator_path = params.param.obj_path + "/" + "pipi" + "/x" + std::to_string(origin[0][0]) + "_y" + std::to_string(origin[0][1]) + "_z" + std::to_string(origin[0][2]) + "_t" + std::to_string(origin[0][3]) + "_xprime" + std::to_string(origin[1][0]) + "_yprime" + std::to_string(origin[1][1]) + "_zprime" + std::to_string(origin[1][2]) + "_tprime" + std::to_string(origin[1][3]);
+                        h5out.push(correlator_path);
 #else
                         std::string pipi_string_name="pipi";
                         std::string correlator_path = pipi_string_name + "_x" + std::to_string(origin[0][0]) + "_y" + std::to_string(origin[0][1]) + "_z" + std::to_string(origin[0][2]) + "_t" + std::to_string(origin[0][3]) + "_xprime" + std::to_string(origin[1][0]) + "_yprime" + std::to_string(origin[1][1]) + "_zprime" + std::to_string(origin[1][2]) + "_tprime" + std::to_string(origin[1][3]);
@@ -425,6 +426,7 @@ namespace Chroma
                             std::tuple<int, int, int> momenta1, momenta2;
                             momenta1 = std::get<0>(iter->first);
                             momenta2 = std::get<1>(iter->first);
+
 #ifndef BUILD_HDF5
                             std::string correlator_path_mom = correlator_path + "_px" + std::to_string(std::get<0>(momenta1)) + "_py" + std::to_string(std::get<1>(momenta1)) + "_pz" + std::to_string(std::get<2>(momenta1)) + "_pprimex" + std::to_string(std::get<0>(momenta2)) + "_pprimey" + std::to_string(std::get<1>(momenta2)) + "_pprimez" + std::to_string(std::get<2>(momenta2));
                             TextFileWriter file_out(correlator_path_mom);
@@ -432,11 +434,9 @@ namespace Chroma
                             for (int t = 0; t < Nt; t++)
                             {
                                 temp_element = iter->second[t];
-
                                 int t_relative = t - t_0;
                                 if (t_relative < 0)
                                     t_relative += Nt;
-
 #ifndef BUILD_HDF5
                                 file_out << temp_element << "\n";
 #endif
@@ -447,11 +447,7 @@ namespace Chroma
 #else
                             //Change the name of string compred to 4d output so general correlator path is the same.
                             std::string correlator_path_mom = correlator_path + "/px" + std::to_string(std::get<0>(momenta1)) + "_py" + std::to_string(std::get<1>(momenta1)) + "_pz" + std::to_string(std::get<2>(momenta1)) + "_pprimex" + std::to_string(std::get<0>(momenta2)) + "_pprimey" + std::to_string(std::get<1>(momenta2)) + "_pprimez" + std::to_string(std::get<2>(momenta2));
-              QDPIO::cout << "/* Before writing!!!!! */" << '\n';
-QDPIO::cout << correlator_path_mom << '\n';
                             h5out.write(correlator_path_mom, pipi_correlator_towrite, wmode);
-              QDPIO::cout << "/* After writing!!!!! */" << '\n';
-
                             h5out.writeAttribute(correlator_path_mom, "is_shifted", 1, wmode);
                             h5out.cd("/");
 #endif
@@ -465,8 +461,6 @@ QDPIO::cout << correlator_path_mom << '\n';
             }
 
 #ifdef BUILD_HDF5
-QDPIO::cout << "/* 123456!!!!! */" << '\n';
-
             h5out.cd("/");
             h5out.close();
 #endif

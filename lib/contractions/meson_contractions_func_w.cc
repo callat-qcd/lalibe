@@ -1,4 +1,4 @@
-/*! 
+/*!
  *  Functions that do meson spin and color contractions.
  *  Color is nested inside of spin.
  *  Authors:

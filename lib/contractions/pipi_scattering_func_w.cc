@@ -68,22 +68,23 @@ namespace Chroma
 			// Loop over all ps, p's and time
 			for (int mom_num1 = 0; mom_num1 < phases.numMom(); ++mom_num1)
 				for (int mom_num2 = 0; mom_num2 < phases.numMom(); ++mom_num2)
+				{
+					mom_comp1 = phases.numToMom(mom_num1);
+					mom_comp2 = phases.numToMom(mom_num2);
+
+					// Fix the origin
+					orgin_phases = 0;
+
+					for (int p_comp = 0; p_comp < 3; ++p_comp)
+						orgin_phases += mom_comp1[p_comp] * origin_list[0][p_comp] + mom_comp2[p_comp] * origin_list[1][p_comp];
+
+					origin_fix = cmplx(cos(orgin_phases), sin(orgin_phases));
+
+					correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))] = tmp_multi1d;
 					for (int t = 0; t < Nt; ++t)
-					{
-						mom_comp1 = phases.numToMom(mom_num1);
-						mom_comp2 = phases.numToMom(mom_num2);
-
-						// Fix the origin
-						orgin_phases = 0;
-
-						for (int p_comp = 0; p_comp < 3; ++p_comp)
-							orgin_phases += mom_comp1[p_comp] * origin_list[0][p_comp] + mom_comp2[p_comp] * origin_list[1][p_comp];
-
-						origin_fix = cmplx(cos(orgin_phases), sin(orgin_phases));
-
-						correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))] = tmp_multi1d;
 						correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] = 2 * (trace(Q[mom_num1][t] * Gamma(G5)) * trace(Q[mom_num2][t] * Gamma(G5)) - trace(Q[mom_num1][t] * Gamma(G5) * Q[mom_num2][t] * Gamma(G5))) * origin_fix;
-					}
+				}
+
 		}
 		else // The general case
 		{
@@ -111,23 +112,22 @@ namespace Chroma
 
 			for (int mom_num1 = 0; mom_num1 < phases.numMom(); ++mom_num1)
 				for (int mom_num2 = 0; mom_num2 < phases.numMom(); ++mom_num2)
+				{
+					mom_comp1 = phases.numToMom(mom_num1);
+					mom_comp2 = phases.numToMom(mom_num2);
+
+					// Fix the origin
+					orgin_phases = 0;
+
+					for (int p_comp = 0; p_comp < 3; ++p_comp)
+						orgin_phases += mom_comp1[p_comp] * origin_list[0][p_comp] + mom_comp2[p_comp] * origin_list[1][p_comp];
+
+					origin_fix = cmplx(cos(orgin_phases), sin(orgin_phases));
+
+					correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))] = tmp_multi1d;
 					for (int t = 0; t < Nt; ++t)
-					{
-						mom_comp1 = phases.numToMom(mom_num1);
-						mom_comp2 = phases.numToMom(mom_num2);
-
-						// Fix the origin
-						orgin_phases = 0;
-
-						for (int p_comp = 0; p_comp < 3; ++p_comp)
-							orgin_phases += mom_comp1[p_comp] * origin_list[0][p_comp] + mom_comp2[p_comp] * origin_list[1][p_comp];
-
-						origin_fix = cmplx(cos(orgin_phases), sin(orgin_phases));
-
-						correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))] = tmp_multi1d;
 						correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] = trace(Q1[mom_num1][t] * Gamma(G5)) * trace(P1[mom_num2][t] * Gamma(G5)) - trace(Q2[mom_num1][t] * Gamma(G5) * P2[mom_num2][t] * Gamma(G5)) - trace(P2[mom_num1][t] * Gamma(G5) * Q2[mom_num2][t] * Gamma(G5)) + trace(P1[mom_num1][t] * Gamma(G5)) * trace(Q1[mom_num2][t] * Gamma(G5)) * origin_fix;
-
-					}
+				}
 
 		}
 
