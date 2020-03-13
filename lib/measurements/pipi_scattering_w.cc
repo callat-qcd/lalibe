@@ -267,7 +267,7 @@ namespace Chroma
                     t_0 = orig_header.source_header.t_source;
                     if (orig_header.source_header.getTSrce() != origin[0])
                     {
-                        QDPIO::cout << "The origin of the first two propagators are different, you idot, I'm gonna speak Chinese. 你个傻逼." << std::endl;
+                        QDPIO::cout << "The origin of the first two propagators are different, you idiot, I'm gonna speak Chinese. 你个傻逼." << std::endl;
                     }
 
                 }
