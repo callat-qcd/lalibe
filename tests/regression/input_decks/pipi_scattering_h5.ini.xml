@@ -50,6 +50,7 @@
   <Name>PIPI_SCATTERING</Name>
   <PipiParams>
     <p2_max>1</p2_max>
+    <ptot2_max>2</ptot2_max>
     <particle_list>
       <elem>piplus</elem>
     </particle_list>

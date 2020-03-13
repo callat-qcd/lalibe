@@ -72,7 +72,8 @@ namespace Chroma
 
             //We set output_full_correlator to true if no momentum is specified.
             read(paramtop, "p2_max", par.p2_max);
-            QDPIO::cout << "Reading momenta centered around the origin with a max of " << par.p2_max << std::endl;
+            read(paramtop, "ptot2_max", par.ptot2_max);
+            QDPIO::cout << "Reading momenta centered around the origin with a max of " << par.p2_max << "and total max of " << par.ptot2_max << std::endl;
             read(paramtop, "particle_list", par.particle_list);
         }
 
@@ -400,7 +401,7 @@ namespace Chroma
 
                         CorrelatorType::Correlator correlator_out;
 
-                        pipi_correlator(correlator_out, quark_propagator_1, quark_propagator_2, quark_propagator_3, quark_propagator_4, origin, params.param.p2_max, t_0, j_decay);
+                        pipi_correlator(correlator_out, quark_propagator_1, quark_propagator_2, quark_propagator_3, quark_propagator_4, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
 
                         QDPIO::cout << "Calculation finished. Starting to write HDF5..." << std::endl;
 

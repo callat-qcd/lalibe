@@ -34,7 +34,7 @@
 namespace Chroma
 {
 
-	void pipi_correlator(CorrelatorType::Correlator& correlator_out, const LatticePropagator& quark_prop_1, const LatticePropagator& quark_prop_2, const LatticePropagator& quark_prop_3, const LatticePropagator& quark_prop_4, const multi2d<int>& origin_list, const int p2max, const int t0, const int j_decay)
+	void pipi_correlator(CorrelatorType::Correlator& correlator_out, const LatticePropagator& quark_prop_1, const LatticePropagator& quark_prop_2, const LatticePropagator& quark_prop_3, const LatticePropagator& quark_prop_4, const multi2d<int>& origin_list, const int p2max, const int ptot2max, const int t0, const int j_decay)
 	{
 		int G5 = Ns * Ns - 1;
 
@@ -72,17 +72,24 @@ namespace Chroma
 					mom_comp1 = phases.numToMom(mom_num1);
 					mom_comp2 = phases.numToMom(mom_num2);
 
-					// Fix the origin
-					orgin_phases = 0;
-
+					// Select momenta pairs that lower than the setting p total max
+					int ptot2 = 0;
 					for (int p_comp = 0; p_comp < 3; ++p_comp)
-						orgin_phases += mom_comp1[p_comp] * origin_list[0][p_comp] + mom_comp2[p_comp] * origin_list[1][p_comp];
+						ptot2 += (mom_comp1[p_comp] + mom_comp2[p_comp]) * (mom_comp1[p_comp] + mom_comp2[p_comp]);
+					if (ptot2 <= ptot2max)
+					{
+						// Fix the origin
+						orgin_phases = 0;
 
-					origin_fix = cmplx(cos(orgin_phases), sin(orgin_phases));
+						for (int p_comp = 0; p_comp < 3; ++p_comp)
+							orgin_phases += mom_comp1[p_comp] * origin_list[0][p_comp] + mom_comp2[p_comp] * origin_list[1][p_comp];
 
-					correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))] = tmp_multi1d;
-					for (int t = 0; t < Nt; ++t)
-						correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] = 2 * (trace(Q[mom_num1][t] * Gamma(G5)) * trace(Q[mom_num2][t] * Gamma(G5)) - trace(Q[mom_num1][t] * Gamma(G5) * Q[mom_num2][t] * Gamma(G5))) * origin_fix;
+						origin_fix = cmplx(cos(orgin_phases), sin(orgin_phases));
+
+						correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))] = tmp_multi1d;
+						for (int t = 0; t < Nt; ++t)
+							correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] = 2 * (trace(Q[mom_num1][t] * Gamma(G5)) * trace(Q[mom_num2][t] * Gamma(G5)) - trace(Q[mom_num1][t] * Gamma(G5) * Q[mom_num2][t] * Gamma(G5))) * origin_fix;
+					}
 				}
 
 		}
@@ -116,17 +123,24 @@ namespace Chroma
 					mom_comp1 = phases.numToMom(mom_num1);
 					mom_comp2 = phases.numToMom(mom_num2);
 
-					// Fix the origin
-					orgin_phases = 0;
-
+					// Select momenta pairs that lower than the setting p total max
+					int ptot2 = 0;
 					for (int p_comp = 0; p_comp < 3; ++p_comp)
-						orgin_phases += mom_comp1[p_comp] * origin_list[0][p_comp] + mom_comp2[p_comp] * origin_list[1][p_comp];
+						ptot2 += (mom_comp1[p_comp] + mom_comp2[p_comp]) * (mom_comp1[p_comp] + mom_comp2[p_comp]);
+					if (ptot2 <= ptot2max)
+					{
+						// Fix the origin
+						orgin_phases = 0;
 
-					origin_fix = cmplx(cos(orgin_phases), sin(orgin_phases));
+						for (int p_comp = 0; p_comp < 3; ++p_comp)
+							orgin_phases += mom_comp1[p_comp] * origin_list[0][p_comp] + mom_comp2[p_comp] * origin_list[1][p_comp];
 
-					correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))] = tmp_multi1d;
-					for (int t = 0; t < Nt; ++t)
-						correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] = trace(Q1[mom_num1][t] * Gamma(G5)) * trace(P1[mom_num2][t] * Gamma(G5)) - trace(Q2[mom_num1][t] * Gamma(G5) * P2[mom_num2][t] * Gamma(G5)) - trace(P2[mom_num1][t] * Gamma(G5) * Q2[mom_num2][t] * Gamma(G5)) + trace(P1[mom_num1][t] * Gamma(G5)) * trace(Q1[mom_num2][t] * Gamma(G5)) * origin_fix;
+						origin_fix = cmplx(cos(orgin_phases), sin(orgin_phases));
+
+						correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))] = tmp_multi1d;
+						for (int t = 0; t < Nt; ++t)
+							correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] = trace(Q1[mom_num1][t] * Gamma(G5)) * trace(P1[mom_num2][t] * Gamma(G5)) - trace(Q2[mom_num1][t] * Gamma(G5) * P2[mom_num2][t] * Gamma(G5)) - trace(P2[mom_num1][t] * Gamma(G5) * Q2[mom_num2][t] * Gamma(G5)) + trace(P1[mom_num1][t] * Gamma(G5)) * trace(Q1[mom_num2][t] * Gamma(G5)) * origin_fix;
+					}
 				}
 
 		}

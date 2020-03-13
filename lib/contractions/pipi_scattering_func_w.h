@@ -13,9 +13,8 @@ namespace Chroma
 
 	} // namespace CorrelatorType
 
-	void pipi_correlator(CorrelatorType::Correlator& correlator_out, const LatticePropagator& quark_prop_1, const LatticePropagator& quark_prop_2, const LatticePropagator& quark_prop_3, const LatticePropagator& quark_prop_4, const multi2d<int>& origin_list, const int p2max, const int t0, const int j_decay);
+	void pipi_correlator(CorrelatorType::Correlator& correlator_out, const LatticePropagator& quark_prop_1, const LatticePropagator& quark_prop_2, const LatticePropagator& quark_prop_3, const LatticePropagator& quark_prop_4, const multi2d<int>& origin_list, const int p2max, const int ptot2max, const int t0, const int j_decay);
 
 } // End namespace Chroma
 
 #endif
-
