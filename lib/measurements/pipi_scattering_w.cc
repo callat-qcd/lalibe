@@ -439,13 +439,14 @@ namespace Chroma
                             for (int t = 0; t < Nt; t++)
                             {
                                 temp_element = iter->second[t];
-                                int t_relative = t - t_0;
-                                if (t_relative < 0)
-                                    t_relative += Nt;
+                                //We don't need the following because qqbar has done this for us.
+                                //int t_relative = t - t_0;
+                                //if (t_relative < 0)
+                                //    t_relative += Nt;
 #ifndef BUILD_HDF5
                                 file_out << temp_element << "\n";
 #endif
-                                pipi_correlator_towrite[t_relative] = temp_element;
+                                pipi_correlator_towrite[t] = temp_element;
                             }
 #ifndef BUILD_HDF5
                             file_out.close();
