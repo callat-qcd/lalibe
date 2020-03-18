@@ -412,11 +412,15 @@ namespace Chroma
 
                         //Move the h5 pushing here, since all momentum keys will be written in the same general path.
 #ifdef BUILD_HDF5
-                        std::string correlator_path = params.param.obj_path + "/" + "pipi" + "/x" + std::to_string(origin[0][0]) + "_y" + std::to_string(origin[0][1]) + "_z" + std::to_string(origin[0][2]) + "_t" + std::to_string(origin[0][3]) + "_xprime" + std::to_string(origin[1][0]) + "_yprime" + std::to_string(origin[1][1]) + "_zprime" + std::to_string(origin[1][2]) + "_tprime" + std::to_string(origin[1][3]);
+                        //std::string correlator_path = params.param.obj_path + "/" + "pipi" + "/x" + std::to_string(origin[0][0]) + "_y" + std::to_string(origin[0][1]) + "_z" + std::to_string(origin[0][2]) + "_t" + std::to_string(origin[0][3]) + "_xprime" + std::to_string(origin[1][0]) + "_yprime" + std::to_string(origin[1][1]) + "_zprime" + std::to_string(origin[1][2]) + "_tprime" + std::to_string(origin[1][3]);
+                        // x and y stands for the 4-vectors of the two pions, respectivily
+                        std::string correlator_path = params.param.obj_path + "/" + "pipi" + "/x_" + std::to_string(origin[0][0]) + "_" +  std::to_string(origin[0][1]) + "_" + std::to_string(origin[0][2]) + "_" + std::to_string(origin[0][3]) + "__y_" + std::to_string(origin[1][0]) + "_" +  std::to_string(origin[1][1]) + "_" + std::to_string(origin[1][2]) + "_" + std::to_string(origin[1][3]);
+
                         h5out.push(correlator_path);
 #else
                         std::string pipi_string_name="pipi";
-                        std::string correlator_path = pipi_string_name + "_x" + std::to_string(origin[0][0]) + "_y" + std::to_string(origin[0][1]) + "_z" + std::to_string(origin[0][2]) + "_t" + std::to_string(origin[0][3]) + "_xprime" + std::to_string(origin[1][0]) + "_yprime" + std::to_string(origin[1][1]) + "_zprime" + std::to_string(origin[1][2]) + "_tprime" + std::to_string(origin[1][3]);
+                        //std::string correlator_path = pipi_string_name + "_x" + std::to_string(origin[0][0]) + "_y" + std::to_string(origin[0][1]) + "_z" + std::to_string(origin[0][2]) + "_t" + std::to_string(origin[0][3]) + "_xprime" + std::to_string(origin[1][0]) + "_yprime" + std::to_string(origin[1][1]) + "_zprime" + std::to_string(origin[1][2]) + "_tprime" + std::to_string(origin[1][3]);
+                        std::string correlator_path = pipi_string_name + "_x_" + std::to_string(origin[0][0]) + "_" +  std::to_string(origin[0][1]) + "_" + std::to_string(origin[0][2]) + "_" + std::to_string(origin[0][3]) + "__y_" + std::to_string(origin[1][0]) + "_" +  std::to_string(origin[1][1]) + "_" + std::to_string(origin[1][2]) + "_" + std::to_string(origin[1][3]);
 #endif
                         std::map<CorrelatorType::momenta_pair, multi1d<DComplex>>::iterator iter;
                         for (iter = correlator_out.begin(); iter != correlator_out.end(); iter++)
@@ -429,7 +433,7 @@ namespace Chroma
                             momenta2 = std::get<1>(iter->first);
 
 #ifndef BUILD_HDF5
-                            std::string correlator_path_mom = correlator_path + "_px" + std::to_string(std::get<0>(momenta1)) + "_py" + std::to_string(std::get<1>(momenta1)) + "_pz" + std::to_string(std::get<2>(momenta1)) + "_pprimex" + std::to_string(std::get<0>(momenta2)) + "_pprimey" + std::to_string(std::get<1>(momenta2)) + "_pprimez" + std::to_string(std::get<2>(momenta2));
+                            std::string correlator_path_mom = correlator_path + "_px" + std::to_string(std::get<0>(momenta1)) + "_py" + std::to_string(std::get<1>(momenta1)) + "_pz" + std::to_string(std::get<2>(momenta1)) + "_qx" + std::to_string(std::get<0>(momenta2)) + "_qy" + std::to_string(std::get<1>(momenta2)) + "_qz" + std::to_string(std::get<2>(momenta2));
                             TextFileWriter file_out(correlator_path_mom);
 #endif
                             for (int t = 0; t < Nt; t++)
@@ -447,7 +451,13 @@ namespace Chroma
                             file_out.close();
 #else
                             //Change the name of string compred to 4d output so general correlator path is the same.
-                            std::string correlator_path_mom = correlator_path + "/px" + std::to_string(std::get<0>(momenta1)) + "_py" + std::to_string(std::get<1>(momenta1)) + "_pz" + std::to_string(std::get<2>(momenta1)) + "_pprimex" + std::to_string(std::get<0>(momenta2)) + "_pprimey" + std::to_string(std::get<1>(momenta2)) + "_pprimez" + std::to_string(std::get<2>(momenta2));
+                            //std::string correlator_path_mom = correlator_path + "/px" + std::to_string(std::get<0>(momenta1)) + "_py" + std::to_string(std::get<1>(momenta1)) + "_pz" + std::to_string(std::get<2>(momenta1)) + "_qx" + std::to_string(std::get<0>(momenta2)) + "_qy" + std::to_string(std::get<1>(momenta2)) + "_qz" + std::to_string(std::get<2>(momenta2));
+                            //I add a total momentum directory to make André happy
+                            std::string correlator_path_tot_mom = "/ptotx" + std::to_string(std::get<0>(momenta1)+std::get<0>(momenta2)) + "_ptoty" + std::to_string(std::get<1>(momenta1)+std::get<1>(momenta2)) + "_ptotz" + std::to_string(std::get<2>(momenta1)+std::get<2>(momenta2));
+                            std::string correlator_path_mom = correlator_path + correlator_path_tot_mom + "/px" + std::to_string(std::get<0>(momenta1)) + "_py" + std::to_string(std::get<1>(momenta1)) + "_pz" + std::to_string(std::get<2>(momenta1)) + "_qx" + std::to_string(std::get<0>(momenta2)) + "_qy" + std::to_string(std::get<1>(momenta2)) + "_qz" + std::to_string(std::get<2>(momenta2));
+                            //Haobo: I don't know why should I push, but push is right!
+                            h5out.push(correlator_path+correlator_path_tot_mom);
+
                             h5out.write(correlator_path_mom, pipi_correlator_towrite, wmode);
                             h5out.writeAttribute(correlator_path_mom, "is_shifted", 1, wmode);
                             h5out.cd("/");

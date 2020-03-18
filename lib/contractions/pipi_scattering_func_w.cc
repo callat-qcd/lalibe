@@ -57,7 +57,7 @@ namespace Chroma
 		if (same_origin) // y=y'
 		{
 			multi2d<DPropagator> Q(phases.numMom(), Nt);
-			Q=zero;
+			Q = zero;
 
 			compute_qqbar(Q, quark_prop_2, quark_prop_1, phases, t0);
 
@@ -102,6 +102,10 @@ namespace Chroma
 			compute_qqbar(Q2, quark_prop_2, quark_prop_3, phases, t0);
 			compute_qqbar(P2, quark_prop_4, quark_prop_1, phases, t0);
 
+			Q1 = zero;
+			P1 = zero;
+			Q2 = zero;
+			P2 = zero;
 			//compute_qqbar(Q3, quark_prop_4, quark_prop_1, phases1, t0);
 			//compute_qqbar(P3, quark_prop_2, quark_prop_3, phases2, t0);
 			//compute_qqbar(Q4, quark_prop_4, quark_prop_3, phases1, t0);
