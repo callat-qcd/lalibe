@@ -21,7 +21,7 @@
     <obj_name>PS_prop</obj_name>
   </File>
 </elem>
-
+<!--
 <elem>
   <Name>SINK_SMEAR</Name>
   <Frequency>1</Frequency>
@@ -45,7 +45,7 @@
     <smeared_prop_id>SS_prop</smeared_prop_id>
   </NamedObject>
 </elem>
-
+-->
 <elem>
   <Name>PIPI_SCATTERING</Name>
   <PipiParams>
@@ -55,13 +55,13 @@
       <elem>piplus</elem>
     </particle_list>
     <h5_file_name>./lalibe_pipi_spectrum.h5</h5_file_name>
-    <obj_path>/SS</obj_path>
+    <obj_path>/PS</obj_path>
   </PipiParams>
   <NamedObject>
-    <quark_prop_1>SS_prop</quark_prop_1>
-    <quark_prop_2>SS_prop</quark_prop_2>
-    <quark_prop_3>SS_prop</quark_prop_3>
-    <quark_prop_4>SS_prop</quark_prop_4>
+    <quark_prop_1>PS_prop</quark_prop_1>
+    <quark_prop_2>PS_prop</quark_prop_2>
+    <quark_prop_3>PS_prop</quark_prop_3>
+    <quark_prop_4>PS_prop</quark_prop_4>
   </NamedObject>
 </elem>
 
