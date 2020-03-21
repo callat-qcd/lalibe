@@ -51,9 +51,6 @@
   <PipiParams>
     <p2_max>1</p2_max>
     <ptot2_max>2</ptot2_max>
-    <particle_list>
-      <elem>piplus</elem>
-    </particle_list>
     <h5_file_name>./lalibe_pipi_spectrum.h5</h5_file_name>
     <obj_path>/PS</obj_path>
   </PipiParams>

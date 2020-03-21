@@ -63,8 +63,8 @@ for t in range(8):
                             correlator2[t,z,y,x,s,r,q] = -np.einsum('mjba,mn,nkbc,op,oldc,kl,pida,ij', np.conj(M[t,z,y,x,:,:,:,:]), G, S[t,s,r,q,:,:,:,:], G, np.conj(M[t,s,r,q,:,:,:,:]), G, S[t,z,y,x,:,:,:,:], G, optimize='greedy')
                             correlator3[t,z,y,x,s,r,q] = -np.einsum('mlbc,mn,niba,op,pkdc,kl,ojda,ij', np.conj(M[t,s,r,q,:,:,:,:]), G, S[t,z,y,x,:,:,:,:], G, S[t,s,r,q,:,:,:,:], G, np.conj(M[t,z,y,x,:,:,:,:]), G, optimize='greedy')
                             correlator4[t,z,y,x,s,r,q] =  np.einsum('mlbc,mn,nkbc,op,pida,kl,ojda,ij', np.conj(M[t,s,r,q,:,:,:,:]), G, S[t,s,r,q,:,:,:,:], G, S[t,z,y,x,:,:,:,:], G, np.conj(M[t,z,y,x,:,:,:,:]), G, optimize='greedy')
-                            correlator[t,z,y,x,s,r,q] = correlator1[t,z,y,x,s,r,q] + correlator2[t,z,y,x,s,r,q] + correlator3[t,z,y,x,s,r,q] +correlator4[t,z,y,x,s,r,q]
-                            #correlator[t,z,y,x,s,r,q] = correlator3[t,z,y,x,s,r,q]
+                            #correlator[t,z,y,x,s,r,q] = correlator1[t,z,y,x,s,r,q] + correlator2[t,z,y,x,s,r,q] + correlator3[t,z,y,x,s,r,q] +correlator4[t,z,y,x,s,r,q]
+                            correlator[t,z,y,x,s,r,q] = correlator2[t,z,y,x,s,r,q]
     cnt += 1
     print('Contraction {:.2%} completed.'.format(cnt/tot))
 
@@ -106,10 +106,10 @@ for p1 in momlist:
                                 for r in range(4):
                                     for q in range(4):
                                         tmpFT += np.exp(1j*(np.pi/2)*(p1[0]*x+p1[1]*y+p1[2]*z + p2[0]*q+p2[1]*r+p2[2]*s)) * correlator[t,z,y,x,s,r,q]
-                t_relative = t - t_0;
+                t_relative = t - t_0
                 if (t_relative < 0):
-                    t_relative += Nt;
-                tmpFTlist[t_relative] = tmpFT;
+                    t_relative += Nt
+                tmpFTlist[t_relative] = tmpFT
             correlator_FTed[(p1[0],p1[1],p1[2],p2[0],p2[1],p2[2])] = tmpFTlist        
 print('Fourier transform completed.')
 

@@ -39,7 +39,6 @@ namespace Chroma
                 bool output_full_correlator;          //If no momentum is specified, we output the full correlator.
                 int p2_max;                           //max of momentum transfer squared, optional
                 int ptot2_max;                        //max of total momentum
-                multi1d<std::string> particle_list;   //list of actual particles we gunna make from the contractions yo
 #ifdef BUILD_HDF5
                 std::string file_name;
                 std::string obj_path;
