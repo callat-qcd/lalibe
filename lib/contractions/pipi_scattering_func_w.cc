@@ -88,8 +88,7 @@ namespace Chroma
 
 						correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))] = tmp_multi1d;
 						for (int t = 0; t < Nt; ++t)
-							//correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] = 2 * (trace(Q[mom_num1][t] * Gamma(G5)) * trace(Q[mom_num2][t] * Gamma(G5)) - trace(Q[mom_num1][t] * Gamma(G5) * Q[mom_num2][t] * Gamma(G5))) * origin_fix;
-							correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] = - trace(Q[mom_num1][t] * Gamma(G5) * Q[mom_num2][t] * Gamma(G5));
+							correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] = 2 * (trace(Q[mom_num1][t] * Gamma(G5)) * trace(Q[mom_num2][t] * Gamma(G5)) - trace(Q[mom_num1][t] * Gamma(G5) * Q[mom_num2][t] * Gamma(G5))) * origin_fix;
 					}
 				}
 

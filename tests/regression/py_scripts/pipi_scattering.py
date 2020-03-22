@@ -60,11 +60,10 @@ for t in range(8):
                     for r in range(4):
                         for q in range(4):
                             correlator1[t,z,y,x,s,r,q] =  np.einsum('mjba,mn,oldc,op,pkdc,kl,niba,ij', np.conj(M[t,z,y,x,:,:,:,:]), G, np.conj(M[t,s,r,q,:,:,:,:]), G, S[t,s,r,q,:,:,:,:], G, S[t,z,y,x,:,:,:,:], G, optimize='greedy')
-                            correlator2[t,z,y,x,s,r,q] = -np.einsum('mjba,mn,nkbc,op,oldc,kl,pida,ij', np.conj(M[t,z,y,x,:,:,:,:]), G, S[t,s,r,q,:,:,:,:], G, np.conj(M[t,s,r,q,:,:,:,:]), G, S[t,z,y,x,:,:,:,:], G, optimize='greedy')
-                            correlator3[t,z,y,x,s,r,q] = -np.einsum('mlbc,mn,niba,op,pkdc,kl,ojda,ij', np.conj(M[t,s,r,q,:,:,:,:]), G, S[t,z,y,x,:,:,:,:], G, S[t,s,r,q,:,:,:,:], G, np.conj(M[t,z,y,x,:,:,:,:]), G, optimize='greedy')
-                            correlator4[t,z,y,x,s,r,q] =  np.einsum('mlbc,mn,nkbc,op,pida,kl,ojda,ij', np.conj(M[t,s,r,q,:,:,:,:]), G, S[t,s,r,q,:,:,:,:], G, S[t,z,y,x,:,:,:,:], G, np.conj(M[t,z,y,x,:,:,:,:]), G, optimize='greedy')
-                            #correlator[t,z,y,x,s,r,q] = correlator1[t,z,y,x,s,r,q] + correlator2[t,z,y,x,s,r,q] + correlator3[t,z,y,x,s,r,q] +correlator4[t,z,y,x,s,r,q]
-                            correlator[t,z,y,x,s,r,q] = correlator2[t,z,y,x,s,r,q]
+                            correlator2[t,z,y,x,s,r,q] = -np.einsum('mjba,mn,nkbc,op,oldc,kl,pida,ij', np.conj(M[t,z,y,x,:,:,:,:]), G, S[t,z,y,x,:,:,:,:], G, np.conj(M[t,s,r,q,:,:,:,:]), G, S[t,s,r,q,:,:,:,:], G, optimize='greedy')
+                            correlator3[t,z,y,x,s,r,q] = -np.einsum('mlbc,mn,niba,op,pkdc,kl,ojda,ij', np.conj(M[t,z,y,x,:,:,:,:]), G, S[t,z,y,x,:,:,:,:], G, S[t,s,r,q,:,:,:,:], G, np.conj(M[t,s,r,q,:,:,:,:]), G, optimize='greedy')
+                            correlator4[t,z,y,x,s,r,q] =  np.einsum('mlbc,mn,nkbc,op,pida,kl,ojda,ij', np.conj(M[t,z,y,x,:,:,:,:]), G, S[t,z,y,x,:,:,:,:], G, S[t,s,r,q,:,:,:,:], G, np.conj(M[t,s,r,q,:,:,:,:]), G, optimize='greedy')
+                            correlator[t,z,y,x,s,r,q] = correlator1[t,z,y,x,s,r,q] + correlator2[t,z,y,x,s,r,q] + correlator3[t,z,y,x,s,r,q] +correlator4[t,z,y,x,s,r,q]
     cnt += 1
     print('Contraction {:.2%} completed.'.format(cnt/tot))
 

@@ -81,7 +81,7 @@ for p in momlist:
             t_relative += Nt
         for z in range(4):
             for y in range(4):
-                for x in range(4):       
+                for x in range(4):
                     Q[t_relative,pnum,:,:,:,:] += np.exp(1j*(np.pi/2)*(p[0]*x+p[1]*y+p[2]*z)) * quarkloop[t,z,y,x,:,:,:,:]
     pnum += 1
 
@@ -96,8 +96,10 @@ for p1 in momlist:
             # Let me omit the origin fix at this moment
             tmpFTlist = np.zeros(8, dtype = np.complex128)
             for t in range(8):
-                #tmpFTlist[t] = np.einsum('jiaa,ij', Q[t,p1num,:,:,:,:], G, optimize='greedy') * np.einsum('jiaa,ij', Q[t,p2num,:,:,:,:], G, optimize='greedy')
-                tmpFTlist[t] = -np.einsum('ikac,kica', Q[t,p1num,:,:,:,:], Q[t,p2num,:,:,:,:], optimize='greedy')
+                tmpFTlist[t] += np.einsum('jiaa,ij', Q[t,p1num,:,:,:,:], G, optimize='greedy') * np.einsum('jiaa,ij', Q[t,p2num,:,:,:,:], G, optimize='greedy')
+                tmpFTlist[t] -= np.einsum('jkac,kl,lica,ij', Q[t,p1num,:,:,:,:], G, Q[t,p2num,:,:,:,:], G, optimize='greedy')
+                tmpFTlist[t] -= np.einsum('jkac,kl,lica,ij', Q[t,p2num,:,:,:,:], G, Q[t,p1num,:,:,:,:], G, optimize='greedy')
+                tmpFTlist[t] += np.einsum('jiaa,ij', Q[t,p2num,:,:,:,:], G, optimize='greedy') * np.einsum('jiaa,ij', Q[t,p1num,:,:,:,:], G, optimize='greedy')
             correlator_FTed[(p1[0],p1[1],p1[2],p2[0],p2[1],p2[2])] = tmpFTlist
         p2num += 1
     p1num += 1
