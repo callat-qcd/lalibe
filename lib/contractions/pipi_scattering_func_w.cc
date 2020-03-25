@@ -62,7 +62,7 @@ namespace Chroma
 			compute_qqbar(Q, quark_prop_2, quark_prop_1, phases, t0);
 
 			DComplex origin_fix;
-			Double orgin_phases;
+			Double origin_phases;
 			multi1d<int> mom_comp1, mom_comp2;
 
 			// Loop over all ps, p's and time
@@ -79,12 +79,12 @@ namespace Chroma
 					if (ptot2 <= ptot2max)
 					{
 						// Fix the origin
-						orgin_phases = 0;
+						origin_phases = 0;
 
 						for (int p_comp = 0; p_comp < 3; ++p_comp)
-							orgin_phases += mom_comp1[p_comp] * origin_list[0][p_comp] + mom_comp2[p_comp] * origin_list[1][p_comp];
+							origin_phases -= (mom_comp1[p_comp] * origin_list[0][p_comp] + mom_comp2[p_comp] * origin_list[1][p_comp]) * 2 * M_PI / Layout::lattSize()[p_comp];
 
-						origin_fix = cmplx(cos(orgin_phases), sin(orgin_phases));
+						origin_fix = cmplx(cos(origin_phases), sin(origin_phases));
 
 						correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))] = tmp_multi1d;
 						for (int t = 0; t < Nt; ++t)
@@ -96,16 +96,16 @@ namespace Chroma
 		else // The general case
 		{
 			multi2d<DPropagator> Q1(phases.numMom(), Nt), P1(phases.numMom(), Nt), Q2(phases.numMom(), Nt), P2(phases.numMom(), Nt);
+			Q1 = zero;
+			P1 = zero;
+			Q2 = zero;
+			P2 = zero;
 
 			compute_qqbar(Q1, quark_prop_2, quark_prop_1, phases, t0);
 			compute_qqbar(P1, quark_prop_4, quark_prop_3, phases, t0);
 			compute_qqbar(Q2, quark_prop_2, quark_prop_3, phases, t0);
 			compute_qqbar(P2, quark_prop_4, quark_prop_1, phases, t0);
 
-			Q1 = zero;
-			P1 = zero;
-			Q2 = zero;
-			P2 = zero;
 			//compute_qqbar(Q3, quark_prop_4, quark_prop_1, phases1, t0);
 			//compute_qqbar(P3, quark_prop_2, quark_prop_3, phases2, t0);
 			//compute_qqbar(Q4, quark_prop_4, quark_prop_3, phases1, t0);
@@ -118,7 +118,7 @@ namespace Chroma
 			//P4 = Q1;
 
 			DComplex origin_fix;
-			Double orgin_phases;
+			Double origin_phases;
 			multi1d<int> mom_comp1, mom_comp2;
 
 			for (int mom_num1 = 0; mom_num1 < phases.numMom(); ++mom_num1)
@@ -134,12 +134,12 @@ namespace Chroma
 					if (ptot2 <= ptot2max)
 					{
 						// Fix the origin
-						orgin_phases = 0;
+						origin_phases = 0;
 
 						for (int p_comp = 0; p_comp < 3; ++p_comp)
-							orgin_phases += mom_comp1[p_comp] * origin_list[0][p_comp] + mom_comp2[p_comp] * origin_list[1][p_comp];
+							origin_phases -= (mom_comp1[p_comp] * origin_list[0][p_comp] + mom_comp2[p_comp] * origin_list[1][p_comp]) * 2 * M_PI / Layout::lattSize()[p_comp];
 
-						origin_fix = cmplx(cos(orgin_phases), sin(orgin_phases));
+						origin_fix = cmplx(cos(origin_phases), sin(origin_phases));
 
 						correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))] = tmp_multi1d;
 						for (int t = 0; t < Nt; ++t)

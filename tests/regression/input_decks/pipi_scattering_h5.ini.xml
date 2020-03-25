@@ -16,11 +16,26 @@
     <object_type>LatticePropagator</object_type>
   </NamedObject>
   <File>
-    <file_name>./test_propagator.h5</file_name>
+    <file_name>./test_propagator1.h5</file_name>
     <path>/sh_sig2p0_n5</path>
     <obj_name>PS_prop</obj_name>
   </File>
 </elem>
+
+<elem>
+  <Name>HDF5_READ_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>PS_prop2</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./test_propagator2.h5</file_name>
+    <path>/sh_sig2p0_n5</path>
+    <obj_name>PS_prop</obj_name>
+  </File>
+</elem>
+
 <!--
 <elem>
   <Name>SINK_SMEAR</Name>
@@ -57,8 +72,8 @@
   <NamedObject>
     <quark_prop_1>PS_prop</quark_prop_1>
     <quark_prop_2>PS_prop</quark_prop_2>
-    <quark_prop_3>PS_prop</quark_prop_3>
-    <quark_prop_4>PS_prop</quark_prop_4>
+    <quark_prop_3>PS_prop2</quark_prop_3>
+    <quark_prop_4>PS_prop2</quark_prop_4>
   </NamedObject>
 </elem>
 

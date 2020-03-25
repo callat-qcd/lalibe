@@ -32,17 +32,24 @@ t' = u
 
 t_0 = 3
 Nt = 8
+origin_list=[[1,0,0,3],[0,-1,0,3]]
 
 D = np.zeros([3, 3], dtype = np.complex128)
 for i in range(3):
     D[i,i] = 1.
 
-path = '/Users/haobo/lattice_qcd/test_run/lalibe/test_propagator.h5'
+path = '/Users/haobo/lattice_qcd/test_run/lalibe/test_propagator1.h5'
 f = h5.File(path, 'r')
 S = f['sh_sig2p0_n5/PS_prop'][()]
 f.close()
 
+path = '/Users/haobo/lattice_qcd/test_run/lalibe/test_propagator2.h5'
+f = h5.File(path, 'r')
+S2 = f['sh_sig2p0_n5/PS_prop'][()]
+f.close()
+
 M = np.einsum('li,tzyxikab,kj->tzyxljab', G, S, G)
+M2 = np.einsum('li,tzyxikab,kj->tzyxljab', G, S2, G)
 
 correlator  = np.zeros([8,4,4,4,4,4,4], dtype = np.complex128)
 correlator1 = np.zeros([8,4,4,4,4,4,4], dtype = np.complex128)
@@ -59,10 +66,10 @@ for t in range(8):
                 for s in range(4):
                     for r in range(4):
                         for q in range(4):
-                            correlator1[t,z,y,x,s,r,q] =  np.einsum('mjba,mn,oldc,op,pkdc,kl,niba,ij', np.conj(M[t,z,y,x,:,:,:,:]), G, np.conj(M[t,s,r,q,:,:,:,:]), G, S[t,s,r,q,:,:,:,:], G, S[t,z,y,x,:,:,:,:], G, optimize='greedy')
-                            correlator2[t,z,y,x,s,r,q] = -np.einsum('mjba,mn,nkbc,op,oldc,kl,pida,ij', np.conj(M[t,z,y,x,:,:,:,:]), G, S[t,z,y,x,:,:,:,:], G, np.conj(M[t,s,r,q,:,:,:,:]), G, S[t,s,r,q,:,:,:,:], G, optimize='greedy')
-                            correlator3[t,z,y,x,s,r,q] = -np.einsum('mlbc,mn,niba,op,pkdc,kl,ojda,ij', np.conj(M[t,z,y,x,:,:,:,:]), G, S[t,z,y,x,:,:,:,:], G, S[t,s,r,q,:,:,:,:], G, np.conj(M[t,s,r,q,:,:,:,:]), G, optimize='greedy')
-                            correlator4[t,z,y,x,s,r,q] =  np.einsum('mlbc,mn,nkbc,op,pida,kl,ojda,ij', np.conj(M[t,z,y,x,:,:,:,:]), G, S[t,z,y,x,:,:,:,:], G, S[t,s,r,q,:,:,:,:], G, np.conj(M[t,s,r,q,:,:,:,:]), G, optimize='greedy')
+                            correlator1[t,z,y,x,s,r,q] =  np.einsum('mjba,mn,oldc,op,pkdc,kl,niba,ij', np.conj(M[t,z,y,x,:,:,:,:]), G, np.conj(M2[t,s,r,q,:,:,:,:]), G, S2[t,s,r,q,:,:,:,:], G, S[t,z,y,x,:,:,:,:], G, optimize='greedy')
+                            correlator2[t,z,y,x,s,r,q] = -np.einsum('mjba,mn,nkbc,op,oldc,kl,pida,ij', np.conj(M[t,z,y,x,:,:,:,:]), G, S2[t,z,y,x,:,:,:,:], G, np.conj(M2[t,s,r,q,:,:,:,:]), G, S[t,s,r,q,:,:,:,:], G, optimize='greedy')
+                            correlator3[t,z,y,x,s,r,q] = -np.einsum('mlbc,mn,niba,op,pkdc,kl,ojda,ij', np.conj(M2[t,z,y,x,:,:,:,:]), G, S[t,z,y,x,:,:,:,:], G, S2[t,s,r,q,:,:,:,:], G, np.conj(M[t,s,r,q,:,:,:,:]), G, optimize='greedy')
+                            correlator4[t,z,y,x,s,r,q] =  np.einsum('mlbc,mn,nkbc,op,pida,kl,ojda,ij', np.conj(M2[t,z,y,x,:,:,:,:]), G, S2[t,z,y,x,:,:,:,:], G, S[t,s,r,q,:,:,:,:], G, np.conj(M[t,s,r,q,:,:,:,:]), G, optimize='greedy')
                             correlator[t,z,y,x,s,r,q] = correlator1[t,z,y,x,s,r,q] + correlator2[t,z,y,x,s,r,q] + correlator3[t,z,y,x,s,r,q] +correlator4[t,z,y,x,s,r,q]
     cnt += 1
     print('Contraction {:.2%} completed.'.format(cnt/tot))
@@ -105,18 +112,22 @@ for p1 in momlist:
                                 for r in range(4):
                                     for q in range(4):
                                         tmpFT += np.exp(1j*(np.pi/2)*(p1[0]*x+p1[1]*y+p1[2]*z + p2[0]*q+p2[1]*r+p2[2]*s)) * correlator[t,z,y,x,s,r,q]
+
                 t_relative = t - t_0
                 if (t_relative < 0):
                     t_relative += Nt
                 tmpFTlist[t_relative] = tmpFT
-            correlator_FTed[(p1[0],p1[1],p1[2],p2[0],p2[1],p2[2])] = tmpFTlist        
+            
+            origin_phases = 0
+            for p_comp in range(3):
+                origin_phases -= (p1[p_comp] * origin_list[0][p_comp] + p2[p_comp] * origin_list[1][p_comp]) * np.pi/2;
+
+            correlator_FTed[(p1[0],p1[1],p1[2],p2[0],p2[1],p2[2])] = tmpFTlist * np.exp(-1j*(np.pi/2)*origin_phases)
 print('Fourier transform completed.')
 
-# Let me omit the origin fix at this moment
-        
 # Python version
-PY = correlator_FTed[(0,0,1,0,0,0)]
+PY = correlator_FTed[(0,-1,0,0,0,1)]
 # C++ version
 f = h5.File('/Users/haobo/lattice_qcd/test_run/lalibe/lalibe_pipi_spectrum.h5','r')
-CXX = f['PS']['pipi']['x_0_0_0_3__y_0_0_0_3']['ptotx0_ptoty0_ptotz1']['px0_py0_pz1_qx0_qy0_qz0'][()]
+CXX = f['PS']['pipi']['x_1_0_0_3__y_0_-1_0_3']['ptotx0_ptoty-1_ptotz1']['px0_py-1_pz0_qx0_qy0_qz1'][()]
 f.close()
