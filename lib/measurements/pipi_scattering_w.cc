@@ -67,52 +67,51 @@ namespace Chroma
 
             XMLReader inputtop(xml, path);
 
-            //read(inputtop, "gauge_id" , input.gauge_id);
             //Logic to read quark propagators (whichever ones are present.)
 
-            if (inputtop.count("quark_prop_1") != 0)
+            if (inputtop.count("light_prop_1") != 0)
             {
-                read(inputtop, "quark_prop_1", input.quark_prop_1);
-                QDPIO::cout << "I found the first quark propagator, here is its id: " << input.quark_prop_1 << std::endl;
-                input.is_prop_1 = true;
+                read(inputtop, "light_prop_1", input.light_prop_1);
+                QDPIO::cout << "I found the first light quark propagator, here is its id: " << input.light_prop_1 << std::endl;
+                input.have_light_prop_1 = true;
             }
             else
             {
-                QDPIO::cout << "I couldn't find the first quark, hope you don't need it for the inputted pipi scattering. " << std::endl;
-                input.is_prop_1 = false;
+                QDPIO::cout << "I couldn't find the first light quark, this is absurd, go change your xml. " << std::endl;
+                input.have_light_prop_1 = false;
             }
-            if (inputtop.count("quark_prop_2") != 0)
+            if (inputtop.count("light_prop_2") != 0)
             {
-                read(inputtop, "quark_prop_2", input.quark_prop_2);
-                QDPIO::cout << "I found the second quark propagator, here is its id: " << input.quark_prop_2 << std::endl;
-                input.is_prop_2 = true;
-            }
-            else
-            {
-                QDPIO::cout << "I couldn't find the second quark, hope you don't need it for the inputted pipi scattering. " << std::endl;
-                input.is_prop_2 = false;
-            }
-            if (inputtop.count("quark_prop_3") != 0)
-            {
-                read(inputtop, "quark_prop_3", input.quark_prop_3);
-                QDPIO::cout << "I found the third quark propagator, here is its id: " << input.quark_prop_3 << std::endl;
-                input.is_prop_3 = true;
+                read(inputtop, "light_prop_2", input.light_prop_2);
+                QDPIO::cout << "I found the second light quark propagator, here is its id: " << input.light_prop_2 << std::endl;
+                input.have_light_prop_2 = true;
             }
             else
             {
-                QDPIO::cout << "I couldn't find the third quark, hope you don't need it for the inputted pipi scattering. " << std::endl;
-                input.is_prop_3 = false;
+                QDPIO::cout << "I couldn't find the second light quark, we have only one origin for the inputted pipi scattering. " << std::endl;
+                input.have_light_prop_2 = false;
             }
-            if (inputtop.count("quark_prop_4") != 0)
+            if (inputtop.count("strange_prop_1") != 0)
             {
-                read(inputtop, "quark_prop_4", input.quark_prop_4);
-                QDPIO::cout << "I found the forth quark propagator, here is its id: " << input.quark_prop_4 << std::endl;
-                input.is_prop_4 = true;
+                read(inputtop, "strange_prop_1", input.strange_prop_1);
+                QDPIO::cout << "I found the first strange quark propagator, here is its id: " << input.strange_prop_1 << std::endl;
+                input.have_strange_prop_1 = true;
             }
             else
             {
-                QDPIO::cout << "I couldn't find the forth quark, hope you don't need it for the inputted pipi scattering. " << std::endl;
-                input.is_prop_4 = false;
+                QDPIO::cout << "I couldn't find the first strange quark, no KK or Kpi scattering. " << std::endl;
+                input.have_strange_prop_1 = false;
+            }
+            if (inputtop.count("strange_prop_2") != 0)
+            {
+                read(inputtop, "strange_prop_2", input.strange_prop_2);
+                QDPIO::cout << "I found the second strange quark propagator, here is its id: " << input.strange_prop_2 << std::endl;
+                input.have_strange_prop_2 = true;
+            }
+            else
+            {
+                QDPIO::cout << "I couldn't find the second strange quark, we have only one origin for the inputted KK scattering. " << std::endl;
+                input.have_strange_prop_2 = false;
             }
 
         }
@@ -163,14 +162,14 @@ namespace Chroma
             QDPIO::cout << "Pipi scattering starting..." << std::endl;
 
             //Grab all the propagators that are given.
-            XMLReader prop_1_file_xml, prop_1_record_xml;
-            LatticePropagator quark_propagator_1;
-            XMLReader prop_2_file_xml, prop_2_record_xml;
-            LatticePropagator quark_propagator_2;
-            XMLReader prop_3_file_xml, prop_3_record_xml;
-            LatticePropagator quark_propagator_3;
-            XMLReader prop_4_file_xml, prop_4_record_xml;
-            LatticePropagator quark_propagator_4;
+            XMLReader light_prop_1_file_xml, light_prop_1_record_xml;
+            LatticePropagator light_quark_propagator_1;
+            XMLReader light_prop_2_file_xml, light_prop_2_record_xml;
+            LatticePropagator light_quark_propagator_2;
+            XMLReader strange_prop_1_file_xml, strange_prop_1_record_xml;
+            LatticePropagator strange_quark_propagator_1;
+            XMLReader strange_prop_2_file_xml, strange_prop_2_record_xml;
+            LatticePropagator strange_quark_propagator_2;
 
             //Need origin, j_decay, and t0 for fourier transform!
             //Need j_decay of bc to know what comes with a minus sign.
@@ -178,25 +177,25 @@ namespace Chroma
             int t_0;
             multi2d<int> origin(2,4);
 
-            if (params.named_obj.is_prop_1 == true)
+            if (params.named_obj.have_light_prop_1 == true)
             {
-                QDPIO::cout << "Attempting to read the first propagator" << std::endl;
+                QDPIO::cout << "Attempting to read the first light propagator" << std::endl;
                 try
                 {
-                    quark_propagator_1 = TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.quark_prop_1);
-                    TheNamedObjMap::Instance().get(params.named_obj.quark_prop_1).getFileXML(prop_1_file_xml);
-                    TheNamedObjMap::Instance().get(params.named_obj.quark_prop_1).getRecordXML(prop_1_record_xml);
+                    light_quark_propagator_1 = TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.light_prop_1);
+                    TheNamedObjMap::Instance().get(params.named_obj.light_prop_1).getFileXML(light_prop_1_file_xml);
+                    TheNamedObjMap::Instance().get(params.named_obj.light_prop_1).getRecordXML(light_prop_1_record_xml);
                     //Get the origin  and j_decay for the FT, this assumes all quarks have the same origin.
                     MakeSourceProp_t  orig_header;
-                    if (prop_1_record_xml.count("/Propagator") != 0)
+                    if (light_prop_1_record_xml.count("/Propagator") != 0)
                     {
-                        QDPIO::cout << "The first quark propagator is unsmeared, reading from Propagator tag..." << std::endl;
-                        read(prop_1_record_xml, "/Propagator", orig_header);
+                        QDPIO::cout << "The first light quark propagator is unsmeared, reading from Propagator tag..." << std::endl;
+                        read(light_prop_1_record_xml, "/Propagator", orig_header);
                     }
-                    else if (prop_1_record_xml.count("/SinkSmear") != 0)
+                    else if (light_prop_1_record_xml.count("/SinkSmear") != 0)
                     {
-                        QDPIO::cout << "The first quark propagator is smeared, reading from SinkSmear tag..." << std::endl;
-                        read(prop_1_record_xml, "/SinkSmear", orig_header);
+                        QDPIO::cout << "The first light quark propagator is smeared, reading from SinkSmear tag..." << std::endl;
+                        read(light_prop_1_record_xml, "/SinkSmear", orig_header);
                     }
                     else
                     {
@@ -206,7 +205,7 @@ namespace Chroma
                     j_decay = orig_header.source_header.j_decay;
                     t_0 = orig_header.source_header.t_source;
                     origin[0] = orig_header.source_header.getTSrce();
-
+                    origin[1] = orig_header.source_header.getTSrce();
                 }
                 catch (std::bad_cast)
                 {
@@ -221,25 +220,67 @@ namespace Chroma
                 }
             }
 
-            if (params.named_obj.is_prop_2 == true)
+            if (params.named_obj.have_light_prop_2 == true)
             {
-                QDPIO::cout << "Attempting to read the second propagator" << std::endl;
+                QDPIO::cout << "Attempting to read the second light propagator" << std::endl;
                 try
                 {
-                    quark_propagator_2 = TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.quark_prop_2);
-                    TheNamedObjMap::Instance().get(params.named_obj.quark_prop_2).getFileXML(prop_2_file_xml);
-                    TheNamedObjMap::Instance().get(params.named_obj.quark_prop_2).getRecordXML(prop_2_record_xml);
+                    light_quark_propagator_2 = TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.light_prop_2);
+                    TheNamedObjMap::Instance().get(params.named_obj.light_prop_2).getFileXML(light_prop_2_file_xml);
+                    TheNamedObjMap::Instance().get(params.named_obj.light_prop_2).getRecordXML(light_prop_2_record_xml);
                     //Get the origin  and j_decay for the FT, this assumes all quarks have the same origin.
                     MakeSourceProp_t  orig_header;
-                    if (prop_2_record_xml.count("/Propagator") != 0)
+                    if (light_prop_2_record_xml.count("/Propagator") != 0)
                     {
-                        QDPIO::cout << "The second quark propagator is unsmeared, reading from Propagator tag..." << std::endl;
-                        read(prop_2_record_xml, "/Propagator", orig_header);
+                        QDPIO::cout << "The second light quark propagator is unsmeared, reading from Propagator tag..." << std::endl;
+                        read(light_prop_2_record_xml, "/Propagator", orig_header);
                     }
-                    else if (prop_2_record_xml.count("/SinkSmear") != 0)
+                    else if (light_prop_2_record_xml.count("/SinkSmear") != 0)
                     {
-                        QDPIO::cout << "The second quark propagator is smeared, reading from SinkSmear tag..." << std::endl;
-                        read(prop_2_record_xml, "/SinkSmear", orig_header);
+                        QDPIO::cout << "The second light quark propagator is smeared, reading from SinkSmear tag..." << std::endl;
+                        read(light_prop_2_record_xml, "/SinkSmear", orig_header);
+                    }
+                    else
+                    {
+                        QDPIO::cout << "What type of weird propagator did you give me? I can't find the right tag to get j_decay, source location, and whatnot...exiting..." << std::endl;
+                    }
+
+                    j_decay = orig_header.source_header.j_decay;
+                    t_0 = orig_header.source_header.t_source;
+                    origin[1] = orig_header.source_header.getTSrce();
+                }
+                catch (std::bad_cast)
+                {
+                    QDPIO::cerr << name << ": caught dynamic cast error" << std::endl;
+                    QDP_abort(1);
+                }
+                catch (const std::string& e)
+                {
+                    QDPIO::cerr << name << ": error reading src prop_header: "
+                        << e << std::endl;
+                    QDP_abort(1);
+                }
+            }
+
+            if (params.named_obj.have_strange_prop_1 == true)
+            {
+                QDPIO::cout << "Attempting to read the first strange propagator" << std::endl;
+                try
+                {
+                    strange_quark_propagator_1 = TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.strange_prop_1);
+                    TheNamedObjMap::Instance().get(params.named_obj.strange_prop_1).getFileXML(strange_prop_1_file_xml);
+                    TheNamedObjMap::Instance().get(params.named_obj.strange_prop_1).getRecordXML(strange_prop_1_record_xml);
+                    //Get the origin  and j_decay for the FT, this assumes all quarks have the same origin.
+                    MakeSourceProp_t  orig_header;
+                    if (strange_prop_1_record_xml.count("/Propagator") != 0)
+                    {
+                        QDPIO::cout << "The first strange quark propagator is unsmeared, reading from Propagator tag..." << std::endl;
+                        read(strange_prop_1_record_xml, "/Propagator", orig_header);
+                    }
+                    else if (strange_prop_1_record_xml.count("/SinkSmear") != 0)
+                    {
+                        QDPIO::cout << "The first strange quark propagator is smeared, reading from SinkSmear tag..." << std::endl;
+                        read(strange_prop_1_record_xml, "/SinkSmear", orig_header);
                     }
                     else
                     {
@@ -250,9 +291,8 @@ namespace Chroma
                     t_0 = orig_header.source_header.t_source;
                     if (orig_header.source_header.getTSrce() != origin[0])
                     {
-                        QDPIO::cout << "The origin of the first two propagators are different, you idiot, I'm gonna speak Chinese. 你个傻逼." << std::endl;
+                        QDPIO::cout << "The origin of the first light and strange propagators are different, you idiot, I'm gonna speak Chinese. 你个傻逼." << std::endl;
                     }
-
                 }
                 catch (std::bad_cast)
                 {
@@ -267,68 +307,25 @@ namespace Chroma
                 }
             }
 
-            if (params.named_obj.is_prop_3 == true)
+            if (params.named_obj.have_strange_prop_2 == true)
             {
-                QDPIO::cout << "Attempting to read the third propagator" << std::endl;
+                QDPIO::cout << "Attempting to read the second strange propagator" << std::endl;
                 try
                 {
-                    quark_propagator_3 = TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.quark_prop_3);
-                    TheNamedObjMap::Instance().get(params.named_obj.quark_prop_3).getFileXML(prop_3_file_xml);
-                    TheNamedObjMap::Instance().get(params.named_obj.quark_prop_3).getRecordXML(prop_3_record_xml);
+                    strange_quark_propagator_2 = TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.strange_prop_2);
+                    TheNamedObjMap::Instance().get(params.named_obj.strange_prop_2).getFileXML(strange_prop_2_file_xml);
+                    TheNamedObjMap::Instance().get(params.named_obj.strange_prop_2).getRecordXML(strange_prop_2_record_xml);
                     //Get the origin  and j_decay for the FT, this assumes all quarks have the same origin.
                     MakeSourceProp_t  orig_header;
-                    if (prop_3_record_xml.count("/Propagator") != 0)
+                    if (strange_prop_2_record_xml.count("/Propagator") != 0)
                     {
-                        QDPIO::cout << "The third quark propagator is unsmeared, reading from Propagator tag..." << std::endl;
-                        read(prop_3_record_xml, "/Propagator", orig_header);
+                        QDPIO::cout << "The second strange quark propagator is unsmeared, reading from Propagator tag..." << std::endl;
+                        read(strange_prop_2_record_xml, "/Propagator", orig_header);
                     }
-                    else if (prop_3_record_xml.count("/SinkSmear") != 0)
+                    else if (strange_prop_2_record_xml.count("/SinkSmear") != 0)
                     {
-                        QDPIO::cout << "The third quark propagator is smeared, reading from SinkSmear tag..." << std::endl;
-                        read(prop_3_record_xml, "/SinkSmear", orig_header);
-                    }
-                    else
-                    {
-                        QDPIO::cout << "What type of weird propagator did you give me? I can't find the right tag to get j_decay, source location, and whatnot...exiting..." << std::endl;
-                    }
-
-                    j_decay = orig_header.source_header.j_decay;
-                    t_0 = orig_header.source_header.t_source;
-                    origin[1] = orig_header.source_header.getTSrce();
-
-                }
-                catch (std::bad_cast)
-                {
-                    QDPIO::cerr << name << ": caught dynamic cast error" << std::endl;
-                    QDP_abort(1);
-                }
-                catch (const std::string& e)
-                {
-                    QDPIO::cerr << name << ": error reading src prop_header: "
-                        << e << std::endl;
-                    QDP_abort(1);
-                }
-            }
-
-            if (params.named_obj.is_prop_4 == true)
-            {
-                QDPIO::cout << "Attempting to read the fourth propagator" << std::endl;
-                try
-                {
-                    quark_propagator_4 = TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.quark_prop_4);
-                    TheNamedObjMap::Instance().get(params.named_obj.quark_prop_4).getFileXML(prop_4_file_xml);
-                    TheNamedObjMap::Instance().get(params.named_obj.quark_prop_4).getRecordXML(prop_4_record_xml);
-                    //Get the origin  and j_decay for the FT, this assumes all quarks have the same origin.
-                    MakeSourceProp_t  orig_header;
-                    if (prop_4_record_xml.count("/Propagator") != 0)
-                    {
-                        QDPIO::cout << "The forth quark propagator is unsmeared, reading from Propagator tag..." << std::endl;
-                        read(prop_4_record_xml, "/Propagator", orig_header);
-                    }
-                    else if (prop_4_record_xml.count("/SinkSmear") != 0)
-                    {
-                        QDPIO::cout << "The forth quark propagator is smeared, reading from SinkSmear tag..." << std::endl;
-                        read(prop_4_record_xml, "/SinkSmear", orig_header);
+                        QDPIO::cout << "The second strange quark propagator is smeared, reading from SinkSmear tag..." << std::endl;
+                        read(strange_prop_2_record_xml, "/SinkSmear", orig_header);
                     }
                     else
                     {
@@ -339,7 +336,7 @@ namespace Chroma
                     t_0 = orig_header.source_header.t_source;
                     if (orig_header.source_header.getTSrce() != origin[1])
                     {
-                        QDPIO::cout << "The origin of the last two propagators are different, you idot, I'm gonna speak Chinese. 你个傻逼." << std::endl;
+                        QDPIO::cout << "The origin of the second light and strange are different, you idiot, I'm gonna speak Chinese. 你个傻逼." << std::endl;
                     }
                 }
                 catch (std::bad_cast)
@@ -367,64 +364,116 @@ namespace Chroma
 
             //Next we call the physics code to do the pipi scattering.
 
-            CorrelatorType::Correlator correlator_out;
+            CorrelatorType::Correlator correlator_pipi11, correlator_pipi12, correlator_pipi22, correlator_kk11, correlator_kk12, correlator_kk22, correlator_kpi11, correlator_kpi12, correlator_kpi21, correlator_kpi22;
+            bool have_pipi11 = false, have_pipi12 = false, have_pipi21 = false, have_pipi22 = false, have_kk11 = false, have_kk12 = false, have_kk21 = false, have_kk22 = false, have_kpi11 = false, have_kpi12 = false, have_kpi21 = false, have_kpi22 = false;
 
-            pipi_correlator(correlator_out, quark_propagator_1, quark_propagator_2, quark_propagator_3, quark_propagator_4, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+            std::map<std::string, CorrelatorType::Correlator> correlators;
+
+            if (params.named_obj.have_light_prop_1 == true && params.named_obj.have_light_prop_2 == false && params.named_obj.have_strange_prop_1 == false && params.named_obj.have_strange_prop_2 == false)
+            {
+              pipi_correlator(correlators["pipi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+            }
+            else if (params.named_obj.have_light_prop_1 == true && params.named_obj.have_light_prop_2 == true && params.named_obj.have_strange_prop_1 == false && params.named_obj.have_strange_prop_2 == false)
+            {
+              pipi_correlator(correlators["pipi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              pipi_correlator(correlators["pipi22"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              pipi_correlator(correlators["pipi12"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, light_quark_propagator_2, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+            }
+            else if (params.named_obj.have_light_prop_1 == true && params.named_obj.have_light_prop_2 == false && params.named_obj.have_strange_prop_1 == true && params.named_obj.have_strange_prop_2 == false)
+            {
+              pipi_correlator(correlators["pipi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+
+              pipi_correlator(correlators["kk11"], light_quark_propagator_1, strange_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+
+              kpi_correlator(correlators["kpi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+            }
+            else if (params.named_obj.have_light_prop_1 == true && params.named_obj.have_light_prop_2 == true && params.named_obj.have_strange_prop_1 == true && params.named_obj.have_strange_prop_2 == false)
+            {
+              pipi_correlator(correlators["pipi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              pipi_correlator(correlators["pipi22"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              pipi_correlator(correlators["pipi12"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, light_quark_propagator_2, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+
+              pipi_correlator(correlators["kk11"], light_quark_propagator_1, strange_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+
+              kpi_correlator(correlators["kpi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              kpi_correlator(correlators["kpi21"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_1, strange_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+            }
+            else if (params.named_obj.have_light_prop_1 == true && params.named_obj.have_light_prop_2 == true && params.named_obj.have_strange_prop_1 == true && params.named_obj.have_strange_prop_2 == true)
+            {
+              pipi_correlator(correlators["pipi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              pipi_correlator(correlators["pipi22"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              pipi_correlator(correlators["pipi12"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, light_quark_propagator_2, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+
+              pipi_correlator(correlators["kk11"], light_quark_propagator_1, strange_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              pipi_correlator(correlators["kk22"], light_quark_propagator_2, strange_quark_propagator_2, light_quark_propagator_2, strange_quark_propagator_2, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              pipi_correlator(correlators["kk12"], light_quark_propagator_1, strange_quark_propagator_1, light_quark_propagator_2, strange_quark_propagator_2, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+
+              kpi_correlator(correlators["kpi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              kpi_correlator(correlators["kpi12"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, strange_quark_propagator_2, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              kpi_correlator(correlators["kpi21"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_1, strange_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              kpi_correlator(correlators["kpi22"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, strange_quark_propagator_2, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+            }
 
             QDPIO::cout << "Calculation finished. Starting to write HDF5..." << std::endl;
 
             // Write out the correlator.
 
-            //Temp variable for writing below.
+            // Temp variable for writing below.
             DComplex temp_element;
+            std::string particle;
 
-#ifdef BUILD_HDF5
-            //std::string correlator_path = params.param.obj_path + "/" + "pipi" + "/x" + std::to_string(origin[0][0]) + "_y" + std::to_string(origin[0][1]) + "_z" + std::to_string(origin[0][2]) + "_t" + std::to_string(origin[0][3]) + "_xprime" + std::to_string(origin[1][0]) + "_yprime" + std::to_string(origin[1][1]) + "_zprime" + std::to_string(origin[1][2]) + "_tprime" + std::to_string(origin[1][3]);
-            // x and y stands for the 4-vectors of the two pions, respectivily
-            std::string correlator_path = params.param.obj_path + "/" + "pipi" + "/x_" + std::to_string(origin[0][0]) + "_" +  std::to_string(origin[0][1]) + "_" + std::to_string(origin[0][2]) + "_" + std::to_string(origin[0][3]) + "__y_" + std::to_string(origin[1][0]) + "_" +  std::to_string(origin[1][1]) + "_" + std::to_string(origin[1][2]) + "_" + std::to_string(origin[1][3]);
+            std::map<std::string, CorrelatorType::Correlator>::iterator correlator_iter;
 
-            h5out.push(correlator_path);
-#else
-            std::string pipi_string_name="pipi";
-            //std::string correlator_path = pipi_string_name + "_x" + std::to_string(origin[0][0]) + "_y" + std::to_string(origin[0][1]) + "_z" + std::to_string(origin[0][2]) + "_t" + std::to_string(origin[0][3]) + "_xprime" + std::to_string(origin[1][0]) + "_yprime" + std::to_string(origin[1][1]) + "_zprime" + std::to_string(origin[1][2]) + "_tprime" + std::to_string(origin[1][3]);
-            std::string correlator_path = pipi_string_name + "_x_" + std::to_string(origin[0][0]) + "_" +  std::to_string(origin[0][1]) + "_" + std::to_string(origin[0][2]) + "_" + std::to_string(origin[0][3]) + "__y_" + std::to_string(origin[1][0]) + "_" +  std::to_string(origin[1][1]) + "_" + std::to_string(origin[1][2]) + "_" + std::to_string(origin[1][3]);
-#endif
-            std::map<CorrelatorType::momenta_pair, multi1d<DComplex>>::iterator iter;
-            for (iter = correlator_out.begin(); iter != correlator_out.end(); iter++)
+            // Loop over all collisions, 10 for max.
+            for (correlator_iter = correlators.begin(); correlator_iter != correlators.end(); correlator_iter++)
             {
-                //One more temp variable instanited inside loop (once again for writing.)
-                multi1d<DComplex> pipi_correlator_towrite;
-                pipi_correlator_towrite.resize(Nt);
-                std::tuple<int, int, int> momenta1, momenta2;
-                momenta1 = std::get<0>(iter->first);
-                momenta2 = std::get<1>(iter->first);
-
-#ifndef BUILD_HDF5
-                std::string correlator_path_mom = correlator_path + "_px" + std::to_string(std::get<0>(momenta1)) + "_py" + std::to_string(std::get<1>(momenta1)) + "_pz" + std::to_string(std::get<2>(momenta1)) + "_qx" + std::to_string(std::get<0>(momenta2)) + "_qy" + std::to_string(std::get<1>(momenta2)) + "_qz" + std::to_string(std::get<2>(momenta2));
-                TextFileWriter file_out(correlator_path_mom);
-#endif
-                for (int t = 0; t < Nt; t++)
-                {
-                    temp_element = iter->second[t];
-#ifndef BUILD_HDF5
-                    file_out << temp_element << "\n";
-#endif
-                    pipi_correlator_towrite[t] = temp_element;
-                }
-#ifndef BUILD_HDF5
-                file_out.close();
+              particle = correlator_iter->first;
+#ifdef BUILD_HDF5
+              //std::string correlator_path = params.param.obj_path + "/" + "pipi" + "/x" + std::to_string(origin[0][0]) + "_y" + std::to_string(origin[0][1]) + "_z" + std::to_string(origin[0][2]) + "_t" + std::to_string(origin[0][3]) + "_xprime" + std::to_string(origin[1][0]) + "_yprime" + std::to_string(origin[1][1]) + "_zprime" + std::to_string(origin[1][2]) + "_tprime" + std::to_string(origin[1][3]);
+              // x and y stands for the 4-vectors of the two pions, respectivily
+              std::string correlator_path = params.param.obj_path + "/" + particle + "/x_" + std::to_string(origin[0][0]) + "_" +  std::to_string(origin[0][1]) + "_" + std::to_string(origin[0][2]) + "_" + std::to_string(origin[0][3]) + "__y_" + std::to_string(origin[1][0]) + "_" +  std::to_string(origin[1][1]) + "_" + std::to_string(origin[1][2]) + "_" + std::to_string(origin[1][3]);
+              h5out.push(correlator_path);
 #else
-                //Change the name of string compred to 4d output so general correlator path is the same.
-                //I add a total momentum directory to make André happy
-                std::string correlator_path_tot_mom = "/ptotx" + std::to_string(std::get<0>(momenta1)+std::get<0>(momenta2)) + "_ptoty" + std::to_string(std::get<1>(momenta1)+std::get<1>(momenta2)) + "_ptotz" + std::to_string(std::get<2>(momenta1)+std::get<2>(momenta2));
-                std::string correlator_path_mom = correlator_path + correlator_path_tot_mom + "/px" + std::to_string(std::get<0>(momenta1)) + "_py" + std::to_string(std::get<1>(momenta1)) + "_pz" + std::to_string(std::get<2>(momenta1)) + "_qx" + std::to_string(std::get<0>(momenta2)) + "_qy" + std::to_string(std::get<1>(momenta2)) + "_qz" + std::to_string(std::get<2>(momenta2));
-                //Haobo: I don't know why should I push, but push is right!
-                h5out.push(correlator_path+correlator_path_tot_mom);
-
-                h5out.write(correlator_path_mom, pipi_correlator_towrite, wmode);
-                h5out.writeAttribute(correlator_path_mom, "is_shifted", 1, wmode);
-                h5out.cd("/");
+              std::string correlator_path = particle + "_x_" + std::to_string(origin[0][0]) + "_" +  std::to_string(origin[0][1]) + "_" + std::to_string(origin[0][2]) + "_" + std::to_string(origin[0][3]) + "__y_" + std::to_string(origin[1][0]) + "_" +  std::to_string(origin[1][1]) + "_" + std::to_string(origin[1][2]) + "_" + std::to_string(origin[1][3]);
 #endif
+
+              std::map<CorrelatorType::momenta_pair, multi1d<DComplex>>::iterator iter;
+              for (iter = correlator_iter->second.begin(); iter != correlator_iter->second.end(); iter++)
+              {
+                  //One more temp variable instanited inside loop (once again for writing.)
+                  multi1d<DComplex> pipi_correlator_towrite;
+                  pipi_correlator_towrite.resize(Nt);
+                  std::tuple<int, int, int> momenta1, momenta2;
+                  momenta1 = std::get<0>(iter->first);
+                  momenta2 = std::get<1>(iter->first);
+
+  #ifndef BUILD_HDF5
+                  std::string correlator_path_mom = correlator_path + "_px" + std::to_string(std::get<0>(momenta1)) + "_py" + std::to_string(std::get<1>(momenta1)) + "_pz" + std::to_string(std::get<2>(momenta1)) + "_qx" + std::to_string(std::get<0>(momenta2)) + "_qy" + std::to_string(std::get<1>(momenta2)) + "_qz" + std::to_string(std::get<2>(momenta2));
+                  TextFileWriter file_out(correlator_path_mom);
+  #endif
+                  for (int t = 0; t < Nt; t++)
+                  {
+                      temp_element = iter->second[t];
+  #ifndef BUILD_HDF5
+                      file_out << temp_element << "\n";
+  #endif
+                      pipi_correlator_towrite[t] = temp_element;
+                  }
+  #ifndef BUILD_HDF5
+                  file_out.close();
+  #else
+                  //Change the name of string compred to 4d output so general correlator path is the same.
+                  //I add a total momentum directory to make André happy
+                  std::string correlator_path_tot_mom = "/ptotx" + std::to_string(std::get<0>(momenta1)+std::get<0>(momenta2)) + "_ptoty" + std::to_string(std::get<1>(momenta1)+std::get<1>(momenta2)) + "_ptotz" + std::to_string(std::get<2>(momenta1)+std::get<2>(momenta2));
+                  std::string correlator_path_mom = correlator_path + correlator_path_tot_mom + "/px" + std::to_string(std::get<0>(momenta1)) + "_py" + std::to_string(std::get<1>(momenta1)) + "_pz" + std::to_string(std::get<2>(momenta1)) + "_qx" + std::to_string(std::get<0>(momenta2)) + "_qy" + std::to_string(std::get<1>(momenta2)) + "_qz" + std::to_string(std::get<2>(momenta2));
+                  //Haobo: I don't know why should I push, but push is right!
+                  h5out.push(correlator_path+correlator_path_tot_mom);
+
+                  h5out.write(correlator_path_mom, pipi_correlator_towrite, wmode);
+                  h5out.writeAttribute(correlator_path_mom, "is_shifted", 1, wmode);
+                  h5out.cd("/");
+  #endif
+              }
             }
 
 #ifdef BUILD_HDF5

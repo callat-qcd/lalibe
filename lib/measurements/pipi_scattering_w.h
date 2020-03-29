@@ -48,15 +48,15 @@ namespace Chroma
             struct NamedObject_t
             {
                 //std::string  gauge_id;     //Grab the usual gauge field.
-                std::string  quark_prop_1;
-                bool is_prop_1;
-                std::string  quark_prop_2;
-                bool is_prop_2;
-                std::string  quark_prop_3;
-                bool is_prop_3;
-                std::string  quark_prop_4;
-                bool is_prop_4;
-
+                // std::string  quark_prop_1;
+                std::string  light_prop_1;
+                bool have_light_prop_1;
+                std::string  light_prop_2;
+                bool have_light_prop_2;
+                std::string  strange_prop_1;
+                bool have_strange_prop_1;
+                std::string  strange_prop_2;
+                bool have_strange_prop_2;
                 //Above are various strings and bools that will identify the quarks and which quarks are present in the input.
                 //This could just be done by checking if these strings are null (and ensuring they are with no input), but I like bools, so whatever.
 

@@ -38,7 +38,7 @@ D = np.zeros([3, 3], dtype = np.complex128)
 for i in range(3):
     D[i,i] = 1.
 
-path = '/Users/haobo/lattice_qcd/test_run/lalibe/test_propagator.h5'
+path = '/Users/haobo/lattice_qcd/test_run/lalibe/test_propagator2.h5'
 f = h5.File(path, 'r')
 S = f['sh_sig2p0_n5/PS_prop'][()]
 f.close()

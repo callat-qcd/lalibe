@@ -70,10 +70,10 @@
     <obj_path>/PS</obj_path>
   </PipiParams>
   <NamedObject>
-    <quark_prop_1>PS_prop</quark_prop_1>
-    <quark_prop_2>PS_prop</quark_prop_2>
-    <quark_prop_3>PS_prop2</quark_prop_3>
-    <quark_prop_4>PS_prop2</quark_prop_4>
+    <light_prop_1>PS_prop</light_prop_1>
+    <light_prop_2>PS_prop2</light_prop_2>
+    <strange_prop_1>PS_prop</strange_prop_1>
+    <strange_prop_2>PS_prop2</strange_prop_2>
   </NamedObject>
 </elem>
 
