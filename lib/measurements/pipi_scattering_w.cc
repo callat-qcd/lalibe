@@ -57,6 +57,7 @@ namespace Chroma
             //We set output_full_correlator to true if no momentum is specified.
             read(paramtop, "p2_max", par.p2_max);
             read(paramtop, "ptot2_max", par.ptot2_max);
+            read(paramtop, "diagram", par.diagram);
             QDPIO::cout << "Reading momenta centered around the origin with a max of " << par.p2_max << "and total max of " << par.ptot2_max << std::endl;
         }
 
@@ -110,8 +111,9 @@ namespace Chroma
             }
             else
             {
-                QDPIO::cout << "I couldn't find the second strange quark, we have only one origin for the inputted KK scattering. " << std::endl;
                 input.have_strange_prop_2 = false;
+                if (inputtop.count("strange_prop_1") != 0)
+                    QDPIO::cout << "I couldn't find the second strange quark, we have only one origin for the inputted KK scattering. " << std::endl;
             }
 
         }
@@ -175,7 +177,7 @@ namespace Chroma
             //Need j_decay of bc to know what comes with a minus sign.
             int j_decay;
             int t_0;
-            multi2d<int> origin(2,4);
+            multi2d<int> origin11(2,4), origin22(2,4), origin12(2,4), origin21(2,4);
 
             if (params.named_obj.have_light_prop_1 == true)
             {
@@ -204,8 +206,10 @@ namespace Chroma
 
                     j_decay = orig_header.source_header.j_decay;
                     t_0 = orig_header.source_header.t_source;
-                    origin[0] = orig_header.source_header.getTSrce();
-                    origin[1] = orig_header.source_header.getTSrce();
+                    origin11[0] = orig_header.source_header.getTSrce();
+                    origin11[1] = orig_header.source_header.getTSrce();
+                    origin12[0] = orig_header.source_header.getTSrce();
+                    origin21[1] = orig_header.source_header.getTSrce();
                 }
                 catch (std::bad_cast)
                 {
@@ -247,7 +251,10 @@ namespace Chroma
 
                     j_decay = orig_header.source_header.j_decay;
                     t_0 = orig_header.source_header.t_source;
-                    origin[1] = orig_header.source_header.getTSrce();
+                    origin22[0] = orig_header.source_header.getTSrce();
+                    origin22[1] = orig_header.source_header.getTSrce();
+                    origin12[1] = orig_header.source_header.getTSrce();
+                    origin21[0] = orig_header.source_header.getTSrce();
                 }
                 catch (std::bad_cast)
                 {
@@ -289,9 +296,9 @@ namespace Chroma
 
                     j_decay = orig_header.source_header.j_decay;
                     t_0 = orig_header.source_header.t_source;
-                    if (orig_header.source_header.getTSrce() != origin[0])
+                    if (orig_header.source_header.getTSrce() != origin11[0])
                     {
-                        QDPIO::cout << "The origin of the first light and strange propagators are different, you idiot, I'm gonna speak Chinese. 你个傻逼." << std::endl;
+                        QDPIO::cout << "The origin of the first light and strange propagators are different, go change your propagators." << std::endl;
                     }
                 }
                 catch (std::bad_cast)
@@ -334,9 +341,9 @@ namespace Chroma
 
                     j_decay = orig_header.source_header.j_decay;
                     t_0 = orig_header.source_header.t_source;
-                    if (orig_header.source_header.getTSrce() != origin[1])
+                    if (orig_header.source_header.getTSrce() != origin22[0])
                     {
-                        QDPIO::cout << "The origin of the second light and strange are different, you idiot, I'm gonna speak Chinese. 你个傻逼." << std::endl;
+                        QDPIO::cout << "The origin of the second light and strange are different, you idiot, go change your propagators." << std::endl;
                     }
                 }
                 catch (std::bad_cast)
@@ -371,47 +378,71 @@ namespace Chroma
 
             if (params.named_obj.have_light_prop_1 == true && params.named_obj.have_light_prop_2 == false && params.named_obj.have_strange_prop_1 == false && params.named_obj.have_strange_prop_2 == false)
             {
-              pipi_correlator(correlators["pipi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              pipi_correlator(correlators["pipi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
             }
             else if (params.named_obj.have_light_prop_1 == true && params.named_obj.have_light_prop_2 == true && params.named_obj.have_strange_prop_1 == false && params.named_obj.have_strange_prop_2 == false)
             {
-              pipi_correlator(correlators["pipi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
-              pipi_correlator(correlators["pipi22"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
-              pipi_correlator(correlators["pipi12"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, light_quark_propagator_2, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              //pipi_correlator(correlators["pipi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              //pipi_correlator(correlators["pipi22"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, origin22, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              //pipi_correlator(correlators["pipi12"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, light_quark_propagator_2, origin12, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              if (params.param.diagram == 0)
+              {
+                pipi_correlator(correlators["pipi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+                pipi_correlator(correlators["pipi22"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, origin22, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+                pipi_correlator(correlators["pipi12"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, light_quark_propagator_2, origin12, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              }
+              else
+              {
+                pipi_correlator_debug(correlators["pipi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 0);
+                pipi_correlator_debug(correlators["pipi22"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, origin22, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 0);
+                pipi_correlator_debug(correlators["pipi12"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, light_quark_propagator_2, origin12, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 0);
+                pipi_correlator_debug(correlators["pipi11_diagram1"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 1);
+                pipi_correlator_debug(correlators["pipi22_diagram1"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, origin22, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 1);
+                pipi_correlator_debug(correlators["pipi12_diagram1"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, light_quark_propagator_2, origin12, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 1);
+                pipi_correlator_debug(correlators["pipi11_diagram2"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 2);
+                pipi_correlator_debug(correlators["pipi22_diagram2"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, origin22, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 2);
+                pipi_correlator_debug(correlators["pipi12_diagram2"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, light_quark_propagator_2, origin12, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 2);
+                pipi_correlator_debug(correlators["pipi11_diagram3"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 3);
+                pipi_correlator_debug(correlators["pipi22_diagram3"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, origin22, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 3);
+                pipi_correlator_debug(correlators["pipi12_diagram3"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, light_quark_propagator_2, origin12, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 3);
+                pipi_correlator_debug(correlators["pipi11_diagram4"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 4);
+                pipi_correlator_debug(correlators["pipi22_diagram4"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, origin22, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 4);
+                pipi_correlator_debug(correlators["pipi12_diagram4"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, light_quark_propagator_2, origin12, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 4);
+              }
             }
             else if (params.named_obj.have_light_prop_1 == true && params.named_obj.have_light_prop_2 == false && params.named_obj.have_strange_prop_1 == true && params.named_obj.have_strange_prop_2 == false)
             {
-              pipi_correlator(correlators["pipi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              pipi_correlator(correlators["pipi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
 
-              pipi_correlator(correlators["kk11"], light_quark_propagator_1, strange_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              pipi_correlator(correlators["kk11"], light_quark_propagator_1, strange_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
 
-              kpi_correlator(correlators["kpi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              kpi_correlator(correlators["kpi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
             }
             else if (params.named_obj.have_light_prop_1 == true && params.named_obj.have_light_prop_2 == true && params.named_obj.have_strange_prop_1 == true && params.named_obj.have_strange_prop_2 == false)
             {
-              pipi_correlator(correlators["pipi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
-              pipi_correlator(correlators["pipi22"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
-              pipi_correlator(correlators["pipi12"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, light_quark_propagator_2, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              pipi_correlator(correlators["pipi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              pipi_correlator(correlators["pipi22"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, origin22, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              pipi_correlator(correlators["pipi12"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, light_quark_propagator_2, origin12, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
 
-              pipi_correlator(correlators["kk11"], light_quark_propagator_1, strange_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              pipi_correlator(correlators["kk11"], light_quark_propagator_1, strange_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
 
-              kpi_correlator(correlators["kpi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
-              kpi_correlator(correlators["kpi21"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_1, strange_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              kpi_correlator(correlators["kpi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              kpi_correlator(correlators["kpi21"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_1, strange_quark_propagator_1, origin21, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
             }
             else if (params.named_obj.have_light_prop_1 == true && params.named_obj.have_light_prop_2 == true && params.named_obj.have_strange_prop_1 == true && params.named_obj.have_strange_prop_2 == true)
             {
-              pipi_correlator(correlators["pipi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
-              pipi_correlator(correlators["pipi22"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
-              pipi_correlator(correlators["pipi12"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, light_quark_propagator_2, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              pipi_correlator(correlators["pipi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              pipi_correlator(correlators["pipi22"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, origin22, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              //pipi_correlator(correlators["pipi12"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, light_quark_propagator_2, origin12, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
 
-              pipi_correlator(correlators["kk11"], light_quark_propagator_1, strange_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
-              pipi_correlator(correlators["kk22"], light_quark_propagator_2, strange_quark_propagator_2, light_quark_propagator_2, strange_quark_propagator_2, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
-              pipi_correlator(correlators["kk12"], light_quark_propagator_1, strange_quark_propagator_1, light_quark_propagator_2, strange_quark_propagator_2, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              pipi_correlator(correlators["kk11"], light_quark_propagator_1, strange_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              pipi_correlator(correlators["kk22"], light_quark_propagator_2, strange_quark_propagator_2, light_quark_propagator_2, strange_quark_propagator_2, origin22, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              //pipi_correlator(correlators["kk12"], light_quark_propagator_1, strange_quark_propagator_1, light_quark_propagator_2, strange_quark_propagator_2, origin12, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
 
-              kpi_correlator(correlators["kpi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
-              kpi_correlator(correlators["kpi12"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, strange_quark_propagator_2, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
-              kpi_correlator(correlators["kpi21"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_1, strange_quark_propagator_1, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
-              kpi_correlator(correlators["kpi22"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, strange_quark_propagator_2, origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              kpi_correlator(correlators["kpi11"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              //kpi_correlator(correlators["kpi12"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, strange_quark_propagator_2, origin12, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              //kpi_correlator(correlators["kpi21"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_1, strange_quark_propagator_1, origin21, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+              kpi_correlator(correlators["kpi22"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, strange_quark_propagator_2, origin22, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
             }
 
             QDPIO::cout << "Calculation finished. Starting to write HDF5..." << std::endl;
@@ -428,8 +459,23 @@ namespace Chroma
             for (correlator_iter = correlators.begin(); correlator_iter != correlators.end(); correlator_iter++)
             {
               particle = correlator_iter->first;
+              multi2d<int> origin(2,4);
+              int number_start;
+              if (particle[1] == 'i')
+                number_start = 4;
+              else if (particle[1] == 'k')
+                number_start = 2;
+              else if (particle[1] == 'p')
+                number_start = 3;
+              if (particle.substr(number_start, 2) == "11")
+                origin = origin11;
+              else if (particle.substr(number_start, 2) == "22")
+                origin = origin22;
+              else if (particle.substr(number_start, 2) == "12")
+                origin = origin12;
+              else if (particle.substr(number_start, 2) == "21")
+                origin = origin21;
 #ifdef BUILD_HDF5
-              //std::string correlator_path = params.param.obj_path + "/" + "pipi" + "/x" + std::to_string(origin[0][0]) + "_y" + std::to_string(origin[0][1]) + "_z" + std::to_string(origin[0][2]) + "_t" + std::to_string(origin[0][3]) + "_xprime" + std::to_string(origin[1][0]) + "_yprime" + std::to_string(origin[1][1]) + "_zprime" + std::to_string(origin[1][2]) + "_tprime" + std::to_string(origin[1][3]);
               // x and y stands for the 4-vectors of the two pions, respectivily
               std::string correlator_path = params.param.obj_path + "/" + particle + "/x_" + std::to_string(origin[0][0]) + "_" +  std::to_string(origin[0][1]) + "_" + std::to_string(origin[0][2]) + "_" + std::to_string(origin[0][3]) + "__y_" + std::to_string(origin[1][0]) + "_" +  std::to_string(origin[1][1]) + "_" + std::to_string(origin[1][2]) + "_" + std::to_string(origin[1][3]);
               h5out.push(correlator_path);
