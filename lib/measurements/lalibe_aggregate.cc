@@ -18,6 +18,7 @@
 #include "lalibe_bar3ptfn_w.h"
 #include "lalibe_seqsource_w.h"
 #include "coherent_seqsource_w.h"
+#include "qedm_product_field.h"
 
 // UTILITIES
 #include "multi_prop_add.h"
@@ -64,6 +65,7 @@ namespace Chroma
 	success &= LalibeBar3ptfnEnv::registerAll() ;
         success &= LalibeSeqSourceEnv::registerAll() ;
         success &= LalibeCoherentSeqsourceEnv::registerAll() ;
+        success &= LalibeQEDMProductFieldEnv::registerAll() ;
 
         // USEFUL UTILITIES
         success &= LalibeMultiPropagatorAddEnv::registerAll() ;
