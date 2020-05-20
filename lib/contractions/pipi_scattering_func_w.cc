@@ -24,11 +24,13 @@
  //  + tr(Q4(p,y',y') * g5)*tr(P4(p',y,y) * g5)
 
  // Propagator notations
- //S_u(x, y)  = quark_prop_1
- //S_d(x, y)  = quark_prop_2
- //S_u(x, y') = quark_prop_3
- //S_d(x, y') = quark_prop_4 for pipi scattring
- //S_s(x, y') = quark_prop_4 for Kpi scattring
+ // S_u(x, y)  = quark_prop_1
+ // S_d(x, y)  = quark_prop_2
+ // S_u(x, y') = quark_prop_3
+ // S_d(x, y') = quark_prop_4 for pipi scattring
+
+ // S_s(x, y)  = quark_prop_2 for kk scattering
+ // S_s(x, y') = quark_prop_4 for kk and kpi scattring
 
 #include "chromabase.h"
 #include "pipi_scattering_func_w.h"
@@ -132,7 +134,8 @@ namespace Chroma
 						origin_phases = 0;
 
 						for (int p_comp = 0; p_comp < 3; ++p_comp)
-							origin_phases -= (mom_comp1[p_comp] * origin_list[0][p_comp] + mom_comp2[p_comp] * origin_list[1][p_comp]) * 2 * M_PI / Layout::lattSize()[p_comp];
+						//origin_phases -= (mom_comp1[p_comp] * origin_list[0][p_comp] + mom_comp2[p_comp] * origin_list[1][p_comp]) * 2 * M_PI / Layout::lattSize()[p_comp];
+						origin_phases -= ((mom_comp2[p_comp]) *( origin_list[0][p_comp]-origin_list[1][p_comp])) * 2 * M_PI / Layout::lattSize()[p_comp];
 
 						origin_fix = cmplx(cos(origin_phases), sin(origin_phases));
 
@@ -188,9 +191,14 @@ namespace Chroma
 					// Fix the origin
 					origin_phases = 0;
 
-					for (int p_comp = 0; p_comp < 3; ++p_comp)
-						origin_phases -= (mom_comp1[p_comp] * origin_list[0][p_comp] + mom_comp2[p_comp] * origin_list[1][p_comp]) * 2 * M_PI / Layout::lattSize()[p_comp];
+//					for (int p_comp = 0; p_comp < 3; ++p_comp)
+	//					origin_phases -= (mom_comp1[p_comp] * origin_list[0][p_comp] + mom_comp2[p_comp] * origin_list[1][p_comp]) * 2 * M_PI / Layout::lattSize()[p_comp];
+																		for (int p_comp = 0; p_comp < 3; ++p_comp)
+																		{
+																			//origin_phases -= (mom_comp1[p_comp] * origin_list[0][p_comp] + mom_comp2[p_comp] * origin_list[1][p_comp]) * 2 * M_PI / Layout::lattSize()[p_comp];
+																			origin_phases -= (mom_comp1[p_comp]+mom_comp2[p_comp]) *( origin_list[0][p_comp]) * 2 * M_PI / Layout::lattSize()[p_comp];
 
+																		}
 					origin_fix = cmplx(cos(origin_phases), sin(origin_phases));
 
 					correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))] = tmp_multi1d;
@@ -306,8 +314,8 @@ namespace Chroma
 				//Q4 = P1;
 				//P4 = Q1;
 
-				DComplex origin_fix;
-				Double origin_phases;
+				DComplex origin_fix1, origin_fix2;
+				Double origin_phases1, origin_phases2;
 				multi1d<int> mom_comp1, mom_comp2;
 
 				for (int mom_num1 = 0; mom_num1 < phases.numMom(); ++mom_num1)
@@ -323,47 +331,51 @@ namespace Chroma
 						if (ptot2 <= ptot2max)
 						{
 							// Fix the origin
-							origin_phases = 0;
+							origin_phases1 = 0;
+							origin_phases2 = 0;
 
 							//for (int p_comp = 0; p_comp < 3; ++p_comp)
 							//	origin_phases -= (mom_comp1[p_comp] * origin_list[0][p_comp] + mom_comp2[p_comp] * origin_list[1][p_comp]) * 2 * M_PI / Layout::lattSize()[p_comp];
 
 																			for (int p_comp = 0; p_comp < 3; ++p_comp)
 																			{
-																				origin_phases -= (mom_comp1[p_comp] * origin_list[0][p_comp] + mom_comp2[p_comp] * origin_list[1][p_comp]) * 2 * M_PI / Layout::lattSize()[p_comp];
+																				//origin_phases -= (mom_comp1[p_comp] * origin_list[0][p_comp] + mom_comp2[p_comp] * origin_list[1][p_comp]) * 2 * M_PI / Layout::lattSize()[p_comp];
+																				origin_phases1 -= (mom_comp1[p_comp]+mom_comp2[p_comp]) *( origin_list[0][p_comp]) * 2 * M_PI / Layout::lattSize()[p_comp];
+																				origin_phases2 -= (mom_comp1[p_comp]+mom_comp2[p_comp]) *( origin_list[1][p_comp]) * 2 * M_PI / Layout::lattSize()[p_comp];
 
 																			}
-																			QDPIO::cout<<"["<<mom_comp1[0]<<mom_comp1[1]<<mom_comp1[2]<<","<<mom_comp2[0]<<mom_comp2[1]<<mom_comp2[2]<<"]"<<origin_phases<<std::endl;
+																			QDPIO::cout<<"["<<mom_comp1[0]<<mom_comp1[1]<<mom_comp1[2]<<","<<mom_comp2[0]<<mom_comp2[1]<<mom_comp2[2]<<"]"<<origin_phases1<<std::endl;
 
 
 
-							origin_fix = cmplx(cos(origin_phases), sin(origin_phases));
+																			origin_fix1 = cmplx(cos(origin_phases1), sin(origin_phases1));
+																			origin_fix2 = cmplx(cos(origin_phases2), sin(origin_phases2));
 
 							correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))] = tmp_multi1d;
 							if (diagram == 1)
 							{
 								for (int t = 0; t < Nt; ++t)
-									correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] = trace(Q1[mom_num1][t] * Gamma(G5)) * trace(P1[mom_num2][t] * Gamma(G5)) * origin_fix;
+									correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] = trace(Q1[mom_num1][t] * Gamma(G5)) * trace(P1[mom_num2][t] * Gamma(G5)) * origin_fix1;
 							}
 							else if (diagram == 2)
 							{
 								for (int t = 0; t < Nt; ++t)
-									correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] =  - trace(Q2[mom_num1][t] * Gamma(G5) * P2[mom_num2][t] * Gamma(G5))  * origin_fix;
+									correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] =  - trace(Q2[mom_num1][t] * Gamma(G5) * P2[mom_num2][t] * Gamma(G5))  * origin_fix1;
 							}
 							else if (diagram == 3)
 							{
 								for (int t = 0; t < Nt; ++t)
-									correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] =  - trace(P2[mom_num1][t] * Gamma(G5) * Q2[mom_num2][t] * Gamma(G5))  * origin_fix;
+									correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] =  - trace(P2[mom_num1][t] * Gamma(G5) * Q2[mom_num2][t] * Gamma(G5))  * origin_fix2;
 							}
 							else if (diagram == 4)
 							{
 								for (int t = 0; t < Nt; ++t)
-									correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] = trace(P1[mom_num1][t] * Gamma(G5)) * trace(Q1[mom_num2][t] * Gamma(G5)) * origin_fix;
+									correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] = trace(P1[mom_num1][t] * Gamma(G5)) * trace(Q1[mom_num2][t] * Gamma(G5)) * origin_fix2;
 							}
 							else
 							{
 								for (int t = 0; t < Nt; ++t)
-									correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] = (trace(Q1[mom_num1][t] * Gamma(G5)) * trace(P1[mom_num2][t] * Gamma(G5)) - trace(Q2[mom_num1][t] * Gamma(G5) * P2[mom_num2][t] * Gamma(G5)) - trace(P2[mom_num1][t] * Gamma(G5) * Q2[mom_num2][t] * Gamma(G5)) + trace(P1[mom_num1][t] * Gamma(G5)) * trace(Q1[mom_num2][t] * Gamma(G5))) * origin_fix;
+									correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] = (trace(Q1[mom_num1][t] * Gamma(G5)) * trace(P1[mom_num2][t] * Gamma(G5)) - trace(Q2[mom_num1][t] * Gamma(G5) * P2[mom_num2][t] * Gamma(G5))) * origin_fix1 + (- trace(P2[mom_num1][t] * Gamma(G5) * Q2[mom_num2][t] * Gamma(G5)) + trace(P1[mom_num1][t] * Gamma(G5)) * trace(Q1[mom_num2][t] * Gamma(G5))) * origin_fix2;
 							}
 						}
 					}

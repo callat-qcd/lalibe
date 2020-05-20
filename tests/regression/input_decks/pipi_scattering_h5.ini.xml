@@ -16,9 +16,9 @@
     <object_type>LatticePropagator</object_type>
   </NamedObject>
   <File>
-    <file_name>./pipi_propagators.h5</file_name>
+    <file_name>./pipi_unit_propagators.h5</file_name>
     <path>./</path>
-    <obj_name>l_prop_x0_y0_z1_t0</obj_name>
+    <obj_name>l_prop_x0_y0_z0_t0</obj_name>
   </File>
 </elem>
 <elem>
@@ -29,9 +29,9 @@
     <object_type>LatticePropagator</object_type>
   </NamedObject>
   <File>
-    <file_name>./pipi_propagators.h5</file_name>
+    <file_name>./pipi_unit_propagators.h5</file_name>
     <path>./</path>
-    <obj_name>l_prop_x0_y0_z1_t0</obj_name>
+    <obj_name>l_prop_x2_y2_z2_t0</obj_name>
   </File>
 </elem>
 <elem>
@@ -42,9 +42,9 @@
     <object_type>LatticePropagator</object_type>
   </NamedObject>
   <File>
-    <file_name>./pipi_propagators.h5</file_name>
+    <file_name>./pipi_unit_propagators.h5</file_name>
     <path>./</path>
-    <obj_name>s_prop_x0_y0_z1_t0</obj_name>
+    <obj_name>s_prop_x0_y0_z0_t0</obj_name>
   </File>
 </elem>
 <elem>
@@ -55,9 +55,9 @@
     <object_type>LatticePropagator</object_type>
   </NamedObject>
   <File>
-    <file_name>./pipi_propagators.h5</file_name>
+    <file_name>./pipi_unit_propagators.h5</file_name>
     <path>./</path>
-    <obj_name>s_prop_x0_y0_z1_t0</obj_name>
+    <obj_name>s_prop_x2_y2_z2_t0</obj_name>
   </File>
 </elem>
 
@@ -80,7 +80,7 @@
 
 
 </InlineMeasurements>
-<nrow>4 4 4 8</nrow>
+<nrow>8 8 8 16</nrow>
 </Param>
 
 <RNG>
