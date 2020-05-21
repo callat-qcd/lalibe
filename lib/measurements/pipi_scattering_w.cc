@@ -422,34 +422,41 @@ namespace Chroma
 
             // Temp variable for writing below.
             DComplex temp_element;
-            std::string particle;
+            std::string particles, collision_type;
 
             std::map<std::string, CorrelatorType::Correlator>::iterator correlator_iter;
 
             // Loop over all collisions, 9 for max.
             for (correlator_iter = correlators.begin(); correlator_iter != correlators.end(); correlator_iter++)
             {
-                particle = correlator_iter->first;
+                particles = correlator_iter->first;
                 multi2d<int> origin(2,4);
                 int number_start;
-                if (particle[1] == 'i')
+                if (particles[1] == 'i')
                   number_start = 4;
-                else if (particle[1] == 'k')
+                else if (particles[1] == 'k')
                   number_start = 2;
-                else if (particle[1] == 'p')
+                else if (particles[1] == 'p')
                   number_start = 3;
-                if (particle.substr(number_start, 2) == "11")
+                if (particles.substr(number_start, 2) == "11")
                   origin = origin11;
-                else if (particle.substr(number_start, 2) == "22")
+                else if (particles.substr(number_start, 2) == "22")
                   origin = origin22;
-                else if (particle.substr(number_start, 2) == "12")
+                else if (particles.substr(number_start, 2) == "12")
                   origin = origin12;
+
+                if (particles[1] == 'i')
+                  collision_type = "pipi";
+                else if (particles[1] == 'k')
+                  collision_type = "kk";
+                else if (particles[1] == 'p')
+                  collision_type = "kpi";
 #ifdef BUILD_HDF5
                 // x and y stands for the 4-vectors of the two pions, respectivily
-                std::string correlator_path = params.param.obj_path + "/" + particle + "/x_" + std::to_string(origin[0][0]) + "_" +  std::to_string(origin[0][1]) + "_" + std::to_string(origin[0][2]) + "_" + std::to_string(origin[0][3]) + "__y_" + std::to_string(origin[1][0]) + "_" +  std::to_string(origin[1][1]) + "_" + std::to_string(origin[1][2]) + "_" + std::to_string(origin[1][3]);
+                std::string correlator_path = params.param.obj_path + "/" + collision_type + "/x_" + std::to_string(origin[0][0]) + "_" +  std::to_string(origin[0][1]) + "_" + std::to_string(origin[0][2]) + "_" + std::to_string(origin[0][3]) + "__y_" + std::to_string(origin[1][0]) + "_" +  std::to_string(origin[1][1]) + "_" + std::to_string(origin[1][2]) + "_" + std::to_string(origin[1][3]);
                 h5out.push(correlator_path);
 #else
-                std::string correlator_path = particle + "_x_" + std::to_string(origin[0][0]) + "_" +  std::to_string(origin[0][1]) + "_" + std::to_string(origin[0][2]) + "_" + std::to_string(origin[0][3]) + "__y_" + std::to_string(origin[1][0]) + "_" +  std::to_string(origin[1][1]) + "_" + std::to_string(origin[1][2]) + "_" + std::to_string(origin[1][3]);
+                std::string correlator_path = collision_type + "_x_" + std::to_string(origin[0][0]) + "_" +  std::to_string(origin[0][1]) + "_" + std::to_string(origin[0][2]) + "_" + std::to_string(origin[0][3]) + "__y_" + std::to_string(origin[1][0]) + "_" +  std::to_string(origin[1][1]) + "_" + std::to_string(origin[1][2]) + "_" + std::to_string(origin[1][3]);
 #endif
 
                 std::map<CorrelatorType::momenta_pair, multi1d<DComplex>>::iterator iter;
