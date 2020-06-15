@@ -441,6 +441,11 @@ pipi_correlator_debug(correlators["pipi12_diagram4"], light_quark_propagator_1, 
     pipi_correlator_debug(correlators["pipi11_diagram0"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 0);
     pipi_correlator_debug(correlators["pipi22_diagram0"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, origin22, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 0);
     pipi_correlator_debug(correlators["pipi12_diagram0"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, light_quark_propagator_2, origin12, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 0);
+
+    kpi_correlator_debug(correlators["kpi11_diagram0"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 0);
+    kpi_correlator_debug(correlators["kpi12_diagram0"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, strange_quark_propagator_2, origin12, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 0);
+    kpi_correlator_debug(correlators["kpi22_diagram0"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, strange_quark_propagator_2, origin22, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 0);
+
     if (params.param.diagrams == 1)
     {
     pipi_correlator_debug(correlators["pipi11_diagram1"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 1);
@@ -470,14 +475,22 @@ pipi_correlator_debug(correlators["pipi12_diagram4"], light_quark_propagator_1, 
     pipi_correlator_debug(correlators["kk11_diagram4"], light_quark_propagator_1, strange_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 4);
     pipi_correlator_debug(correlators["kk22_diagram4"], light_quark_propagator_2, strange_quark_propagator_2, light_quark_propagator_2, strange_quark_propagator_2, origin22, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 4);
     pipi_correlator_debug(correlators["kk12_diagram4"], light_quark_propagator_1, strange_quark_propagator_1, light_quark_propagator_2, strange_quark_propagator_2, origin12, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 4);
+
+    kpi_correlator_debug(correlators["kpi11_diagram1"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 1);
+    kpi_correlator_debug(correlators["kpi12_diagram1"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, strange_quark_propagator_2, origin12, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 1);
+    kpi_correlator_debug(correlators["kpi22_diagram1"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, strange_quark_propagator_2, origin22, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 1);
+    kpi_correlator_debug(correlators["kpi11_diagram2"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 2);
+    kpi_correlator_debug(correlators["kpi12_diagram2"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, strange_quark_propagator_2, origin12, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 2);
+    kpi_correlator_debug(correlators["kpi22_diagram2"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, strange_quark_propagator_2, origin22, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 2);
+
 }
 //              pipi_correlator(correlators["kk11"], light_quark_propagator_1, strange_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
   //            pipi_correlator(correlators["kk22"], light_quark_propagator_2, strange_quark_propagator_2, light_quark_propagator_2, strange_quark_propagator_2, origin22, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
     //          pipi_correlator(correlators["kk12"], light_quark_propagator_1, strange_quark_propagator_1, light_quark_propagator_2, strange_quark_propagator_2, origin12, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
 
-              kpi_correlator(correlators["kpi11_diagram0"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
-              kpi_correlator(correlators["kpi12_diagram0"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, strange_quark_propagator_2, origin12, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
-              kpi_correlator(correlators["kpi22_diagram0"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, strange_quark_propagator_2, origin22, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+      //        kpi_correlator(correlators["kpi11_diagram0"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_1, strange_quark_propagator_1, origin11, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+        //      kpi_correlator(correlators["kpi12_diagram0"], light_quark_propagator_1, light_quark_propagator_1, light_quark_propagator_2, strange_quark_propagator_2, origin12, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
+          //    kpi_correlator(correlators["kpi22_diagram0"], light_quark_propagator_2, light_quark_propagator_2, light_quark_propagator_2, strange_quark_propagator_2, origin22, params.param.p2_max, params.param.ptot2_max, t_0, j_decay);
 
             }
 
