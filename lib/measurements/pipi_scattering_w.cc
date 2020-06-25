@@ -487,6 +487,9 @@ namespace Chroma
 
             QDPIO::cout << "Calculation finished. Starting to write HDF5..." << std::endl;
 
+            if (params.param.diagrams == 1)
+                QDPIO::cout << "I will print separate diagrams" << std::endl;
+
             // Write out the correlator.
 
             // Temp variable for writing below.
