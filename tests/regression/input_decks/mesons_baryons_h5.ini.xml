@@ -211,8 +211,7 @@
   <MesonParams>
     <p2_max>1</p2_max>
     <particle_list>
-      <elem>piplus</elem>
-      <elem>kplus</elem>
+      <elem>octet_iso</elem>
     </particle_list>
     <h5_file_name>./lalibe_2pt_spectrum.h5</h5_file_name>
     <obj_path>/SS</obj_path>
@@ -228,8 +227,7 @@
   <MesonParams>
     <p2_max>1</p2_max>
     <particle_list>
-        <elem>piplus</elem>
-        <elem>kplus</elem>
+      <elem>octet_iso</elem>
     </particle_list>
     <h5_file_name>./lalibe_2pt_spectrum.h5</h5_file_name>
     <obj_path>/PS</obj_path>
@@ -404,8 +402,7 @@
   <MesonParams>
     <p2_max>1</p2_max>
     <particle_list>
-      <elem>piplus</elem>
-      <elem>kplus</elem>
+      <elem>octet_iso</elem>
     </particle_list>
     <h5_file_name>./lalibe_2pt_spectrum_lime.h5</h5_file_name>
     <obj_path>/SS</obj_path>
@@ -421,8 +418,7 @@
   <MesonParams>
     <p2_max>1</p2_max>
     <particle_list>
-        <elem>piplus</elem>
-        <elem>kplus</elem>
+      <elem>octet_iso</elem>
     </particle_list>
     <h5_file_name>./lalibe_2pt_spectrum_lime.h5</h5_file_name>
     <obj_path>/PS</obj_path>
