@@ -381,43 +381,41 @@ namespace Chroma
       //Next we do the contractions for the specified particles.
       //Loop over list of particles and check that all the necessary flavors are present.
       std::set<char> reqProps;
-      for(auto aParticle : params.param.particle_list)
-      {
-	auto flavCode = get_flavor_code(aParticle.first);
-	reqProps.insert(std::get<0>(flavCode));
-	reqProps.insert(std::get<1>(flavCode));
-	reqProps.insert(std::get<2>(flavCode));
+      for(auto aParticle : params.param.particle_list){
+          auto flavCode = get_flavor_code(aParticle.first);
+          reqProps.insert(std::get<0>(flavCode));
+          reqProps.insert(std::get<1>(flavCode));
+          reqProps.insert(std::get<2>(flavCode));
       }
 
       for (auto aProp : reqProps) {
-	if (prop_map.find(aProp) == prop_map.end()) {
-	  QDPIO::cerr << "Could not find required propagator for "<<aProp<<" quark"<<std::endl;
-	  QDP_abort(1);
-	}
+          if (prop_map.find(aProp) == prop_map.end()) {
+              QDPIO::cerr << "Could not find required propagator for "<<aProp<<" quark"<<std::endl;
+              QDP_abort(1);
+          }
       }
 
       //If flavor check has passed, now we loop through particles and do the contractions.
-      for (auto aParticle : params.param.particle_list)
-      {
-	QDPIO::cout<<"Starting "<<aParticle.first<<" "<<aParticle.second<<" contraction..."<<std::endl;
+      for (auto aParticle : params.param.particle_list){
+          QDPIO::cout<<"Starting "<<aParticle.first<<" "<<aParticle.second<<" contraction..."<<std::endl;
 
-	auto flavCode = get_flavor_code(aParticle.first);
+          auto flavCode = get_flavor_code(aParticle.first);
 
-	LatticeComplex baryon = zero;
+          LatticeComplex baryon = zero;
 
-	do_contraction(prop_map[std::get<0>(flavCode)],
-	    	       prop_map[std::get<1>(flavCode)],
-		       prop_map[std::get<2>(flavCode)],
-		       aParticle.first,
-		       aParticle.second,
-		       baryon);
+          do_contraction(prop_map[std::get<0>(flavCode)],
+                         prop_map[std::get<1>(flavCode)],
+                         prop_map[std::get<2>(flavCode)],
+                         aParticle.first,
+                         aParticle.second,
+                         baryon);
 
-	write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
-	    aParticle.first, aParticle.second,
+          write_correlator(params.param.output_full_correlator, params.param.is_antiperiodic,
+                           aParticle.first, aParticle.second,
 #ifdef BUILD_HDF5
-	    params.param.obj_path, h5out, wmode,
+                           params.param.obj_path, h5out, wmode,
 #endif
-	    t_0, Nt, origin, ft, baryon);
+                           t_0, Nt, origin, ft, baryon);
 
       }
 

@@ -81,6 +81,8 @@ namespace Chroma
         std::map<std::string, std::vector<std::string>> aliasMap = {
             { "octet",    {"proton", "lambda_z", "sigma_p", "xi_z"} },
             { "decuplet", {"delta_pp", "sigma_star_p", "xi_star_z", "omega_m"} },
+            { "octet_iso",    {"proton", "neutron", "lambda_z", "lambda_to_sigma", "sigma_to_lambda", "sigma_p", "sigma_z", "sigma_m", "xi_z", "xi_m"} },
+            { "decuplet_iso", {"delta_pp", "delta_p", "delta_z", "delta_m", "sigma_star_p", "sigma_star_z", "sigma_star_m", "xi_star_z", "xi_star_m", "omega_m"} },
         };
     }
 

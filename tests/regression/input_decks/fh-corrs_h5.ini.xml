@@ -12,13 +12,13 @@
   <Name>HDF5_READ_NAMED_OBJECT</Name>
   <Frequency>1</Frequency>
   <NamedObject>
-    <object_id>PS_prop</object_id>
+    <object_id>PS_up</object_id>
     <object_type>LatticePropagator</object_type>
   </NamedObject>
   <File>
     <file_name>./test_propagator.h5</file_name>
     <path>/sh_sig2p0_n5</path>
-    <obj_name>PS_prop</obj_name>
+    <obj_name>PS_up</obj_name>
   </File>
 </elem>
 
@@ -26,13 +26,13 @@
   <Name>HDF5_READ_NAMED_OBJECT</Name>
   <Frequency>1</Frequency>
   <NamedObject>
-    <object_id>fh_prop_A3</object_id>
+    <object_id>PS_dn</object_id>
     <object_type>LatticePropagator</object_type>
   </NamedObject>
   <File>
-    <file_name>./test_fh_propagator.h5</file_name>
-    <path>/PS</path>
-    <obj_name>fh_prop_A3</obj_name>
+    <file_name>./test_propagator.h5</file_name>
+    <path>/sh_sig2p0_n5</path>
+    <obj_name>PS_dn</obj_name>
   </File>
 </elem>
 
@@ -40,17 +40,88 @@
   <Name>HDF5_READ_NAMED_OBJECT</Name>
   <Frequency>1</Frequency>
   <NamedObject>
-    <object_id>fh_prop_V4</object_id>
+    <object_id>fh_up_A3</object_id>
     <object_type>LatticePropagator</object_type>
   </NamedObject>
   <File>
     <file_name>./test_fh_propagator.h5</file_name>
     <path>/PS</path>
-    <obj_name>fh_prop_V4</obj_name>
+    <obj_name>fh_up_A3</obj_name>
   </File>
 </elem>
 
 <elem>
+  <Name>HDF5_READ_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>fh_up_V4</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./test_fh_propagator.h5</file_name>
+    <path>/PS</path>
+    <obj_name>fh_up_V4</obj_name>
+  </File>
+</elem>
+
+<elem>
+  <Name>HDF5_READ_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>fh_dn_A3</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./test_fh_propagator.h5</file_name>
+    <path>/PS</path>
+    <obj_name>fh_dn_A3</obj_name>
+  </File>
+</elem>
+
+<elem>
+  <Name>HDF5_READ_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>fh_dn_V4</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./test_fh_propagator.h5</file_name>
+    <path>/PS</path>
+    <obj_name>fh_dn_V4</obj_name>
+  </File>
+</elem>
+
+<elem>
+  <Name>HDF5_READ_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>fh_up_dn_A3</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./test_fh_propagator.h5</file_name>
+    <path>/PS</path>
+    <obj_name>fh_up_dn_A3</obj_name>
+  </File>
+</elem>
+
+<elem>
+  <Name>HDF5_READ_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>fh_up_dn_V4</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./test_fh_propagator.h5</file_name>
+    <path>/PS</path>
+    <obj_name>fh_up_dn_V4</obj_name>
+  </File>
+</elem>
+
+
+<elem>
   <Name>FLAVOR_CONSERVING_FH_BARYON_CONTRACTIONS</Name>
   <Frequency>1</Frequency>
   <FlavorConservingFHBaryonParams>
@@ -63,9 +134,9 @@
    <particle_list><elem>proton</elem></particle_list>
   </FlavorConservingFHBaryonParams>
   <NamedObject>
-    <up_quark>PS_prop</up_quark>
-    <down_quark>PS_prop</down_quark>
-    <fh_quark>fh_prop_A3</fh_quark>
+    <up_quark>PS_up</up_quark>
+    <down_quark>PS_dn</down_quark>
+    <fh_quark>fh_up_A3</fh_quark>
   </NamedObject>
 </elem>
 
@@ -82,9 +153,9 @@
    <particle_list><elem>proton</elem></particle_list>
   </FlavorConservingFHBaryonParams>
   <NamedObject>
-    <up_quark>PS_prop</up_quark>
-    <down_quark>PS_prop</down_quark>
-    <fh_quark>fh_prop_A3</fh_quark>
+    <up_quark>PS_up</up_quark>
+    <down_quark>PS_dn</down_quark>
+    <fh_quark>fh_dn_A3</fh_quark>
   </NamedObject>
 </elem>
 
@@ -101,9 +172,9 @@
    <particle_list><elem>proton_neutron</elem></particle_list>
   </FlavorChangingFHBaryonParams>
   <NamedObject>
-    <up_quark>PS_prop</up_quark>
-    <down_quark>PS_prop</down_quark>
-    <fh_quark>fh_prop_A3</fh_quark>
+    <up_quark>PS_up</up_quark>
+    <down_quark>PS_dn</down_quark>
+    <fh_quark>fh_up_dn_A3</fh_quark>
   </NamedObject>
 </elem>
 
@@ -120,9 +191,9 @@
    <particle_list><elem>proton</elem></particle_list>
   </FlavorConservingFHBaryonParams>
   <NamedObject>
-    <up_quark>PS_prop</up_quark>
-    <down_quark>PS_prop</down_quark>
-    <fh_quark>fh_prop_V4</fh_quark>
+    <up_quark>PS_up</up_quark>
+    <down_quark>PS_dn</down_quark>
+    <fh_quark>fh_up_V4</fh_quark>
   </NamedObject>
 </elem>
 
@@ -139,9 +210,9 @@
    <particle_list><elem>proton</elem></particle_list>
   </FlavorConservingFHBaryonParams>
   <NamedObject>
-    <up_quark>PS_prop</up_quark>
-    <down_quark>PS_prop</down_quark>
-    <fh_quark>fh_prop_V4</fh_quark>
+    <up_quark>PS_up</up_quark>
+    <down_quark>PS_dn</down_quark>
+    <fh_quark>fh_dn_V4</fh_quark>
   </NamedObject>
 </elem>
 
@@ -158,9 +229,9 @@
    <particle_list><elem>proton_neutron</elem></particle_list>
   </FlavorChangingFHBaryonParams>
   <NamedObject>
-    <up_quark>PS_prop</up_quark>
-    <down_quark>PS_prop</down_quark>
-    <fh_quark>fh_prop_V4</fh_quark>
+    <up_quark>PS_up</up_quark>
+    <down_quark>PS_dn</down_quark>
+    <fh_quark>fh_up_dn_V4</fh_quark>
   </NamedObject>
 </elem>
 
@@ -183,8 +254,8 @@
   </Param>
   <NamedObject>
     <gauge_id>default_gauge_field</gauge_id>
-    <prop_id>PS_prop</prop_id>
-    <smeared_prop_id>SS_prop</smeared_prop_id>
+    <prop_id>PS_up</prop_id>
+    <smeared_prop_id>SS_up</smeared_prop_id>
   </NamedObject>
 </elem>
 
@@ -207,8 +278,32 @@
   </Param>
   <NamedObject>
     <gauge_id>default_gauge_field</gauge_id>
-    <prop_id>fh_prop_A3</prop_id>
-    <smeared_prop_id>SS_fh_prop_A3</smeared_prop_id>
+    <prop_id>PS_dn</prop_id>
+    <smeared_prop_id>SS_dn</smeared_prop_id>
+  </NamedObject>
+</elem>
+
+<elem>
+  <Name>SINK_SMEAR</Name>
+  <Frequency>1</Frequency>
+  <Param>
+    <version>5</version>
+    <Sink>
+      <version>2</version>
+      <SinkType>SHELL_SINK</SinkType>
+      <j_decay>3</j_decay>
+      <SmearingParam>
+        <wvf_kind>GAUGE_INV_GAUSSIAN</wvf_kind>
+        <wvf_param>2.0</wvf_param>
+        <wvfIntPar>5</wvfIntPar>
+        <no_smear_dir>3</no_smear_dir>
+      </SmearingParam>
+    </Sink>
+  </Param>
+  <NamedObject>
+    <gauge_id>default_gauge_field</gauge_id>
+    <prop_id>fh_up_A3</prop_id>
+    <smeared_prop_id>SS_fh_up_A3</smeared_prop_id>
   </NamedObject>
 </elem>
 
@@ -216,13 +311,13 @@
   <Name>HDF5_WRITE_NAMED_OBJECT</Name>
   <Frequency>1</Frequency>
   <NamedObject>
-    <object_id>fh_prop_A3</object_id>
+    <object_id>fh_up_A3</object_id>
     <object_type>LatticePropagator</object_type>
   </NamedObject>
   <File>
     <file_name>./test_fh_propagator.h5</file_name>
     <path>/SS</path>
-    <obj_name>SS_fh_prop_A3</obj_name>
+    <obj_name>SS_fh_up_A3</obj_name>
   </File>
 </elem>
 
@@ -245,8 +340,8 @@
   </Param>
   <NamedObject>
     <gauge_id>default_gauge_field</gauge_id>
-    <prop_id>fh_prop_V4</prop_id>
-    <smeared_prop_id>SS_fh_prop_V4</smeared_prop_id>
+    <prop_id>fh_up_V4</prop_id>
+    <smeared_prop_id>SS_fh_up_V4</smeared_prop_id>
   </NamedObject>
 </elem>
 
@@ -254,17 +349,170 @@
   <Name>HDF5_WRITE_NAMED_OBJECT</Name>
   <Frequency>1</Frequency>
   <NamedObject>
-    <object_id>fh_prop_V4</object_id>
+    <object_id>fh_up_V4</object_id>
     <object_type>LatticePropagator</object_type>
   </NamedObject>
   <File>
     <file_name>./test_fh_propagator.h5</file_name>
     <path>/SS</path>
-    <obj_name>SS_fh_prop_V4</obj_name>
+    <obj_name>SS_fh_up_V4</obj_name>
   </File>
 </elem>
 
 <elem>
+  <Name>SINK_SMEAR</Name>
+  <Frequency>1</Frequency>
+  <Param>
+    <version>5</version>
+    <Sink>
+      <version>2</version>
+      <SinkType>SHELL_SINK</SinkType>
+      <j_decay>3</j_decay>
+      <SmearingParam>
+        <wvf_kind>GAUGE_INV_GAUSSIAN</wvf_kind>
+        <wvf_param>2.0</wvf_param>
+        <wvfIntPar>5</wvfIntPar>
+        <no_smear_dir>3</no_smear_dir>
+      </SmearingParam>
+    </Sink>
+  </Param>
+  <NamedObject>
+    <gauge_id>default_gauge_field</gauge_id>
+    <prop_id>fh_dn_A3</prop_id>
+    <smeared_prop_id>SS_fh_dn_A3</smeared_prop_id>
+  </NamedObject>
+</elem>
+
+<elem>
+  <Name>HDF5_WRITE_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>fh_dn_A3</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./test_fh_propagator.h5</file_name>
+    <path>/SS</path>
+    <obj_name>SS_fh_dn_A3</obj_name>
+  </File>
+</elem>
+
+<elem>
+  <Name>SINK_SMEAR</Name>
+  <Frequency>1</Frequency>
+  <Param>
+    <version>5</version>
+    <Sink>
+      <version>2</version>
+      <SinkType>SHELL_SINK</SinkType>
+      <j_decay>3</j_decay>
+      <SmearingParam>
+        <wvf_kind>GAUGE_INV_GAUSSIAN</wvf_kind>
+        <wvf_param>2.0</wvf_param>
+        <wvfIntPar>5</wvfIntPar>
+        <no_smear_dir>3</no_smear_dir>
+      </SmearingParam>
+    </Sink>
+  </Param>
+  <NamedObject>
+    <gauge_id>default_gauge_field</gauge_id>
+    <prop_id>fh_dn_V4</prop_id>
+    <smeared_prop_id>SS_fh_dn_V4</smeared_prop_id>
+  </NamedObject>
+</elem>
+
+<elem>
+  <Name>HDF5_WRITE_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>fh_dn_V4</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./test_fh_propagator.h5</file_name>
+    <path>/SS</path>
+    <obj_name>SS_fh_dn_V4</obj_name>
+  </File>
+</elem>
+
+<elem>
+  <Name>SINK_SMEAR</Name>
+  <Frequency>1</Frequency>
+  <Param>
+    <version>5</version>
+    <Sink>
+      <version>2</version>
+      <SinkType>SHELL_SINK</SinkType>
+      <j_decay>3</j_decay>
+      <SmearingParam>
+        <wvf_kind>GAUGE_INV_GAUSSIAN</wvf_kind>
+        <wvf_param>2.0</wvf_param>
+        <wvfIntPar>5</wvfIntPar>
+        <no_smear_dir>3</no_smear_dir>
+      </SmearingParam>
+    </Sink>
+  </Param>
+  <NamedObject>
+    <gauge_id>default_gauge_field</gauge_id>
+    <prop_id>fh_up_dn_A3</prop_id>
+    <smeared_prop_id>SS_fh_up_dn_A3</smeared_prop_id>
+  </NamedObject>
+</elem>
+
+<elem>
+  <Name>HDF5_WRITE_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>fh_up_dn_A3</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./test_fh_propagator.h5</file_name>
+    <path>/SS</path>
+    <obj_name>SS_fh_up_dn_A3</obj_name>
+  </File>
+</elem>
+
+<elem>
+  <Name>SINK_SMEAR</Name>
+  <Frequency>1</Frequency>
+  <Param>
+    <version>5</version>
+    <Sink>
+      <version>2</version>
+      <SinkType>SHELL_SINK</SinkType>
+      <j_decay>3</j_decay>
+      <SmearingParam>
+        <wvf_kind>GAUGE_INV_GAUSSIAN</wvf_kind>
+        <wvf_param>2.0</wvf_param>
+        <wvfIntPar>5</wvfIntPar>
+        <no_smear_dir>3</no_smear_dir>
+      </SmearingParam>
+    </Sink>
+  </Param>
+  <NamedObject>
+    <gauge_id>default_gauge_field</gauge_id>
+    <prop_id>fh_up_dn_V4</prop_id>
+    <smeared_prop_id>SS_fh_up_dn_V4</smeared_prop_id>
+  </NamedObject>
+</elem>
+
+<elem>
+  <Name>HDF5_WRITE_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>fh_up_dn_V4</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./test_fh_propagator.h5</file_name>
+    <path>/SS</path>
+    <obj_name>SS_fh_up_dn_V4</obj_name>
+  </File>
+</elem>
+
+
+<elem>
   <Name>FLAVOR_CONSERVING_FH_BARYON_CONTRACTIONS</Name>
   <Frequency>1</Frequency>
   <FlavorConservingFHBaryonParams>
@@ -277,9 +525,9 @@
    <particle_list><elem>proton</elem></particle_list>
   </FlavorConservingFHBaryonParams>
   <NamedObject>
-    <up_quark>SS_prop</up_quark>
-    <down_quark>SS_prop</down_quark>
-    <fh_quark>fh_prop_A3</fh_quark>
+    <up_quark>SS_up</up_quark>
+    <down_quark>SS_dn</down_quark>
+    <fh_quark>fh_up_A3</fh_quark>
   </NamedObject>
 </elem>
 
@@ -296,9 +544,9 @@
    <particle_list><elem>proton</elem></particle_list>
   </FlavorConservingFHBaryonParams>
   <NamedObject>
-    <up_quark>SS_prop</up_quark>
-    <down_quark>SS_prop</down_quark>
-    <fh_quark>fh_prop_A3</fh_quark>
+    <up_quark>SS_up</up_quark>
+    <down_quark>SS_dn</down_quark>
+    <fh_quark>fh_dn_A3</fh_quark>
   </NamedObject>
 </elem>
 
@@ -315,9 +563,9 @@
    <particle_list><elem>proton_neutron</elem></particle_list>
   </FlavorChangingFHBaryonParams>
   <NamedObject>
-    <up_quark>SS_prop</up_quark>
-    <down_quark>SS_prop</down_quark>
-    <fh_quark>fh_prop_A3</fh_quark>
+    <up_quark>SS_up</up_quark>
+    <down_quark>SS_dn</down_quark>
+    <fh_quark>fh_up_dn_A3</fh_quark>
   </NamedObject>
 </elem>
 
@@ -334,9 +582,9 @@
    <particle_list><elem>proton</elem></particle_list>
   </FlavorConservingFHBaryonParams>
   <NamedObject>
-    <up_quark>SS_prop</up_quark>
-    <down_quark>SS_prop</down_quark>
-    <fh_quark>SS_fh_prop_V4</fh_quark>
+    <up_quark>SS_up</up_quark>
+    <down_quark>SS_up</down_quark>
+    <fh_quark>SS_fh_up_V4</fh_quark>
   </NamedObject>
 </elem>
 
@@ -353,9 +601,9 @@
    <particle_list><elem>proton</elem></particle_list>
   </FlavorConservingFHBaryonParams>
   <NamedObject>
-    <up_quark>SS_prop</up_quark>
-    <down_quark>SS_prop</down_quark>
-    <fh_quark>SS_fh_prop_V4</fh_quark>
+    <up_quark>SS_up</up_quark>
+    <down_quark>SS_dn</down_quark>
+    <fh_quark>SS_fh_dn_V4</fh_quark>
   </NamedObject>
 </elem>
 
@@ -372,9 +620,9 @@
    <particle_list><elem>proton_neutron</elem></particle_list>
   </FlavorChangingFHBaryonParams>
   <NamedObject>
-    <up_quark>SS_prop</up_quark>
-    <down_quark>SS_prop</down_quark>
-    <fh_quark>SS_fh_prop_V4</fh_quark>
+    <up_quark>SS_up</up_quark>
+    <down_quark>SS_dn</down_quark>
+    <fh_quark>SS_fh_up_dn_V4</fh_quark>
   </NamedObject>
 </elem>
 
