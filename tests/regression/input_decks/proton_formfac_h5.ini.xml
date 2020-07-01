@@ -12,13 +12,13 @@
   <Name>HDF5_READ_NAMED_OBJECT</Name>
   <Frequency>1</Frequency>
   <NamedObject>
-    <object_id>PS_prop</object_id>
+    <object_id>PS_up</object_id>
     <object_type>LatticePropagator</object_type>
   </NamedObject>
   <File>
     <file_name>./test_propagator.h5</file_name>
     <path>/sh_sig2p0_n5</path>
-    <obj_name>PS_prop</obj_name>
+    <obj_name>PS_up</obj_name>
   </File>
 </elem>
 
@@ -26,44 +26,83 @@
   <Name>HDF5_READ_NAMED_OBJECT</Name>
   <Frequency>1</Frequency>
   <NamedObject>
-    <object_id>PS_proton_DD_up_up_seqprop_x0y0z0t0_tsnk_5</object_id>
+    <object_id>PS_proton_UU_up_up_x0y0z0t0_tsnk_5_seqprop</object_id>
     <object_type>LatticePropagator</object_type>
   </NamedObject>
   <File>
     <file_name>./test_seqprop.h5</file_name>
     <path>/</path>
-    <obj_name>PS_proton_DD_up_up_seqprop_x0y0z0t0_tsnk_5</obj_name>
+    <obj_name>PS_proton_UU_up_up_x0y0z0t0_tsnk_5_seqprop</obj_name>
   </File>
 </elem>
 
 <elem>
-  <annotation>
-  ; BAR3PTFN input file.
-  </annotation>
-
   <Name>LALIBE_BAR3PTFN</Name>
   <Frequency>1</Frequency>
   <Param>
     <version>7</version>
     <j_decay>3</j_decay>
-   <currents><elem>V4</elem><elem>A3</elem></currents>
-   <mom_list>
-     <elem>0 0 0</elem>
-     <elem>0 0 1</elem>
-     <elem>0 0 2</elem>
-   </mom_list>
-   <annotation>
-     <p2_max>1</p2_max>
-   </annotation>
+    <currents>
+       <elem>A3</elem>
+       <elem>V4</elem>
+       <elem>A1</elem>
+       <elem>A2</elem>
+       <elem>A4</elem>
+       <elem>V1</elem>
+       <elem>V2</elem>
+       <elem>V3</elem>
+       <elem>P</elem>
+       <elem>S</elem>
+       <elem>T34</elem>
+       <elem>T12</elem>
+       <elem>CHROMO_MAG</elem>
+    </currents>
     <h5_file_name>lalibe_3ptfn.h5</h5_file_name>
     <path>/</path>
   </Param>
   <NamedObject>
     <gauge_id>default_gauge_field</gauge_id>
-    <prop_id>PS_prop</prop_id>
+    <prop_id>PS_up</prop_id>
     <seqprops>
       <elem>
-	<seqprop_id>PS_proton_DD_up_up_seqprop_x0y0z0t0_tsnk_5</seqprop_id>
+	<seqprop_id>PS_proton_UU_up_up_x0y0z0t0_tsnk_5_seqprop</seqprop_id>
+	<gamma_insertion>0</gamma_insertion>
+      </elem>
+   </seqprops>
+  </NamedObject>
+</elem>
+
+<elem>
+  <Name>LALIBE_BAR3PTFN</Name>
+  <Frequency>1</Frequency>
+  <Param>
+    <version>7</version>
+    <j_decay>3</j_decay>
+    <currents>
+       <elem>A3</elem>
+       <elem>V4</elem>
+       <elem>A1</elem>
+       <elem>A2</elem>
+       <elem>A4</elem>
+       <elem>V1</elem>
+       <elem>V2</elem>
+       <elem>V3</elem>
+       <elem>P</elem>
+       <elem>S</elem>
+       <elem>T34</elem>
+       <elem>T12</elem>
+       <elem>CHROMO_MAG</elem>
+    </currents>
+    <p2_max>0</p2_max>
+    <h5_file_name>lalibe_3ptfn.h5</h5_file_name>
+    <path>/</path>
+  </Param>
+  <NamedObject>
+    <gauge_id>default_gauge_field</gauge_id>
+    <prop_id>PS_up</prop_id>
+    <seqprops>
+      <elem>
+	<seqprop_id>PS_proton_UU_up_up_x0y0z0t0_tsnk_5_seqprop</seqprop_id>
 	<gamma_insertion>0</gamma_insertion>
       </elem>
    </seqprops>
@@ -74,44 +113,83 @@
   <Name>HDF5_READ_NAMED_OBJECT</Name>
   <Frequency>1</Frequency>
   <NamedObject>
-    <object_id>PS_proton_UU_up_up_seqprop_x0y0z0t0_tsnk_5</object_id>
+    <object_id>PS_proton_UU_up_up_x0y0z0t0_tsnk_all_5_seqprop</object_id>
     <object_type>LatticePropagator</object_type>
   </NamedObject>
   <File>
     <file_name>./test_seqprop.h5</file_name>
     <path>/</path>
-    <obj_name>PS_proton_UU_up_up_seqprop_x0y0z0t0_tsnk_5</obj_name>
+    <obj_name>PS_proton_UU_up_up_x0y0z0t0_tsnk_all_5_seqprop</obj_name>
   </File>
 </elem>
 
 <elem>
-  <annotation>
-  ; BAR3PTFN input file.
-  </annotation>
-
   <Name>LALIBE_BAR3PTFN</Name>
   <Frequency>1</Frequency>
   <Param>
     <version>7</version>
     <j_decay>3</j_decay>
-   <currents><elem>V4</elem><elem>A3</elem></currents>
-   <mom_list>
-     <elem>0 0 0</elem>
-     <elem>0 0 1</elem>
-     <elem>0 0 2</elem>
-   </mom_list>
-   <annotation>
-     <p2_max>1</p2_max>
-   </annotation>
-    <h5_file_name>lalibe_3ptfn.h5</h5_file_name>
+    <currents>
+       <elem>A3</elem>
+       <elem>V4</elem>
+       <elem>A1</elem>
+       <elem>A2</elem>
+       <elem>A4</elem>
+       <elem>V1</elem>
+       <elem>V2</elem>
+       <elem>V3</elem>
+       <elem>P</elem>
+       <elem>S</elem>
+       <elem>T34</elem>
+       <elem>T12</elem>
+       <elem>CHROMO_MAG</elem>
+    </currents>
+    <h5_file_name>lalibe_3ptfn_coherent_sink.h5</h5_file_name>
     <path>/</path>
   </Param>
   <NamedObject>
     <gauge_id>default_gauge_field</gauge_id>
-    <prop_id>PS_prop</prop_id>
+    <prop_id>PS_up</prop_id>
     <seqprops>
       <elem>
-	<seqprop_id>PS_proton_UU_up_up_seqprop_x0y0z0t0_tsnk_5</seqprop_id>
+	<seqprop_id>PS_proton_UU_up_up_x0y0z0t0_tsnk_all_5_seqprop</seqprop_id>
+	<gamma_insertion>0</gamma_insertion>
+      </elem>
+   </seqprops>
+  </NamedObject>
+</elem>
+
+<elem>
+  <Name>LALIBE_BAR3PTFN</Name>
+  <Frequency>1</Frequency>
+  <Param>
+    <version>7</version>
+    <j_decay>3</j_decay>
+    <currents>
+       <elem>A3</elem>
+       <elem>V4</elem>
+       <elem>A1</elem>
+       <elem>A2</elem>
+       <elem>A4</elem>
+       <elem>V1</elem>
+       <elem>V2</elem>
+       <elem>V3</elem>
+       <elem>P</elem>
+       <elem>S</elem>
+       <elem>T34</elem>
+       <elem>T12</elem>
+       <elem>CHROMO_MAG</elem>
+    </currents>
+    <p2_max>0</p2_max>
+    <h5_file_name>lalibe_3ptfn_coherent_sink.h5</h5_file_name>
+    <path>/</path>
+  </Param>
+  <NamedObject>
+    <gauge_id>default_gauge_field</gauge_id>
+    <prop_id>PS_up</prop_id>
+    <seqprops>
+      <elem>
+	<seqprop_id>PS_proton_UU_up_up_x0y0z0t0_tsnk_all_5_seqprop</seqprop_id>
 	<gamma_insertion>0</gamma_insertion>
       </elem>
    </seqprops>
@@ -122,44 +200,46 @@
   <Name>HDF5_READ_NAMED_OBJECT</Name>
   <Frequency>1</Frequency>
   <NamedObject>
-    <object_id>PS_proton_DD_dn_dn_seqprop_x0y0z0t0_tsnk_5</object_id>
+    <object_id>PS_proton_UU_up_up_x0y0z0t0_tsnk_2src_tsep5_seqprop</object_id>
     <object_type>LatticePropagator</object_type>
   </NamedObject>
   <File>
     <file_name>./test_seqprop.h5</file_name>
     <path>/</path>
-    <obj_name>PS_proton_DD_dn_dn_seqprop_x0y0z0t0_tsnk_5</obj_name>
+    <obj_name>PS_proton_UU_up_up_x0y0z0t0_tsnk_2src_tsep5_seqprop</obj_name>
   </File>
 </elem>
 
 <elem>
-  <annotation>
-  ; BAR3PTFN input file.
-  </annotation>
-
   <Name>LALIBE_BAR3PTFN</Name>
   <Frequency>1</Frequency>
   <Param>
     <version>7</version>
     <j_decay>3</j_decay>
-   <currents><elem>V4</elem><elem>A3</elem></currents>
-   <mom_list>
-     <elem>0 0 0</elem>
-     <elem>0 0 1</elem>
-     <elem>0 0 2</elem>
-   </mom_list>
-   <annotation>
-     <p2_max>1</p2_max>
-   </annotation>
-    <h5_file_name>lalibe_3ptfn.h5</h5_file_name>
+    <currents>
+       <elem>A3</elem>
+       <elem>V4</elem>
+       <elem>A1</elem>
+       <elem>A2</elem>
+       <elem>A4</elem>
+       <elem>V1</elem>
+       <elem>V2</elem>
+       <elem>V3</elem>
+       <elem>P</elem>
+       <elem>S</elem>
+       <elem>T34</elem>
+       <elem>T12</elem>
+       <elem>CHROMO_MAG</elem>
+    </currents>
+    <h5_file_name>lalibe_3ptfn_2src_coherent_sink.h5</h5_file_name>
     <path>/</path>
   </Param>
   <NamedObject>
     <gauge_id>default_gauge_field</gauge_id>
-    <prop_id>PS_prop</prop_id>
+    <prop_id>PS_up</prop_id>
     <seqprops>
       <elem>
-	<seqprop_id>PS_proton_DD_dn_dn_seqprop_x0y0z0t0_tsnk_5</seqprop_id>
+	<seqprop_id>PS_proton_UU_up_up_x0y0z0t0_tsnk_2src_tsep5_seqprop</seqprop_id>
 	<gamma_insertion>0</gamma_insertion>
       </elem>
    </seqprops>
@@ -167,47 +247,36 @@
 </elem>
 
 <elem>
-  <Name>HDF5_READ_NAMED_OBJECT</Name>
-  <Frequency>1</Frequency>
-  <NamedObject>
-    <object_id>PS_proton_UU_dn_dn_seqprop_x0y0z0t0_tsnk_5</object_id>
-    <object_type>LatticePropagator</object_type>
-  </NamedObject>
-  <File>
-    <file_name>./test_seqprop.h5</file_name>
-    <path>/</path>
-    <obj_name>PS_proton_UU_dn_dn_seqprop_x0y0z0t0_tsnk_5</obj_name>
-  </File>
-</elem>
-
-<elem>
-  <annotation>
-  ; BAR3PTFN input file.
-  </annotation>
-
   <Name>LALIBE_BAR3PTFN</Name>
   <Frequency>1</Frequency>
   <Param>
     <version>7</version>
     <j_decay>3</j_decay>
-   <currents><elem>V4</elem><elem>A3</elem></currents>
-   <mom_list>
-     <elem>0 0 0</elem>
-     <elem>0 0 1</elem>
-     <elem>0 0 2</elem>
-   </mom_list>
-   <annotation>
-     <p2_max>1</p2_max>
-   </annotation>
-    <h5_file_name>lalibe_3ptfn.h5</h5_file_name>
+    <currents>
+       <elem>A3</elem>
+       <elem>V4</elem>
+       <elem>A1</elem>
+       <elem>A2</elem>
+       <elem>A4</elem>
+       <elem>V1</elem>
+       <elem>V2</elem>
+       <elem>V3</elem>
+       <elem>P</elem>
+       <elem>S</elem>
+       <elem>T34</elem>
+       <elem>T12</elem>
+       <elem>CHROMO_MAG</elem>
+    </currents>
+    <p2_max>0</p2_max>
+    <h5_file_name>lalibe_3ptfn_2src_coherent_sink.h5</h5_file_name>
     <path>/</path>
   </Param>
   <NamedObject>
     <gauge_id>default_gauge_field</gauge_id>
-    <prop_id>PS_prop</prop_id>
+    <prop_id>PS_up</prop_id>
     <seqprops>
       <elem>
-	<seqprop_id>PS_proton_UU_dn_dn_seqprop_x0y0z0t0_tsnk_5</seqprop_id>
+	<seqprop_id>PS_proton_UU_up_up_x0y0z0t0_tsnk_2src_tsep5_seqprop</seqprop_id>
 	<gamma_insertion>0</gamma_insertion>
       </elem>
    </seqprops>

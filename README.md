@@ -22,6 +22,9 @@ This software links against Chroma (https://github.com/JeffersonLab/chroma) and 
 The software has three main branches, `production`, `master` and `develop`.  The `production` branch is the most stable, is thoroughly revision tested, but may be out of date compared to `master`.  The `master` branch contains all revision tested code, including that not currently in production.  The `develop` branch is used to collect development from users where it is tested against all changes before being accepted into `master`.
 
 
+We have implemented [regression testing](https://github.com/callat-qcd/lalibe/wiki/Regression-Testing).
+
+
 
 ## Feynman-Hellmann
 This code constructs the Feynman-Hellmann propagators and correlation functions as described in [arXiv:1612.06963](https://arxiv.org/abs/1612.06963) and used to compute the nucleon axial charge in [arXiv:1805.12130](https://arxiv.org/abs/1805.12130).  
