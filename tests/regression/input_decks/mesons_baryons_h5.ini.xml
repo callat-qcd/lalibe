@@ -172,7 +172,7 @@
     <object_type>LatticePropagator</object_type>
   </NamedObject>
   <File>
-    <file_name>./test_propagator.h5</file_name>
+    <file_name>./test_SS_propagator.h5</file_name>
     <path>/sh_sig2p0_n5</path>
     <obj_name>SS_up</obj_name>
   </File>
@@ -186,7 +186,7 @@
     <object_type>LatticePropagator</object_type>
   </NamedObject>
   <File>
-    <file_name>./test_propagator.h5</file_name>
+    <file_name>./test_SS_propagator.h5</file_name>
     <path>/sh_sig2p0_n5</path>
     <obj_name>SS_dn</obj_name>
   </File>
@@ -200,7 +200,7 @@
     <object_type>LatticePropagator</object_type>
   </NamedObject>
   <File>
-    <file_name>./test_propagator.h5</file_name>
+    <file_name>./test_SS_propagator.h5</file_name>
     <path>/sh_sig2p0_n5</path>
     <obj_name>SS_strange</obj_name>
   </File>
@@ -258,8 +258,8 @@
       </mom_list>
     </annotation>
     <particle_list>
-        <elem>octet</elem>
-        <elem>decuplet</elem>
+        <elem>octet_iso</elem>
+        <elem>decuplet_iso</elem>
     </particle_list>
   </BaryonParams>
   <NamedObject>
@@ -285,8 +285,8 @@
       </mom_list>
     </annotation>
     <particle_list>
-        <elem>octet</elem>
-        <elem>decuplet</elem>
+        <elem>octet_iso</elem>
+        <elem>decuplet_iso</elem>
     </particle_list>
   </BaryonParams>
   <NamedObject>
@@ -296,6 +296,36 @@
   </NamedObject>
 </elem>
 
+<elem>
+  <Name>BARYON_CONTRACTIONS</Name>
+  <Frequency>1</Frequency>
+  <BaryonParams>
+    <ng_parity>true</ng_parity>
+    <h5_file_name>./lalibe_2pt_spectrum.h5</h5_file_name>
+    <path>/SS_check_isosymmetric</path>
+    <p2_max>0</p2_max>
+    <annotation>
+      <rotate_to_Dirac>true</rotate_to_Dirac>
+      <is_antiperiodic>true</is_antiperiodic>
+      <mom_list>
+        <elem>1 0 0</elem>
+        <elem>2 0 0</elem>
+      </mom_list>
+    </annotation>
+    <particle_list>
+        <elem>lambda_to_sigma</elem>
+        <elem>sigma_to_lambda</elem>
+    </particle_list>
+  </BaryonParams>
+  <NamedObject>
+      <up_quark>SS_up</up_quark>
+      <down_quark>SS_dn</down_quark>
+      <strange_quark>SS_strange</strange_quark>
+  </NamedObject>
+</elem>
+
+
+<!-- NOW use lime props to do contractions -->
 
 <elem>
   <Name>SINK_SMEAR</Name>
@@ -421,8 +451,8 @@
       </mom_list>
     </annotation>
     <particle_list>
-        <elem>octet</elem>
-        <elem>decuplet</elem>
+        <elem>octet_iso</elem>
+        <elem>decuplet_iso</elem>
     </particle_list>
   </BaryonParams>
   <NamedObject>
@@ -448,8 +478,36 @@
       </mom_list>
     </annotation>
     <particle_list>
-        <elem>octet</elem>
-        <elem>decuplet</elem>
+        <elem>octet_iso</elem>
+        <elem>decuplet_iso</elem>
+    </particle_list>
+  </BaryonParams>
+  <NamedObject>
+      <up_quark>SS_up_lime</up_quark>
+      <down_quark>SS_dn_lime</down_quark>
+      <strange_quark>SS_strange_lime</strange_quark>
+  </NamedObject>
+</elem>
+
+<elem>
+  <Name>BARYON_CONTRACTIONS</Name>
+  <Frequency>1</Frequency>
+  <BaryonParams>
+    <ng_parity>true</ng_parity>
+    <h5_file_name>./lalibe_2pt_spectrum_lime.h5</h5_file_name>
+    <path>/SS_check_isosymmetric</path>
+    <p2_max>0</p2_max>
+    <annotation>
+      <rotate_to_Dirac>true</rotate_to_Dirac>
+      <is_antiperiodic>true</is_antiperiodic>
+      <mom_list>
+        <elem>1 0 0</elem>
+        <elem>2 0 0</elem>
+      </mom_list>
+    </annotation>
+    <particle_list>
+      <elem>lambda_to_sigma</elem>
+      <elem>sigma_to_lambda</elem>
     </particle_list>
   </BaryonParams>
   <NamedObject>

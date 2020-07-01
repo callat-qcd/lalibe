@@ -31,36 +31,39 @@ def assert_h5files_equal(known_result, new_result, atol=0., rtol=1.e-10, verbose
             known_keys = set(dsets_known.keys())
             new_keys   = set(dsets_new.keys())
 
-            if new_keys != known_keys and verbose:
-                raise AssertionError(
-                    (
-                        "Files have different datasets:"
-                        "\n---Dsets in known but not in new---\n\t%s"
-                        "\n---Dsets in new but not in known---\n\t%s"
-                    )
-                    %(
-                        "\n\t".join(known_keys.difference(new_keys)),
-                        "\n\t".join(new_keys.difference(known_keys)),
-                    )
-                )
-            try:
-                for key in known_keys:
-                    if verbose:
-                        error_message = "Dataset %s has unequal values" %key
-                    else:
-                        error_message = None
-                    np.testing.assert_allclose(
-                        dsets_known[key],
-                        dsets_new[key],
-                        atol=atol,
-                        rtol=rtol,
-                        err_msg=error_message,
-                    )
-                data_equal = True
-            except Exception as e:
+            if new_keys != known_keys:
                 data_equal = False
                 if verbose:
-                    print(e)
+                    raise AssertionError(
+                        (
+                            "Files have different datasets:"
+                            "\n---Dsets in known but not in new---\n\t%s"
+                            "\n---Dsets in new but not in known---\n\t%s"
+                        )
+                        %(
+                            "\n\t".join(known_keys.difference(new_keys)),
+                            "\n\t".join(new_keys.difference(known_keys)),
+                        )
+                    )
+            else:
+                try:
+                    for key in known_keys:
+                        if verbose:
+                            error_message = "Dataset %s has unequal values" %key
+                        else:
+                            error_message = None
+                        np.testing.assert_allclose(
+                            dsets_known[key],
+                            dsets_new[key],
+                            atol=atol,
+                            rtol=rtol,
+                            err_msg=error_message,
+                        )
+                    data_equal = True
+                except Exception as e:
+                    data_equal = False
+                    if verbose:
+                        print(e)
     return data_equal
 
 def main():

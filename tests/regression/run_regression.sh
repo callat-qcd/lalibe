@@ -25,6 +25,6 @@ for ini in "${ini_files[@]}"; do
     $mpirun -i $input_decks/$ini
 done
 
-$my_python $lalibe_tests/py_scripts/perform_revision_test.py $lalibe_tests/known_results `pwd`
+$my_python $lalibe_tests/py_scripts/perform_revision_test.py $lalibe_tests/known_results $new_dir
 
 popd
