@@ -317,7 +317,7 @@
   </BaryonParams>
   <NamedObject>
       <up_quark>SS_up</up_quark>
-      <down_quark>SS_dn</down_quark>
+      <down_quark>SS_up</down_quark>
       <strange_quark>SS_strange</strange_quark>
   </NamedObject>
 </elem>
@@ -508,7 +508,7 @@
   </BaryonParams>
   <NamedObject>
       <up_quark>SS_up_lime</up_quark>
-      <down_quark>SS_dn_lime</down_quark>
+      <down_quark>SS_up_lime</down_quark>
       <strange_quark>SS_strange_lime</strange_quark>
   </NamedObject>
 </elem>
