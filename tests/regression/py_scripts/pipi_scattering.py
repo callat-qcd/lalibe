@@ -29,16 +29,16 @@ t' = u
 
 # Remember this program uses unsmeared propagator!
 
-Lattice = [8,8,8,16]
+Lattice = [4,4,4,8]
 Nx = Lattice[0]
 Nt = Lattice[3]
-origin_list=[[0,0,0,0],[0,0,0,0]]
+origin_list=[[0,0,0,0],[0,0,1,0]]
 t_0 = origin_list[0][3]
 
 D = np.zeros([3, 3], dtype = np.complex128)
 for i in range(3):
     D[i,i] = 1.
-
+'''
 path = '/Users/haobo/lattice_qcd/test_run/lalibe/pipi_unit_propagators.h5'
 f = h5.File(path, 'r')
 S = f['l_prop_x0_y0_z0_t0'][()]
@@ -47,17 +47,17 @@ f.close()
 path = '/Users/haobo/lattice_qcd/test_run/lalibe/pipi_unit_propagators.h5'
 f = h5.File(path, 'r')
 S2 = f['l_prop_x0_y0_z0_t0'][()]
-f.close()
-'''
-path = '/Users/haobo/lattice_qcd/test_run/lalibe/test_propagator1.h5'
+f.close()'''
+
+path = '/Users/haobo/lattice_qcd/test_run/lalibe/test_propagator0000.h5'
 f = h5.File(path, 'r')
 S = f['sh_sig2p0_n5/PS_prop'][()]
 f.close()
 
-path = '/Users/haobo/lattice_qcd/test_run/lalibe/test_propagator2.h5'
+path = '/Users/haobo/lattice_qcd/test_run/lalibe/test_propagator0010.h5'
 f = h5.File(path, 'r')
 S2 = f['sh_sig2p0_n5/PS_prop'][()]
-f.close()'''
+f.close()
 
 M = np.einsum('li,tzyxikab,kj->tzyxljab', G, S, G)
 M2 = np.einsum('li,tzyxikab,kj->tzyxljab', G, S2, G)
@@ -139,24 +139,31 @@ for p1 in momlist:
                 tmpFTlist4[t_relative] = tmpFT4
                 tmpFTlist[t_relative] = tmpFT
             
-            origin_phases = 0
+            '''origin_phases = 0
             for p_comp in range(3):
                 origin_phases -= (p1[p_comp] * origin_list[0][p_comp] + p2[p_comp] * origin_list[1][p_comp]) * 2* np.pi/Nx;
+            '''
             
-            print(p1,p2,origin_phases)
+            origin_phases1 = 0
+            origin_phases2 = 0
+            for p_comp in range(3):
+                origin_phases1 -= (p1[p_comp] + p2[p_comp]) * origin_list[0][p_comp] * 2 * np.pi/Nx
+                origin_phases2 -= (p1[p_comp] + p2[p_comp]) * origin_list[1][p_comp] * 2 * np.pi/Nx
+            
+            #print(p1,p2,origin_phases)
 
-            correlator_FTed1[(p1[0],p1[1],p1[2],p2[0],p2[1],p2[2])] = tmpFTlist1 * np.exp(1j*origin_phases)
-            correlator_FTed2[(p1[0],p1[1],p1[2],p2[0],p2[1],p2[2])] = tmpFTlist2 * np.exp(1j*origin_phases)
-            correlator_FTed3[(p1[0],p1[1],p1[2],p2[0],p2[1],p2[2])] = tmpFTlist3 * np.exp(1j*origin_phases)
-            correlator_FTed4[(p1[0],p1[1],p1[2],p2[0],p2[1],p2[2])] = tmpFTlist4 * np.exp(1j*origin_phases)
-            correlator_FTed[(p1[0],p1[1],p1[2],p2[0],p2[1],p2[2])] = tmpFTlist * np.exp(1j*origin_phases)
+            correlator_FTed1[(p1[0],p1[1],p1[2],p2[0],p2[1],p2[2])] = tmpFTlist1 * np.exp(1j*origin_phases1)
+            correlator_FTed2[(p1[0],p1[1],p1[2],p2[0],p2[1],p2[2])] = tmpFTlist2 * np.exp(1j*origin_phases1)
+            correlator_FTed3[(p1[0],p1[1],p1[2],p2[0],p2[1],p2[2])] = tmpFTlist3 * np.exp(1j*origin_phases2)
+            correlator_FTed4[(p1[0],p1[1],p1[2],p2[0],p2[1],p2[2])] = tmpFTlist4 * np.exp(1j*origin_phases2)
+            correlator_FTed[(p1[0],p1[1],p1[2],p2[0],p2[1],p2[2])] = (tmpFTlist1+tmpFTlist2) * np.exp(1j*origin_phases1) + (tmpFTlist3+tmpFTlist4) * np.exp(1j*origin_phases2)
 print('Fourier transform completed.')
 
 # Python version
 PY = correlator_FTed[(0,0,1,0,0,0)]
 # C++ version
-f = h5.File('/Users/haobo/lattice_qcd/test_run/lalibe/lalibe_pipi_spectrum.h5','r')
-CXX = f['PS']['pipi']['x_0_0_1_0']['ptotx0_ptoty0_ptotz1']['px0_py0_pz1_qx0_qy0_qz0'][()]
+f = h5.File('/Users/haobo/lattice_qcd/test_run/lalibe/lalibe_pipi_spectrum00.h5','r')
+CXX = f['PS']['pipi']['diagram0']['x_0_0_0_0__y_0_0_1_0']['ptotx0_ptoty0_ptotz1']['px0_py0_pz1_qx0_qy0_qz0'][()]
 f.close()
 print(PY)
 print(CXX)
