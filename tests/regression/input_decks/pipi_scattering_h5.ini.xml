@@ -12,7 +12,7 @@
   <Name>HDF5_READ_NAMED_OBJECT</Name>
   <Frequency>1</Frequency>
   <NamedObject>
-    <object_id>PS_prop_light1</object_id>
+    <object_id>PS_prop_light</object_id>
     <object_type>LatticePropagator</object_type>
   </NamedObject>
   <File>
@@ -21,24 +21,12 @@
     <obj_name>PS_prop</obj_name>
   </File>
 </elem>
+
 <elem>
   <Name>HDF5_READ_NAMED_OBJECT</Name>
   <Frequency>1</Frequency>
   <NamedObject>
-    <object_id>PS_prop_light2</object_id>
-    <object_type>LatticePropagator</object_type>
-  </NamedObject>
-  <File>
-    <file_name>./light2000_0.05.h5</file_name>
-    <path>/sh_sig2p0_n5</path>
-    <obj_name>PS_prop</obj_name>
-  </File>
-</elem>
-<elem>
-  <Name>HDF5_READ_NAMED_OBJECT</Name>
-  <Frequency>1</Frequency>
-  <NamedObject>
-    <object_id>PS_prop_strange1</object_id>
+    <object_id>PS_prop_strange</object_id>
     <object_type>LatticePropagator</object_type>
   </NamedObject>
   <File>
@@ -47,19 +35,7 @@
     <obj_name>PS_prop</obj_name>
   </File>
 </elem>
-<elem>
-  <Name>HDF5_READ_NAMED_OBJECT</Name>
-  <Frequency>1</Frequency>
-  <NamedObject>
-    <object_id>PS_prop_strange2</object_id>
-    <object_type>LatticePropagator</object_type>
-  </NamedObject>
-  <File>
-    <file_name>./strange2000_0.1.h5</file_name>
-    <path>/sh_sig2p0_n5</path>
-    <obj_name>PS_prop</obj_name>
-  </File>
-</elem>
+
 
 <elem>
   <Name>PIPI_SCATTERING</Name>
@@ -71,10 +47,8 @@
     <obj_path>/PS</obj_path>
   </PipiParams>
   <NamedObject>
-    <light_prop_1>PS_prop_light1</light_prop_1>
-    <light_prop_2>PS_prop_light2</light_prop_2>
-    <strange_prop_1>PS_prop_strange1</strange_prop_1>
-    <strange_prop_2>PS_prop_strange2</strange_prop_2>
+    <light_prop>PS_prop_light</light_prop>
+    <strange_prop>PS_prop_strange</strange_prop>
   </NamedObject>
 </elem>
 
