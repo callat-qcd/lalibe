@@ -24,13 +24,8 @@
  //  + tr(Q4(p,y',y') * g5)*tr(P4(p',y,y) * g5)
 
  // Propagator notations
- // S_u(x, y)  = quark_prop_1
- // S_d(x, y)  = quark_prop_2
- // S_u(x, y') = quark_prop_3
- // S_d(x, y') = quark_prop_4 for pipi scattring
-
- // S_s(x, y)  = quark_prop_2 for kk scattering
- // S_s(x, y') = quark_prop_4 for kk and pik scattring
+ // quark_prop_1 = S_u(x, y) or S_d(x, y)
+ // quark_prop_2 = S_u(x, y) or S_d(x, y) for pipi, S_s(x, y) for kk or pik
 
 #include "chromabase.h"
 #include "pipi_scattering_func_w.h"
@@ -38,7 +33,7 @@
 
 namespace Chroma
 {
-		void pipi_correlator(CorrelatorType::Correlator& correlator_out, const LatticePropagator& quark_prop_1, const LatticePropagator& quark_prop_2, const LatticePropagator& quark_prop_3, const LatticePropagator& quark_prop_4, const multi1d<int>& origin, const int p2max, const int ptot2max, const int t0, const int j_decay, const int diagram)
+		void pipi_correlator(CorrelatorType::Correlator& correlator_out, const LatticePropagator& quark_prop_1, const LatticePropagator& quark_prop_2, const multi1d<int>& origin, const int p2max, const int ptot2max, const int t0, const int j_decay, const int diagram)
 		{
 			int G5 = Ns * Ns - 1;
 			// Construct SftMoms
@@ -97,7 +92,7 @@ namespace Chroma
 			 }
 		}
 
-		void pik_correlator(CorrelatorType::Correlator& correlator_out, const LatticePropagator& quark_prop_1, const LatticePropagator& quark_prop_2, const LatticePropagator& quark_prop_3, const LatticePropagator& quark_prop_4, const multi1d<int>& origin, const int p2max, const int ptot2max, const int t0, const int j_decay, const int diagram)
+		void pik_correlator(CorrelatorType::Correlator& correlator_out, const LatticePropagator& quark_prop_1, const LatticePropagator& quark_prop_2, const multi1d<int>& origin, const int p2max, const int ptot2max, const int t0, const int j_decay, const int diagram)
  		{
  			int G5 = Ns * Ns - 1;
 
@@ -108,16 +103,12 @@ namespace Chroma
  			multi1d<DComplex> tmp_multi1d(Nt);
  			tmp_multi1d=zero;
 
- 			multi2d<DPropagator> Q1(phases.numMom(), Nt), P1(phases.numMom(), Nt), Q2(phases.numMom(), Nt), P2(phases.numMom(), Nt);
+ 			multi2d<DPropagator> Q1(phases.numMom(), Nt), P1(phases.numMom(), Nt);
  			Q1 = zero;
  			P1 = zero;
- 			Q2 = zero;
- 			P2 = zero;
 
- 			compute_qqbar(Q1, quark_prop_2, quark_prop_1, phases, t0);
- 			compute_qqbar(P1, quark_prop_4, quark_prop_3, phases, t0);
- 			compute_qqbar(Q2, quark_prop_2, quark_prop_3, phases, t0);
- 			compute_qqbar(P2, quark_prop_4, quark_prop_1, phases, t0);
+ 			compute_qqbar(Q1, quark_prop_1, quark_prop_1, phases, t0);
+ 			compute_qqbar(P1, quark_prop_2, quark_prop_1, phases, t0);
 
  			DComplex origin_fix;
  			Double origin_phases;
@@ -151,12 +142,12 @@ namespace Chroma
 						else if (diagram == 2)
 						{
 							for (int t = 0; t < Nt; ++t)
-								correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] =  - trace(Q2[mom_num1][t] * Gamma(G5) * P2[mom_num2][t] * Gamma(G5))  * origin_fix;
+								correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] =  - trace(Q1[mom_num1][t] * Gamma(G5) * P1[mom_num2][t] * Gamma(G5))  * origin_fix;
 						}
 						else
 						{
 							for (int t = 0; t < Nt; ++t)
-								correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] = (trace(Q1[mom_num1][t] * Gamma(G5)) * trace(P1[mom_num2][t] * Gamma(G5)) - trace(Q2[mom_num1][t] * Gamma(G5) * P2[mom_num2][t] * Gamma(G5))) * origin_fix;
+								correlator_out[std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))][t] = (trace(Q1[mom_num1][t] * Gamma(G5)) * trace(P1[mom_num2][t] * Gamma(G5)) - trace(Q1[mom_num1][t] * Gamma(G5) * P1[mom_num2][t] * Gamma(G5))) * origin_fix;
 						}
  					}
  				}
