@@ -337,10 +337,10 @@ namespace Chroma
 
 #ifdef BUILD_HDF5
                 // x and y stands for the 4-vectors of the two pions, respectivily
-                std::string correlator_path = params.param.obj_path + "/" + collision_type + "/" + std::to_string(origin[0]) + "_" +  std::to_string(origin[1]) + "_" + std::to_string(origin[2]) + "_" + std::to_string(origin[3]);
+                std::string correlator_path = params.param.obj_path + "/" + collision_type + "/x" + std::to_string(origin[0]) + "_y" +  std::to_string(origin[1]) + "_z" + std::to_string(origin[2]) + "_t" + std::to_string(origin[3]);
                 h5out.push(correlator_path);
 #else
-                std::string correlator_path = collision_type + "_" + std::to_string(origin[0]) + "_" +  std::to_string(origin[1]) + "_" + std::to_string(origin[2]) + "_" + std::to_string(origin[3]);
+                std::string correlator_path = collision_type + "_x" + std::to_string(origin[0]) + "_y" +  std::to_string(origin[1]) + "_z" + std::to_string(origin[2]) + "_t" + std::to_string(origin[3]);
 #endif
 
                 std::map<CorrelatorType::momenta_pair, multi1d<DComplex>>::iterator iter;
