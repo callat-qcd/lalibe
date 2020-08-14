@@ -1,13 +1,16 @@
-#ifndef __binaryRecursiveColoring_h_
-#define __binaryRecursiveColoring_h_
-#include <stdio.h>
-#include <stdlib.h>   /* mallocs, free */
-#include <chroma.h>
+#ifndef __recursive_coloring_h__
+#define __recursive_coloring_h__
 
-//I add this here so I can call some Layout stuff later on in the .cc file.
+//This is Andrea's file that has been modified slightly for chroma.
+//I put many declarations in a header file.
+//Arjun Singh Gambhir
+
+//I add this here so I can cal some Layout stuff later on.
 namespace Chroma
 {
 
+//I put the struct typedef in the header.
+/************************************************************************/
 typedef struct meshVars {
    unsigned int d;		/* Number of dimensions */
    unsigned int *ptsPerDim;     /* points per dimension */
@@ -18,12 +21,15 @@ typedef struct meshVars {
    char *PTbits;   /* Bits for d coordinates of a point (d x maxlog2(Pts)) */
 } meshVars;
 
+/************************************************************************/
+
 /* Turn integer to binary (chars 0 or 1). log(n) should be <= arraySize */
-void int2bin(unsigned int n, char *array, unsigned int arraySize);
+void int2bin(unsigned int n, char *array, unsigned int arraySize) ;
 
 /* Convert binary string to 10-base int. Assumes array has at least arraySize */
 unsigned int bin2int(char *array, unsigned int arraySize);
 
+/************************************************************************/
 /* RBorder array: Permutation array of 2^d nodes.
  * However, permutation nodes are kept in binary (char)
  * so it is a one d array which can be viewed as:
@@ -35,11 +41,20 @@ unsigned int bin2int(char *array, unsigned int arraySize);
 
 void findRBorder(struct meshVars *mesh);
 
+/************************************************************************/
+
 void hierOrderSetUp(struct meshVars *mesh);
+
+/************************************************************************/
 
 unsigned int hierOrderPoint(unsigned int *coord, struct meshVars *mesh);
 
+/************************************************************************/
+/* Deallocate mesh info */
 void freeMeshVars(struct meshVars *mesh);
+/************************************************************************
+ * Hadamard vector related functions 
+ ************************************************************************/
 
 /* hadaColPerm produces the index sequence of hadamard columns which 
  * correspond to a red-black ordering of a power of two dimension 
@@ -53,20 +68,21 @@ void freeMeshVars(struct meshVars *mesh);
  * 	unsigned int *Hperm: the array containing the indices
  */
 void hadaColPerm(unsigned int N, unsigned int* Hperm, unsigned int Hpsize);
-
+/************************************************************************/
 unsigned int num1bits(unsigned int a);
 
 int Hada_element(unsigned int i, unsigned int j);
+/************************************************************************
+ * PROBLEM SPECIFIC FUNCTIONS
+ ************************************************************************/
 
+/************************************************************************/
 void index2coord(unsigned int i, struct meshVars *mesh, unsigned int *coord);
-
 /************************************************************************/
 /* Create permutation array for all i rows local on this processor */
 /* This is problem specific and SHOULD BE ADAPTED */
 void hierPerm(struct meshVars *mesh, unsigned int *perm, unsigned int N);
 
-} //End the chroma namespace.
+} //Chroma namespace
 
 #endif
-
-

@@ -9,7 +9,7 @@
 
 //LALIBE STUFF
 #include "baryon_seqsource_w.h"
-#include "util/ferm/diractodr.h"
+#include "util/spin_basis.h"
 #include "seqsource_contractions_func_w.h"
 
 

@@ -15,6 +15,7 @@
 #include "../momentum/lalibe_sftmom.h"
 #include "meas/inline/io/named_objmap.h"
 #include "io/qprop_io.h"
+#include "util/spin_basis.h"
 
 
 namespace Chroma
@@ -310,7 +311,7 @@ namespace Chroma
 	    origin = orig_header.source_header.getTSrce();
 	    //If we need to rotate, we do it now.
 	    if(params.param.rotate_to_Dirac == true)
-	      LegacyProton::rotate_to_Dirac_Basis(up_quark_propagator);
+	      rotate_to_Dirac_Basis(up_quark_propagator);
 	}
 	catch (std::bad_cast)
 	{
@@ -353,7 +354,7 @@ namespace Chroma
 	    origin = orig_header.source_header.getTSrce();
 	    //If we need to rotate, we do it now.
 	    if(params.param.rotate_to_Dirac == true)
-	      LegacyProton::rotate_to_Dirac_Basis(down_quark_propagator);
+	      rotate_to_Dirac_Basis(down_quark_propagator);
 	}
 	catch (std::bad_cast)
 	{
@@ -396,7 +397,7 @@ namespace Chroma
 	    origin = orig_header.source_header.getTSrce();
 	    //If we need to rotate, we do it now.
 	    if(params.param.rotate_to_Dirac == true)
-	      LegacyProton::rotate_to_Dirac_Basis(strange_quark_propagator);
+	      rotate_to_Dirac_Basis(strange_quark_propagator);
 	}
 	catch (std::bad_cast)
 	{
@@ -439,7 +440,7 @@ namespace Chroma
 	    origin = orig_header.source_header.getTSrce();
 	    //If we need to rotate, we do it now.
 	    if(params.param.rotate_to_Dirac == true)
-	      LegacyProton::rotate_to_Dirac_Basis(charm_quark_propagator);
+	      rotate_to_Dirac_Basis(charm_quark_propagator);
 	}
 	catch (std::bad_cast)
 	{
@@ -463,7 +464,7 @@ namespace Chroma
 	  TheNamedObjMap::Instance().get(params.named_obj.fh_quark).getRecordXML(fh_prop_record_xml);
 	  //If we need to rotate, we do it now.
 	  if(params.param.rotate_to_Dirac == true)
-	    LegacyProton::rotate_to_Dirac_Basis(fh_quark_propagator);
+	    rotate_to_Dirac_Basis(fh_quark_propagator);
       }
       catch (std::bad_cast)
       {

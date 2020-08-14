@@ -18,9 +18,6 @@ namespace Chroma
                           std::string& cur);
 
 
-  void rotate_to_Dirac_Basis(LatticePropagator & quark_to_be_rotated);
-
-
 
   void FH_I_one_Iz_pm_one_contract(LatticePropagator & quark_1,
                              LatticePropagator & quark_2,

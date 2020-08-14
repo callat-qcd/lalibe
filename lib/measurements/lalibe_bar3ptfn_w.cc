@@ -244,12 +244,12 @@ namespace Chroma
 
 
   //--------------------------------------------------------------
-  struct Output_version_t
+  struct Output_version_ty
   {
     int out_version;
   };
 
-  struct FormFac_sequential_source_t
+  struct FormFac_sequential_source_ty
   {
     std::string            seqsrc_type;
     int               t_source;
@@ -259,22 +259,22 @@ namespace Chroma
     LalibeFormFac_insertions_t  formFacs;
   };
 
-  struct FormFac_Wilson_3Pt_fn_measurements_t
+  struct FormFac_Wilson_3Pt_fn_measurements_ty
   {
     int  output_version;   // Unique id for each output version of the structures
-    multi1d<FormFac_sequential_source_t> seqsrc;
+    multi1d<FormFac_sequential_source_ty> seqsrc;
   };
 
   struct LalibeBar3ptfn_t
   {
-    Output_version_t                      output_version;
+    Output_version_ty                      output_version;
     LalibeBar3ptfnParams::Param_t         param;
-    FormFac_Wilson_3Pt_fn_measurements_t  bar;
+    FormFac_Wilson_3Pt_fn_measurements_ty  bar;
   };
 
 
   // params
-  void write(BinaryWriter& bin, const Output_version_t& ver)
+  void write(BinaryWriter& bin, const Output_version_ty& ver)
   {
     write(bin, ver.out_version);
   }
@@ -289,7 +289,7 @@ namespace Chroma
 
 
   //
-  void write(BinaryWriter& bin, const FormFac_sequential_source_t& src)
+  void write(BinaryWriter& bin, const FormFac_sequential_source_ty& src)
   {
     write(bin, src.seqsrc_type);
     write(bin, src.t_source);
@@ -300,7 +300,7 @@ namespace Chroma
   }
 
   // Write a hadron measurements
-  void write(BinaryWriter& bin, const FormFac_Wilson_3Pt_fn_measurements_t& had)
+  void write(BinaryWriter& bin, const FormFac_Wilson_3Pt_fn_measurements_ty& had)
   {
     write(bin, had.output_version);
     write(bin, had.seqsrc);

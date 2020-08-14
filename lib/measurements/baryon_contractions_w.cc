@@ -11,6 +11,7 @@
 #include "../momentum/lalibe_sftmom.h"
 #include "meas/inline/io/named_objmap.h"
 #include "io/qprop_io.h"
+#include "util/spin_basis.h"
 
 #include <set>
 
