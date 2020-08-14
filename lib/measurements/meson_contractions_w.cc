@@ -449,8 +449,8 @@ namespace Chroma
       }
 
       //Initialize FT stuff here, whether this is used or not below is another story...
-      LalibeSftMom ft = params.param.is_mom_max ? LalibeSftMom(params.param.p2_max, origin, false, j_decay)
-	: LalibeSftMom(params.param.p_list, origin, j_decay);
+      LalibeSftMom ft = params.param.is_mom_max ? LalibeSftMom(params.param.p2_max, origin, false, j_decay) 
+          : LalibeSftMom(params.param.p_list, origin, j_decay);
 
       //Here's Nt, we need this.
       int Nt = Layout::lattSize()[j_decay];
@@ -467,112 +467,249 @@ namespace Chroma
       //This is going to be a horrible set of if statements for now, may change this later.
       //Loop over list of particles.
 
-      for(int particle_index = 0; particle_index < params.param.particle_list.size(); particle_index++)
-      {
+      // Declare lists to check
+      std::vector<std::string> pi_octet{"piplus", "octet", "octet_iso"};
+      std::vector<std::string> kp_octet{"kplus",  "octet", "octet_iso"};
+      std::vector<std::string> ss_octet{"ss_conn","octet", "octet_iso"};
 
-	if(params.param.particle_list[particle_index] == "piplus")
-	{
-	  QDPIO::cout<<"Particle number "<<(particle_index+1)<<" is the piplus."<<std::endl;
-	  QDPIO::cout<<"Checking to make sure we have the correct quark propagators to compute the piplus."<<std::endl;
-	  if(params.named_obj.is_up == true && params.named_obj.is_down == true)
-	  {
-	    QDPIO::cout<<"Found up and down quarks for the piplus. Starting calculation..."<<std::endl;
+      std::vector<std::string> pz_octet{"pizero_conn", "octet_iso"};
+      std::vector<std::string> kz_octet{"kzero",       "octet_iso"};
+      std::vector<std::string> uu_octet{"uu_conn",     "octet_iso"};
+      std::vector<std::string> dd_octet{"dd_conn",     "octet_iso"};
+      std::vector<std::string> ee_octet{"e8_conn",     "octet_iso"};
 
+      for(int particle_index = 0; particle_index < params.param.particle_list.size(); particle_index++){
+          // PiPlus
+          if( std::find(std::begin(pi_octet), std::end(pi_octet), params.param.particle_list[particle_index]) != std::end(pi_octet)){
+              QDPIO::cout<<"Particle number "<<(particle_index+1)<<" is the piplus."<<std::endl;
+              QDPIO::cout<<"Checking to make sure we have the correct quark propagators to compute the piplus."<<std::endl;
+              if(params.named_obj.is_up == true && params.named_obj.is_down == true){
+                  QDPIO::cout<<"Found up and down quarks for the piplus. Starting calculation..."<<std::endl;
 
-	    LatticeComplex piplus = zero;
-
-	    I_one_Iz_pm_one_contract(up_quark_propagator, down_quark_propagator, piplus);
-
-        // Write out the correlator.
-	    write_correlator(params.param.output_full_correlator,
-		"piplus",
+                  LatticeComplex piplus = zero;
+                  I_one_Iz_pm_one_contract(up_quark_propagator, down_quark_propagator, piplus);
+                  // Write out the correlator.
+                  write_correlator(params.param.output_full_correlator,
+                                   "piplus",
 #ifdef BUILD_HDF5
-		params.param.obj_path, h5out, wmode,
+                                   params.param.obj_path, h5out, wmode,
 #endif
-		t_0, Nt, origin, ft, piplus);
-      }
-	  else
-	    QDPIO::cout<<"Sorry, I couldn't find both an up quark and down quark. Skipping the piplus contraction..."<<std::endl;
-	}
+                                   t_0, Nt, origin, ft, piplus);
+              }
+              else{
+                  QDPIO::cerr<<"You requested PiPlus but did not provide UP and DOWN quarks - aborting" << std::endl;
+                  QDP_abort(1);
+              }
+          }
+          // KPlus
+          if( std::find(std::begin(kp_octet), std::end(kp_octet), params.param.particle_list[particle_index]) != std::end(kp_octet)){
+              QDPIO::cout<<"Particle number "<<(particle_index+1)<<" is the kplus."<<std::endl;
+              QDPIO::cout<<"Checking to make sure we have the correct quark propagators to compute the kplus."<<std::endl;
+              if(params.named_obj.is_up == true && params.named_obj.is_strange == true){
+                  QDPIO::cout<<"Found up and strage quarks for the kplus. Starting calculation..."<<std::endl;
 
- 	if(params.param.particle_list[particle_index] == "piminus")
-	{
-	  QDPIO::cout<<"Particle number "<<(particle_index+1)<<" is the piminus."<<std::endl;
-	  QDPIO::cout<<"Checking to make sure we have the correct quark propagators to compute the piminus."<<std::endl;
-	  if(params.named_obj.is_up == true && params.named_obj.is_down == true)
-	  {
-	    QDPIO::cout<<"Found up and down quarks for the piminus. Starting calculation..."<<std::endl;
-
-
-	    LatticeComplex piminus = zero;
-
-	    I_one_Iz_pm_one_contract(down_quark_propagator, up_quark_propagator, piminus);
-
-        // Write out the correlator.
-	    write_correlator(params.param.output_full_correlator,
-		"piminus",
+                  LatticeComplex kplus = zero;
+                  I_one_Iz_pm_one_contract(up_quark_propagator, strange_quark_propagator, kplus);
+                  // Write out the correlator.
+                  write_correlator(params.param.output_full_correlator,
+                                   "kplus",
 #ifdef BUILD_HDF5
-		params.param.obj_path, h5out, wmode,
+                                   params.param.obj_path, h5out, wmode,
 #endif
-		t_0, Nt, origin, ft, piminus);
+                                   t_0, Nt, origin, ft, kplus);
+              }
+              else{
+                  QDPIO::cerr<<"You requested KPlus but did not provide UP and STRANGE quarks - aborting" << std::endl;
+                  QDP_abort(1);
+              }
+          }
+          // Sbar S
+          if( std::find(std::begin(ss_octet), std::end(ss_octet), params.param.particle_list[particle_index]) != std::end(ss_octet)){
+              QDPIO::cout<<"Particle number "<<(particle_index+1)<<" is the ss_conn."<<std::endl;
+              QDPIO::cout<<"Checking to make sure we have the correct quark propagators to compute the ss_conn."<<std::endl;
+              if(params.named_obj.is_strange == true){
+                  QDPIO::cout<<"Found strange quark for the ss_conn. Starting calculation..."<<std::endl;
 
-
-      }
-	  else
-	    QDPIO::cout<<"Sorry, I couldn't find both an up quark and down quark. Skipping the piminus contraction..."<<std::endl;
-	}
-
-	if(params.param.particle_list[particle_index] == "kplus")
-	{
-	  QDPIO::cout<<"Particle number "<<(particle_index+1)<<" is the kplus."<<std::endl;
-	  QDPIO::cout<<"Checking to make sure we have the correct quark propagators to compute the kplus."<<std::endl;
-	  if(params.named_obj.is_up == true && params.named_obj.is_strange == true)
-	  {
-	    QDPIO::cout<<"Found up and strange quarks for the kplus. Starting calculation..."<<std::endl;
-
-
-	    LatticeComplex kplus = zero;
-
-	    I_one_Iz_pm_one_contract(up_quark_propagator, strange_quark_propagator, kplus);
-
-        // Write out the correlator.
-	    write_correlator(params.param.output_full_correlator,
-		"kplus",
+                  LatticeComplex ss_conn = zero;
+                  I_one_Iz_pm_one_contract(strange_quark_propagator, strange_quark_propagator, ss_conn);
+                  // Write out the correlator.
+                  write_correlator(params.param.output_full_correlator,
+                                   "ss_conn",
 #ifdef BUILD_HDF5
-		params.param.obj_path, h5out, wmode,
+                                   params.param.obj_path, h5out, wmode,
 #endif
-		t_0, Nt, origin, ft, kplus);
+                                   t_0, Nt, origin, ft, ss_conn);
+              }
+              else{
+                  QDPIO::cerr<<"You requested ss_conn but did not provide STRANGE quarks - aborting" << std::endl;
+                  QDP_abort(1);
+              }
+          }
+          // Ubar U
+          if( std::find(std::begin(uu_octet), std::end(uu_octet), params.param.particle_list[particle_index]) != std::end(uu_octet)){
+              QDPIO::cout<<"Particle number "<<(particle_index+1)<<" is the uu_conn."<<std::endl;
+              QDPIO::cout<<"Checking to make sure we have the correct quark propagators to compute the uu_conn."<<std::endl;
+              if(params.named_obj.is_up == true){
+                  QDPIO::cout<<"Found up quark for the uu_conn. Starting calculation..."<<std::endl;
 
-      }
-	  else
-	    QDPIO::cout<<"Sorry, I couldn't find both an up quark and down quark. Skipping the kplus contraction..."<<std::endl;
-	}
-
-	if(params.param.particle_list[particle_index] == "kminus")
-	{
-	  QDPIO::cout<<"Particle number "<<(particle_index+1)<<" is the kminus."<<std::endl;
-	  QDPIO::cout<<"Checking to make sure we have the correct quark propagators to compute the kminus."<<std::endl;
-	  if(params.named_obj.is_up == true && params.named_obj.is_strange == true)
-	  {
-	    QDPIO::cout<<"Found up and strange quarks for the kminus. Starting calculation..."<<std::endl;
-
-
-	    LatticeComplex kminus = zero;
-
-	    I_one_Iz_pm_one_contract(strange_quark_propagator,up_quark_propagator, kminus);
-        // Write out the correlator.
-	    write_correlator(params.param.output_full_correlator,
-		"kminus",
+                  LatticeComplex uu_conn = zero;
+                  I_one_Iz_pm_one_contract(up_quark_propagator, up_quark_propagator, uu_conn);
+                  // Write out the correlator.
+                  write_correlator(params.param.output_full_correlator,
+                                   "uu_conn",
 #ifdef BUILD_HDF5
-		params.param.obj_path, h5out, wmode,
+                                   params.param.obj_path, h5out, wmode,
 #endif
-		t_0, Nt, origin, ft, kminus);
+                                   t_0, Nt, origin, ft, uu_conn);
+              }
+              else{
+                  QDPIO::cerr<<"You requested uu_conn but did not provide UP quarks - aborting" << std::endl;
+                  QDP_abort(1);
+              }
+          }
+          // Dbar D
+          if( std::find(std::begin(dd_octet), std::end(dd_octet), params.param.particle_list[particle_index]) != std::end(dd_octet)){
+              QDPIO::cout<<"Particle number "<<(particle_index+1)<<" is the dd_conn."<<std::endl;
+              QDPIO::cout<<"Checking to make sure we have the correct quark propagators to compute the dd_conn."<<std::endl;
+              if(params.named_obj.is_down == true){
+                  QDPIO::cout<<"Found down quark for the dd_conn. Starting calculation..."<<std::endl;
 
-      }
-	  else
-	    QDPIO::cout<<"Sorry, I couldn't find both an up quark and down quark. Skipping the kminus contraction..."<<std::endl;
-	}
+                  LatticeComplex dd_conn = zero;
+                  I_one_Iz_pm_one_contract(down_quark_propagator, down_quark_propagator, dd_conn);
+                  // Write out the correlator.
+                  write_correlator(params.param.output_full_correlator,
+                                   "dd_conn",
+#ifdef BUILD_HDF5
+                                   params.param.obj_path, h5out, wmode,
+#endif
+                                   t_0, Nt, origin, ft, dd_conn);
+              }
+              else{
+                  QDPIO::cerr<<"You requested dd_conn but did not provide DOWN quarks - aborting" << std::endl;
+                  QDP_abort(1);
+              }
+          }
+          // Pi Zero
+          if( std::find(std::begin(pz_octet), std::end(pz_octet), params.param.particle_list[particle_index]) != std::end(pz_octet)){
+              QDPIO::cout<<"Particle number "<<(particle_index+1)<<" is the pizero_conn."<<std::endl;
+              QDPIO::cout<<"Checking to make sure we have the correct quark propagators to compute the pizero_conn."<<std::endl;
+              if(params.named_obj.is_up == true && params.named_obj.is_down == true){
+                  QDPIO::cout<<"Found up and down quarks for the pizero_conn. Starting calculation..."<<std::endl;
 
+                  LatticeComplex uu = zero;
+                  LatticeComplex dd = zero;
+                  I_one_Iz_pm_one_contract(up_quark_propagator,   up_quark_propagator, uu);
+                  I_one_Iz_pm_one_contract(down_quark_propagator, down_quark_propagator, dd);
+                  LatticeComplex pizero_conn = 0.5 * uu + 0.5 * dd;
+                  // Write out the correlator.
+                  write_correlator(params.param.output_full_correlator,
+                                   "pizero_conn",
+#ifdef BUILD_HDF5
+                                   params.param.obj_path, h5out, wmode,
+#endif
+                                   t_0, Nt, origin, ft, pizero_conn);
+              }
+              else{
+                  QDPIO::cerr<<"You requested pizero_conn but did not provide UP and DOWN quarks - aborting" << std::endl;
+                  QDP_abort(1);
+              }
+          }
+          // K Zero
+          if( std::find(std::begin(kz_octet), std::end(kz_octet), params.param.particle_list[particle_index]) != std::end(kz_octet)){
+              QDPIO::cout<<"Particle number "<<(particle_index+1)<<" is the kzero."<<std::endl;
+              QDPIO::cout<<"Checking to make sure we have the correct quark propagators to compute the kzero."<<std::endl;
+              if(params.named_obj.is_down == true && params.named_obj.is_strange == true){
+                  QDPIO::cout<<"Found down and strage quarks for the kplus. Starting calculation..."<<std::endl;
+
+                  LatticeComplex kzero = zero;
+                  I_one_Iz_pm_one_contract(down_quark_propagator, strange_quark_propagator, kzero);
+                  // Write out the correlator.
+                  write_correlator(params.param.output_full_correlator,
+                                   "kzero",
+#ifdef BUILD_HDF5
+                                   params.param.obj_path, h5out, wmode,
+#endif
+                                   t_0, Nt, origin, ft, kzero);
+              }
+              else{
+                  QDPIO::cerr<<"You requested KZero but did not provide DOWN and STRANGE quarks - aborting" << std::endl;
+                  QDP_abort(1);
+              }
+          }
+          // Eta 8 connected
+          if( std::find(std::begin(ee_octet), std::end(ee_octet), params.param.particle_list[particle_index]) != std::end(ee_octet)){
+              QDPIO::cout<<"Particle number "<<(particle_index+1)<<" is the e8_conn."<<std::endl;
+              QDPIO::cout<<"Checking to make sure we have the correct quark propagators to compute the e8_conn."<<std::endl;
+              if(params.named_obj.is_up == true && params.named_obj.is_down == true && params.named_obj.is_strange == true){
+                  QDPIO::cout<<"Found up and down and strange quarks for the e8_conn. Starting calculation..."<<std::endl;
+
+                  LatticeComplex uu_e = zero;
+                  LatticeComplex dd_e = zero;
+                  LatticeComplex ss_e = zero;
+                  I_one_Iz_pm_one_contract(up_quark_propagator,      up_quark_propagator, uu_e);
+                  I_one_Iz_pm_one_contract(down_quark_propagator,    down_quark_propagator, dd_e);
+                  I_one_Iz_pm_one_contract(strange_quark_propagator, strange_quark_propagator, ss_e);
+                  // 1/6 UU + 1/6 DD + 4/6 SS
+                  LatticeComplex ee_conn = 0.16666666666666667 * uu_e + 0.16666666666666667 * dd_e + 4 * 0.16666666666666667 * ss_e;
+                  // Write out the correlator.
+                  write_correlator(params.param.output_full_correlator,
+                                   "e8_conn",
+#ifdef BUILD_HDF5
+                                   params.param.obj_path, h5out, wmode,
+#endif
+                                   t_0, Nt, origin, ft, ee_conn);
+              }
+              else{
+                  QDPIO::cerr<<"You requested e8_conn but did not provide UP and DOWN and STRANGE quarks - aborting" << std::endl;
+                  QDP_abort(1);
+              }
+          }
+
+          // Other specific mesons
+          if(params.param.particle_list[particle_index] == "piminus"){
+              QDPIO::cout<<"Particle number "<<(particle_index+1)<<" is the piminus."<<std::endl;
+              QDPIO::cout<<"Checking to make sure we have the correct quark propagators to compute the piminus."<<std::endl;
+              if(params.named_obj.is_up == true && params.named_obj.is_down == true){
+                  QDPIO::cout<<"Found up and down quarks for the piminus. Starting calculation..."<<std::endl;
+
+                  LatticeComplex piminus = zero;
+                  I_one_Iz_pm_one_contract(down_quark_propagator, up_quark_propagator, piminus);
+                  // Write out the correlator.
+                  write_correlator(params.param.output_full_correlator,
+                                   "piminus",
+#ifdef BUILD_HDF5
+                                   params.param.obj_path, h5out, wmode,
+#endif
+                                   t_0, Nt, origin, ft, piminus);
+              }
+              else{
+                  QDPIO::cerr<<"You requested PiMinus but did not provide UP and DOWN quarks - aborting" << std::endl;
+                  QDP_abort(1);
+              }
+          }
+          
+          if(params.param.particle_list[particle_index] == "kminus"){
+              QDPIO::cout<<"Particle number "<<(particle_index+1)<<" is the kminus."<<std::endl;
+              QDPIO::cout<<"Checking to make sure we have the correct quark propagators to compute the kminus."<<std::endl;
+              if(params.named_obj.is_up == true && params.named_obj.is_strange == true){
+                  QDPIO::cout<<"Found up and strange quarks for the kminus. Starting calculation..."<<std::endl;
+
+                  LatticeComplex kminus = zero;
+                  I_one_Iz_pm_one_contract(strange_quark_propagator,up_quark_propagator, kminus);
+                  // Write out the correlator.
+                  write_correlator(params.param.output_full_correlator,
+                                   "kminus",
+#ifdef BUILD_HDF5
+                                   params.param.obj_path, h5out, wmode,
+#endif
+                                   t_0, Nt, origin, ft, kminus);
+              }
+              else{
+                  QDPIO::cerr<<"You requested KMinus but did not provide UP and STRANGE quarks - aborting" << std::endl;
+                  QDP_abort(1);
+              }
+          }
+          
       }
 
 #ifdef BUILD_HDF5
@@ -584,14 +721,14 @@ namespace Chroma
 
       snoop.stop();
       QDPIO::cout << name << ": total time = "
-		  << snoop.getTimeInSeconds()
-		  << " secs" << std::endl;
+                  << snoop.getTimeInSeconds()
+                  << " secs" << std::endl;
 
       QDPIO::cout << name << ": ran successfully" << std::endl;
 
       END_CODE();
     }
-
+      
   }
 
 }

@@ -65,28 +65,158 @@
     </FermionAction>
     <InvertParam>
       <invType>CG_INVERTER</invType>
-      <RsdCG>1.0e-15</RsdCG>
+      <RsdCG>1.0e-12</RsdCG>
       <MaxCG>1000</MaxCG>
     </InvertParam>
   </Param>
   <NamedObject>
     <gauge_id>default_gauge_field</gauge_id>
     <source_id>sh_source_0</source_id>
-    <prop_id>PS_prop</prop_id>
+    <prop_id>PS_up</prop_id>
   </NamedObject>
 </elem>
 
 <elem>
-  <Name>HDF5_WRITE_ERASE_NAMED_OBJECT</Name>
+  <Name>PROPAGATOR</Name>
+  <Frequency>1</Frequency>
+  <Param>
+    <version>10</version>
+    <quarkSpinType>FULL</quarkSpinType>
+    <obsvP>false</obsvP>
+    <numRetries>1</numRetries>
+    <FermionAction>
+      <FermAct>UNPRECONDITIONED_CLOVER</FermAct>
+      <Mass>0.2</Mass>
+      <clovCoeff>1.17</clovCoeff>
+      <FermionBC>
+        <FermBC>SIMPLE_FERMBC</FermBC>
+        <boundary>1 1 1 -1</boundary>
+      </FermionBC>
+    </FermionAction>
+    <InvertParam>
+      <invType>CG_INVERTER</invType>
+      <RsdCG>1.0e-12</RsdCG>
+      <MaxCG>1000</MaxCG>
+    </InvertParam>
+  </Param>
+  <NamedObject>
+    <gauge_id>default_gauge_field</gauge_id>
+    <source_id>sh_source_0</source_id>
+    <prop_id>PS_dn</prop_id>
+  </NamedObject>
+</elem>
+
+<elem>
+  <Name>PROPAGATOR</Name>
+  <Frequency>1</Frequency>
+  <Param>
+    <version>10</version>
+    <quarkSpinType>FULL</quarkSpinType>
+    <obsvP>false</obsvP>
+    <numRetries>1</numRetries>
+    <FermionAction>
+      <FermAct>UNPRECONDITIONED_CLOVER</FermAct>
+      <Mass>0.6</Mass>
+      <clovCoeff>1.17</clovCoeff>
+      <FermionBC>
+        <FermBC>SIMPLE_FERMBC</FermBC>
+        <boundary>1 1 1 -1</boundary>
+      </FermionBC>
+    </FermionAction>
+    <InvertParam>
+      <invType>CG_INVERTER</invType>
+      <RsdCG>1.0e-12</RsdCG>
+      <MaxCG>1000</MaxCG>
+    </InvertParam>
+  </Param>
+  <NamedObject>
+    <gauge_id>default_gauge_field</gauge_id>
+    <source_id>sh_source_0</source_id>
+    <prop_id>PS_strange</prop_id>
+  </NamedObject>
+</elem>
+
+<elem>
+  <Name>HDF5_WRITE_NAMED_OBJECT</Name>
   <Frequency>1</Frequency>
   <NamedObject>
-    <object_id>PS_prop</object_id>
+    <object_id>PS_up</object_id>
     <object_type>LatticePropagator</object_type>
   </NamedObject>
   <File>
     <file_name>./test_propagator.h5</file_name>
     <path>/sh_sig2p0_n5</path>
-    <obj_name>PS_prop</obj_name>
+    <obj_name>PS_up</obj_name>
+  </File>
+</elem>
+
+<elem>
+  <Name>QIO_WRITE_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>PS_up</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./test_propagator_up.lime</file_name>
+    <file_volfmt>SINGLEFILE</file_volfmt>
+    <parallel_io>true</parallel_io>
+  </File>
+</elem>
+
+<elem>
+  <Name>HDF5_WRITE_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>PS_dn</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./test_propagator.h5</file_name>
+    <path>/sh_sig2p0_n5</path>
+    <obj_name>PS_dn</obj_name>
+  </File>
+</elem>
+
+<elem>
+  <Name>QIO_WRITE_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>PS_dn</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./test_propagator_dn.lime</file_name>
+    <file_volfmt>SINGLEFILE</file_volfmt>
+    <parallel_io>true</parallel_io>
+  </File>
+</elem>
+
+<elem>
+  <Name>HDF5_WRITE_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>PS_strange</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./test_propagator.h5</file_name>
+    <path>/sh_sig2p0_n5</path>
+    <obj_name>PS_strange</obj_name>
+  </File>
+</elem>
+
+<elem>
+  <Name>QIO_WRITE_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>PS_strange</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./test_propagator_strange.lime</file_name>
+    <file_volfmt>SINGLEFILE</file_volfmt>
+    <parallel_io>true</parallel_io>
   </File>
 </elem>
 

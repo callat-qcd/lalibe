@@ -19,6 +19,7 @@
 #include "lalibe_seqsource_w.h"
 #include "coherent_seqsource_w.h"
 #include "pipi_scattering_w.h"
+#include "qedm_product_field.h"
 
 // UTILITIES
 #include "multi_prop_add.h"
@@ -50,7 +51,7 @@ namespace Chroma
 	// Fermact stuff from chroma
 	success &= WilsonTypeFermActsEnv::registerAll();
 
-        // INTERESTING PHYSICS
+  // INTERESTING PHYSICS
 	success &= LalibeStochasticFHPropagatorEnv::registerAll() ;
 	success &= LalibeHPFHPropagatorEnv::registerAll() ;
 	success &= LalibeStochasticFourQuarkFHPropagatorEnv::registerAll() ;
@@ -58,17 +59,18 @@ namespace Chroma
 	success &= LalibeFlavorConservingFHBaryonContractionsEnv::registerAll() ;
 	success &= LalibeFlavorChangingFHBaryonContractionsEnv::registerAll() ;
 	success &= LalibeBaryonContractionsEnv::registerAll() ;
-        success &= LalibeMesonContractionsEnv::registerAll() ;
+  success &= LalibeMesonContractionsEnv::registerAll() ;
 	success &= LalibeFHPropagatorEnv::registerAll() ;
 	success &= LalibeZNPropagatorEnv::registerAll() ;
 	success &= LalibeHPPropagatorEnv::registerAll() ;
 	success &= LalibeBar3ptfnEnv::registerAll() ;
-        success &= LalibeSeqSourceEnv::registerAll() ;
-        success &= LalibeCoherentSeqsourceEnv::registerAll() ;
-        success &= LalibePipiScatteringEnv::registerAll() ;
+  success &= LalibeSeqSourceEnv::registerAll() ;
+  success &= LalibeCoherentSeqsourceEnv::registerAll() ;
+  success &= LalibePipiScatteringEnv::registerAll() ;
+  success &= LalibeQEDMProductFieldEnv::registerAll() ;
 
-        // USEFUL UTILITIES
-        success &= LalibeMultiPropagatorAddEnv::registerAll() ;
+  // USEFUL UTILITIES
+  success &= LalibeMultiPropagatorAddEnv::registerAll() ;
 
 #ifdef BUILD_HDF5
 	success &= LalibeHDF5ReadNamedObjEnv::registerAll();
