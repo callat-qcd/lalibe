@@ -27,9 +27,12 @@
  // quark_prop_1 = S_u(x, y) or S_d(x, y)
  // quark_prop_2 = S_u(x, y) or S_d(x, y) for pipi, S_s(x, y) for kk or pik
 
+// Chroma includes
 #include "chromabase.h"
+#include "util/ft/sftmom.h"
+#include "meas/hadron/qqbar_w.h"
+// Lalibe includes
 #include "pipi_scattering_func_w.h"
-#include "../../../chroma/lib/meas/hadron/qqbar_w.cc"
 
 namespace Chroma
 {
