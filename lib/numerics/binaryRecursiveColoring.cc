@@ -13,6 +13,7 @@
 //I put many declarations in a header file.
 //Arjun Singh Gambhir
 #include "binaryRecursiveColoring.h"
+#include "chromabase.h"
 
 //I add this here so I can call some Layout stuff later on.
 namespace Chroma
@@ -270,7 +271,7 @@ void hierPerm(struct meshVars *mesh, unsigned int *perm, unsigned int N)
   for(unsigned int x = 0; x < Nx; x++)
     for(unsigned int y = 0; y < Ny; y++)
       for(unsigned int z = 0; z < Nz; z++)
-	for(unsigned int t = 0; t < Nz; z++)
+	for(unsigned int t = 0; t < Nt; t++)
 	{
 	  unsigned int coord[4] = {x, y, z, t};
 	  unsigned int* coordptr = coord;

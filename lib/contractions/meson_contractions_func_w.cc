@@ -14,7 +14,7 @@
  */
 
 #include "chromabase.h"
-#include "util/ferm/diractodr.h"
+#include "util/spin_basis.h"
 #include "meson_contractions_func_w.h"
 
 namespace Chroma
@@ -94,15 +94,6 @@ namespace Chroma
     {
     FH_antiquark_prop = -adj(Gamma(which_gamma_five)*FH_quark_prop*Gamma(which_gamma_five));
     }
-  }
-
-
-  void rotate_to_Dirac_Basis(LatticePropagator & quark_to_be_rotated)
-  {
-    //I am lazy so I copy Robert to rotate this stuff...
-    SpinMatrix U = DiracToDRMat();
-    quark_to_be_rotated = adj(U)*quark_to_be_rotated*U ;
-
   }
 
 

@@ -8,7 +8,7 @@
 
 #include "baryon_contractions_func_w.h"
 #include "chromabase.h"
-#include "util/ferm/diractodr.h"
+#include "util/spin_basis.h"
 
 
 namespace Chroma 
@@ -781,15 +781,6 @@ namespace Chroma
       retVec.push_back(sIt.first);
 
     return retVec;
-  }
-
-
-  void rotate_to_Dirac_Basis(LatticePropagator & quark_to_be_rotated)
-  {
-    //I am lazy so I copy Robert to rotate this stuff...
-    SpinMatrix U = DiracToDRMat();
-    quark_to_be_rotated = adj(U)*quark_to_be_rotated*U ;
-
   }
 
 
