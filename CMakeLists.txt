@@ -27,7 +27,7 @@ message("I hope for your sake that chroma is installed here: " ${CHROMA_INSTALL}
 find_package(CHROMA PATHS configuration)
 set(CMAKE_CXX_FLAGS "${CHROMA_CXX_FLAGS} -I${CMAKE_SOURCE_DIR}/lib")
 add_subdirectory(lib)
-set(ORDERED_LIBS "-L${CMAKE_CURRENT_BINARY_DIR}/lib -llb ${CHROMA_LD_FLAGS} ${CHROMA_LIBS}")
+set(ORDERED_LIBS "-L${CMAKE_CURRENT_BINARY_DIR}/lib -llb ${CHROMA_LD_FLAGS} ${CHROMA_LIBS}  -lqio -llime")
 message("Here are the chroma cxx flags I found: " ${CHROMA_CXX_FLAGS})
 message("Here are the chroma ld flags I found: " ${CHROMA_LD_FLAGS})
 message("Here are the chroma libs I found: " ${CHROMA_LIBS})
