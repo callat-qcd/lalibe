@@ -87,7 +87,8 @@ namespace Chroma
                 {
                     QDPIO::cout<<"I couldn't find an "<<aFlav<<" quark, hope you don't need it for the inputted meson-meson contractions. "<<std::endl;
                     }
-                }
+            }
+        }
         // don't proliferate xml out that no one reads
         void write(XMLWriter& xml, const std::string& path, const PipiParams::NamedObject_t& input) {}
 
@@ -148,11 +149,12 @@ namespace Chroma
             bool have_strange = params.named_obj.quark_map.count('s');
 
             // map for propagator memory
-            std::map<char, const LatticePropagator&> prop_map;
-            for (auto& qIt : params.named_object.quark_map) {
+            std::map<char, const LatticePropagator*> prop_map;
+            for (auto& qIt : params.named_obj.quark_map) {
                 try
                     {
-                    prop_map[qIt.first] = TheNamedObjMap::Instance().getData<LatticePropagator>(qIt.second);
+                    prop_map[qIt.first] = &TheNamedObjMap::Instance().getData<LatticePropagator>(qIt.second);
+
                     XMLReader prop_file_xml, prop_record_xml;
                     TheNamedObjMap::Instance().get(qIt.second).getFileXML(prop_file_xml);
                     TheNamedObjMap::Instance().get(qIt.second).getRecordXML(prop_record_xml);
@@ -160,12 +162,12 @@ namespace Chroma
                     MakeSourceProp_t  orig_header;
                     if (prop_record_xml.count("/Propagator") != 0)
                         {
-                            QDPIO::cout<<aFlav<<" quark propagator is unsmeared, reading from Propagator tag..."<<std::endl;
+                            QDPIO::cout<< qIt.first <<" quark propagator is unsmeared, reading from Propagator tag..."<<std::endl;
                             read(prop_record_xml, "/Propagator", orig_header);
                         }
                     else if (prop_record_xml.count("/SinkSmear") != 0)
                         {
-                            QDPIO::cout<<aFlav<<" quark propagator is smeared, reading from SinkSmear tag..."<<std::endl;
+                            QDPIO::cout<< qIt.first <<" quark propagator is smeared, reading from SinkSmear tag..."<<std::endl;
                             read(prop_record_xml, "/SinkSmear", orig_header);
                         }
                     else
@@ -232,13 +234,13 @@ namespace Chroma
             // we always do pi+ pi+
             QDPIO::cout << "    pi+ pi+" << std::endl;
             pipi_correlator(correlators["pip_pip"],
-                            prop_map['u'], prop_map['d'],
+                            *prop_map['u'], *prop_map['d'],
                             origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 0);
             if (params.param.diagrams == 1) {
                 // do all 4 diagrams
                 for (int dd=1; dd<=4; dd++){
                     pipi_correlator(correlators["pip_pip_d" + std::to_string(dd)],
-                                    prop_map['u'], prop_map['d'],
+                                    *prop_map['u'], *prop_map['d'],
                                     origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, dd);
                                 }
                 }
@@ -247,12 +249,12 @@ namespace Chroma
                 // add pi+ K+
                 QDPIO::cout << "    pi+ K+" << std::endl;
                 pik_correlator(correlators["pip_kp"],
-                                prop_map['u'], prop_map['d'], prop_map['u'], prop_map['s'],
+                                *prop_map['u'], *prop_map['d'], *prop_map['u'], *prop_map['s'],
                                 origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 0);
                 if (params.param.diagrams == 1) {
                     for (int dd=1; dd<=2; dd++){
                         pik_correlator(correlators["pip_kp_d" + std::to_string(dd)],
-                                        prop_map['u'], prop_map['d'], prop_map['u'], prop_map['s'],
+                                        *prop_map['u'], *prop_map['d'], *prop_map['u'], *prop_map['s'],
                                         origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, dd);
                                     }
                 }
@@ -260,12 +262,12 @@ namespace Chroma
                 // add K+ K+
                 QDPIO::cout << "    K+ K+" << std::endl;
                 pipi_correlator(correlators["kp_kp"],
-                                prop_map['u'], prop_map['s'],
+                                *prop_map['u'], *prop_map['s'],
                                 origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 0);
                 if (params.param.diagrams == 1) {
                     for (int dd=1; dd<=4; dd++){
                         pipi_correlator(correlators["kp_kp_d" + std::to_string(dd)],
-                                        prop_map['u'], prop_map['s'],
+                                        *prop_map['u'], *prop_map['s'],
                                         origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, dd);
                                     }
                 }
@@ -275,24 +277,24 @@ namespace Chroma
                     // add K0 K0
                     QDPIO::cout << "    K0 K0" << std::endl;
                     pipi_correlator(correlators["k0_k0"],
-                                    prop_map['d'], prop_map['s'],
+                                    *prop_map['d'], *prop_map['s'],
                                     origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 0);
                     if (params.param.diagrams == 1) {
                         for (int dd=1; dd<=4; dd++){
                             pipi_correlator(correlators["k0_k0_d" + std::to_string(dd)],
-                                            prop_map['d'], prop_map['s'],
+                                            *prop_map['d'], *prop_map['s'],
                                             origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, dd);
                         }
                     }
                     // add pi+ K0Bar
                     QDPIO::cout << "    pi+ K0Bar" << std::endl;
                     pik_correlator(correlators["pip_k0b"],
-                                    prop_map['u'], prop_map['d'], prop_map['s'], prop_map['d'],
+                                    *prop_map['u'], *prop_map['d'], *prop_map['s'], *prop_map['d'],
                                     origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 0);
                     if (params.param.diagrams == 1) {
                         for (int dd=1; dd<=2; dd++){
                             pik_correlator(correlators["pip_k0b_d"+ std::to_string(dd)],
-                                            prop_map['u'], prop_map['d'], prop_map['s'], prop_map['d'],
+                                            *prop_map['u'], *prop_map['d'], *prop_map['s'], *prop_map['d'],
                                             origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, dd);
                         }
                     }

@@ -61,7 +61,7 @@ namespace Chroma
         multi2d<DPropagator> Q(phases.numMom(), Nt);
         Q = zero;
 
-        compute_qqbar(Q, a_quark_prop_2, quark_prop_1, phases, t0);
+        compute_qqbar(Q, quark_prop_1, a_quark_prop_2, phases, t0);
 
         DComplex origin_fix;
         Double origin_phases;
@@ -89,7 +89,7 @@ namespace Chroma
                             origin_fix = cmplx(cos(origin_phases), sin(origin_phases));
 
                             std::pair< std::tuple<int, int, int>, std::tuple<int, int, int> > pq_pair;
-                            pq_pair = std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))
+                            pq_pair = std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]));
 
                             correlator_out[pq_pair] = tmp_multi1d;
 
@@ -122,7 +122,7 @@ namespace Chroma
 
     void pik_correlator(CorrelatorType::Correlator& correlator_out,
                         const LatticePropagator& quark_prop_1, const LatticePropagator& a_quark_prop_2,
-                        conts LatticePropagator& quark_prop_3, const LatticePropagator& a_quark_prop_4,
+                        const LatticePropagator& quark_prop_3, const LatticePropagator& a_quark_prop_4,
                         const multi1d<int>& origin, const int p2max, const int ptot2max,
                         const int t0, const int j_decay, const int diagram)
     {
@@ -139,8 +139,8 @@ namespace Chroma
         Q1 = zero;
         P1 = zero;
 
-        compute_qqbar(Q1, a_quark_prop_2, quark_prop_1, phases, t0);
-        compute_qqbar(P1, a_quark_prop_4, quark_prop_3, phases, t0);
+        compute_qqbar(Q1, quark_prop_1, a_quark_prop_2, phases, t0);
+        compute_qqbar(P1, quark_prop_3, a_quark_prop_4, phases, t0);
 
         DComplex origin_fix;
         Double origin_phases;
@@ -165,7 +165,8 @@ namespace Chroma
                             origin_fix = cmplx(cos(origin_phases), sin(origin_phases));
 
                             std::pair< std::tuple<int, int, int>, std::tuple<int, int, int> > pq_pair;
-                            pq_pair = std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]))
+                            pq_pair = std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]));
+
                             correlator_out[pq_pair] = tmp_multi1d;
 
                             if (diagram == 1)
