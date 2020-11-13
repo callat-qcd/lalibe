@@ -1,12 +1,9 @@
 /*
  * pipi scattering
  * Authors:
- * Arjun Gambhir
- * Andre Walker-Loud
- * Jason Chang
- * David Brantley
- * Ben Horz
  * Haobo Yan
+ * Ben Horz
+ * Andre Walker-Loud
  * Do pipi scattering and write out the two-point correlator in hdf5
  */
 
@@ -48,14 +45,8 @@ namespace Chroma
 
             struct NamedObject_t
             {
-                //std::string  gauge_id;     //Grab the usual gauge field.
-                // std::string  quark_prop_1;
-                std::string  light_prop;
-                bool have_light_prop;
-                std::string  strange_prop;
-                bool have_strange_prop;
-                //Above are various strings and bools that will identify the quarks and which quarks are present in the input.
-                //This could just be done by checking if these strings are null (and ensuring they are with no input), but I like bools, so whatever.
+                // a map to hold the quark propagator
+                std::map<char, std::string> quark_map;
 
             } named_obj;
 
