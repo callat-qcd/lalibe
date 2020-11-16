@@ -21,7 +21,8 @@ list_of_h5_files = [
     'lalibe_fh_proton.h5',
     'lalibe_3ptfn.h5',
     'lalibe_3ptfn_coherent_sink.h5',
-    'lalibe_3ptfn_2src_coherent_sink.h5'
+    'lalibe_3ptfn_2src_coherent_sink.h5',
+    'lalibe_pipi.h5',
 ]
 
 diff_1_2 = dict()

@@ -19,6 +19,7 @@ ini_files=(
     fh-corrs_h5.ini.xml
     proton_seqprop_h5.ini.xml
     proton_formfac_h5.ini.xml
+    source_prop_pipi.ini.xml
 )
 
 for ini in "${ini_files[@]}"; do
