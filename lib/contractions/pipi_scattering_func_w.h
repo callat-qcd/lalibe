@@ -4,17 +4,24 @@
 namespace Chroma
 {
 
-	namespace CorrelatorType
-	{
+    namespace CorrelatorType
+    {
 
-		typedef std::tuple<int, int, int> momenta;
-		typedef std::pair<momenta, momenta> momenta_pair;
-		typedef std::map<const momenta_pair, multi1d<DComplex>> Correlator;
+        typedef std::tuple<int, int, int> momenta;
+        typedef std::pair<momenta, momenta> momenta_pair;
+        typedef std::map<const momenta_pair, multi1d<DComplex>> Correlator;
 
-	} // namespace CorrelatorType
+    } // namespace CorrelatorType
 
-	void pipi_correlator(CorrelatorType::Correlator& correlator_out, const LatticePropagator& quark_prop_1, const LatticePropagator& quark_prop_2, const multi1d<int>& origin, const int p2max, const int ptot2max, const int t0, const int j_decay, const int diagram);
-	void pik_correlator(CorrelatorType::Correlator& correlator_out, const LatticePropagator& quark_prop_1, const LatticePropagator& quark_prop_2, const multi1d<int>& origin, const int p2max, const int ptot2max, const int t0, const int j_decay, const int diagram);
+    void pipi_correlator(CorrelatorType::Correlator& correlator_out,
+                        const LatticePropagator& quark_prop_1, const LatticePropagator& a_quark_prop_2,
+                        const multi1d<int>& origin, const int p2max, const int ptot2max,
+                        const int t0, const int j_decay, const int diagram);
+    void pik_correlator(CorrelatorType::Correlator& correlator_out,
+                        const LatticePropagator& quark_prop_1, const LatticePropagator& a_quark_prop_2,
+                        const LatticePropagator& quark_prop_3, const LatticePropagator& a_quark_prop_4,
+                        const multi1d<int>& origin, const int p2max, const int ptot2max,
+                        const int t0, const int j_decay, const int diagram);
 
 } // End namespace Chroma
 
