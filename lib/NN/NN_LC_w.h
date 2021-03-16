@@ -60,6 +60,14 @@
         void initTopologies(const std::string& filename, const int& truncsize, const unsigned int& j_decay);
         void clearTopologies();
 
+        // get_barblock that returns time
+        double get_barblock(LatticeHalfBaryonblock& block, 
+                          const LatticePropagator& prop0, 
+                          const LatticePropagator& prop1, 
+                          const LatticePropagator& prop2, 
+                          const SpinMatrix& diquark_proj);
+
+        // Thorsten's get_barblocks
         void get_barblock(LatticeHalfBaryonblock& block, const std::string mode, const LatticePropagator& prop0, const LatticePropagator& prop1, const SpinMatrix& diquark_proj);
         void get_barblock(LatticeHalfBaryonblock& block, const std::string mode, const multi1d<LatticePropagator>& prop0, const multi1d<LatticePropagator>& prop1, const SpinMatrix& diquark_proj, const multi1d<Complex>& weights);
         void get_barblock(LatticeHalfBaryonblock& block, const std::string mode, const LatticePropagator& prop0, const LatticePropagator& prop1, const SpinMatrix& diquark_proj, const sink& snk);

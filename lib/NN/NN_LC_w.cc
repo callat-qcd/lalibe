@@ -32,6 +32,23 @@ namespace Chroma {
         const unsigned int Nshalf=2;
         unsigned int vol3;
 
+        // block function that takes 3 props
+        double get_barblock(LatticeHalfBaryonblock& block,
+                const LatticePropagator& prop0,
+                const LatticePropagator& prop1,
+                const LatticePropagator& prop2,
+                const SpinMatrix& diquark_proj){
+            StopWatch swatch_block;
+            swatch_block.reset();
+
+            swatch_block.start();
+            block=getHalfBaryonblock(prop0,prop1,prop2,diquark_proj);
+            swatch_block.stop();
+            QDPIO::cout << "Build block: time=" << swatch_block.getTimeInSeconds() << std::endl;
+            return swatch_block.getTimeInSeconds();
+        }
+
+        // block function2 that takes 2 props and mode
         void get_barblock(LatticeHalfBaryonblock& block, const std::string mode, const LatticePropagator& prop0, const LatticePropagator& prop1, const SpinMatrix& diquark_proj){
                 StopWatch swatch_block;
                 swatch_block.reset();
@@ -713,201 +730,201 @@ namespace Chroma {
                 END_CODE();
         }
 
-        //***********************************************************************************************************************************
-        //***********************************************************************************************************************************
+        //*********************************************************************************************************
+        //*********************************************************************************************************
         //Combined contractions:
-        //***********************************************************************************************************************************
-        //***********************************************************************************************************************************
+        //*********************************************************************************************************
+        //*********************************************************************************************************
         int contract(LatticeComplex& result_P, std::map<std::string,LatticeHalfSpinMatrix>& resultmats, const LatticePropagator& prop0, const LatticePropagator& prop1, const SpinMatrix& diquark_proj, const LatticeComplex& phases, Fourier& fft, const bool& compute_locals){
 
-                START_CODE();
-                QDPIO::cout << "Performing source-displaced two-proton contractions on the CPU..." << std::flush;
+            START_CODE();
+            QDPIO::cout << "Performing source-displaced two-proton contractions on the CPU..." << std::flush;
 
-                //measure fft performance:
-                StopWatch swatch_fft, swatch_cont;
-                swatch_fft.reset();
-                swatch_cont.reset();
+            //measure fft performance:
+            StopWatch swatch_fft, swatch_cont;
+            swatch_fft.reset();
+            swatch_cont.reset();
 
-                //initialize variables and set all input fields to zero:
-                result_P=zero;
-                for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=resultmats.begin(); it!=resultmats.end(); ++it){
-                    it->second=zero;
-                }
-                LatticeHalfBaryonblock block0, block1;
+            //initialize variables and set all input fields to zero:
+            result_P=zero;
+            for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=resultmats.begin(); it!=resultmats.end(); ++it){
+                it->second=zero;
+            }
+            LatticeHalfBaryonblock block0, block1;
 
-                if(compute_locals){
-                        //get baryon block combination: block0 is boosted
-                        get_barblock_boost(block0,"000",prop0,prop1,diquark_proj,phases);
-                        get_barblock(block1,"000",prop0,prop1,diquark_proj);
+            if(compute_locals){
+                //get baryon block combination: block0 is boosted
+                // change barblock to take 3 props
+                get_barblock_boost(block0,"000",prop0,prop1,diquark_proj,phases);
+                get_barblock(block1,"000",prop0,prop1,diquark_proj);
 
-                        //fourier:
-                        swatch_fft.start();
-                        block0=fft(block0,+1);
-                        block1=fft(block1,-1);
-                        swatch_fft.stop();
-
-                        //contract PP
-                        swatch_cont.start();
-                        one_proton(result_P,block0);
-                        two_proton_source_local(resultmats["PP_SING0_loc"],block0,block1,PP_SING0.getTensor("000|000"));
-
-                        //contract PN
-                        two_proton_source_local(resultmats["PN_TRIPP_loc"],block0,block1,PN_TRIPP.getTensor("000|000"));
-                        two_proton_source_local(resultmats["PN_TRIP0_loc"],block0,block1,PN_TRIP0.getTensor("000|000"));
-                        two_proton_source_local(resultmats["PN_TRIPM_loc"],block0,block1,PN_TRIPM.getTensor("000|000"));
-                        swatch_cont.stop();
-                }
-
-                //store the blocks 101, 110, 011:
-                std::vector<std::string> bmodes(3);
-                bmodes[0]="101";
-                bmodes[1]="110";
-                bmodes[2]="011";
-                std::map<std::string, LatticeHalfBaryonblock> bblockmap;
-                for(unsigned int b=0; b<bmodes.size(); b++){
-                        get_barblock(block1,bmodes[b],prop0,prop1,diquark_proj);
-                        swatch_fft.start();
-                        block1=fft(block1,-1);
-                        swatch_fft.stop();
-                        bblockmap[bmodes[b]]=block1;
-                }
-
-                //do 000 with 111 first:
-                if(!compute_locals){
-                        //first block is boosted:
-                        get_barblock_boost(block0,"000",prop0,prop1,diquark_proj,phases);
-                        swatch_fft.start();
-                        block0=fft(block0,+1);
-                        swatch_fft.stop();
-                }
-                get_barblock(block1,"111",prop0,prop1,diquark_proj);
+                //fourier:
                 swatch_fft.start();
+                block0=fft(block0,+1);
                 block1=fft(block1,-1);
                 swatch_fft.stop();
 
-                //contractions
+                //contract PP
                 swatch_cont.start();
-                //PP
-                //s-wave:
-                two_proton_displaced(resultmats["PP_SING0"],block0,block1,PP_SING0.getTensor("000|111"),phases,fft,PP_SING0.getFourierSign("000|111"));
+                one_proton(result_P,block0);
+                two_proton_source_local(resultmats["PP_SING0_loc"],block0,block1,PP_SING0.getTensor("000|000"));
 
-                //P+1
-                two_proton_displaced(resultmats["PP_TRIPP"],block0,block1,PP_TRIPP.getTensor("000|111"),phases,fft,PP_TRIPP.getFourierSign("000|111"));
-
-                //P0
-                two_proton_displaced(resultmats["PP_TRIP0"],block0,block1,PP_TRIP0.getTensor("000|111"),phases,fft,PP_TRIP0.getFourierSign("000|111"));
-
-                //P-1
-                two_proton_displaced(resultmats["PP_TRIPM"],block0,block1,PP_TRIPM.getTensor("000|111"),phases,fft,PP_TRIPM.getFourierSign("000|111"));
-
-
-                //PN
-                //s-wave:
-                two_proton_displaced(resultmats["PN_SING0"],block0,block1,PN_SING0.getTensor("111|000"),phases,fft,PN_SING0.getFourierSign("111|000"));
-
-                //P+1
-                two_proton_displaced(resultmats["PN_TRIPP"],block0,block1,PN_TRIPP.getTensor("111|000"),phases,fft,PN_TRIPP.getFourierSign("111|000"));
-
-                //P0
-                two_proton_displaced(resultmats["PN_TRIP0"],block0,block1,PN_TRIP0.getTensor("111|000"),phases,fft,PN_TRIP0.getFourierSign("111|000"));
-
-                //P-1
-                two_proton_displaced(resultmats["PN_TRIPM"],block0,block1,PN_TRIPM.getTensor("111|000"),phases,fft,PN_TRIPM.getFourierSign("111|000"));
+                //contract PN
+                two_proton_source_local(resultmats["PN_TRIPP_loc"],block0,block1,PN_TRIPP.getTensor("000|000"));
+                two_proton_source_local(resultmats["PN_TRIP0_loc"],block0,block1,PN_TRIP0.getTensor("000|000"));
+                two_proton_source_local(resultmats["PN_TRIPM_loc"],block0,block1,PN_TRIPM.getTensor("000|000"));
                 swatch_cont.stop();
+            }
 
-
-                //do the rest with all the others
-                std::vector<std::string> bmodes2(3);
-                bmodes2[0]="001";
-                bmodes2[1]="010";
-                bmodes2[2]="100";
-
-                for(unsigned int c=0; c<bmodes2.size(); c++){
-                        //block0 is boosted:
-                        get_barblock_boost(block0,bmodes2[c],prop0,prop1,diquark_proj,phases);
-                        swatch_fft.start();
-                        block0=fft(block0,+1);
-                        swatch_fft.stop();
-
-                        swatch_cont.start();
-                        std::string mode, swapmode;
-                        for(unsigned int b=0; b<bmodes.size(); b++){
-                                //PP
-                                //everything is "normalized" to PP, so the string and orders of blocks can stay as it is:
-                                mode=bmodes2[c]+"|"+bmodes[b];
-                                swapmode=bmodes[b]+"|"+bmodes2[c];
-                                //s-wave:
-                                two_proton_displaced(resultmats["PP_SING0"],block0,bblockmap[bmodes[b]],PP_SING0.getTensor(mode),phases,fft,PP_SING0.getFourierSign(mode));
-
-                                //P+1
-                                two_proton_displaced(resultmats["PP_TRIPP"],block0,bblockmap[bmodes[b]],PP_TRIPP.getTensor(mode),phases,fft,PP_TRIPP.getFourierSign(mode));
-
-                                //P0
-                                two_proton_displaced(resultmats["PP_TRIP0"],block0,bblockmap[bmodes[b]],PP_TRIP0.getTensor(mode),phases,fft,PP_TRIP0.getFourierSign(mode));
-
-                                //P-1
-                                two_proton_displaced(resultmats["PP_TRIPM"],block0,bblockmap[bmodes[b]],PP_TRIPM.getTensor(mode),phases,fft,PP_TRIPM.getFourierSign(mode));
-
-
-                                //PN
-                                //here we might need to swap the blocks:
-                                //s-wave:
-                                if(PN_SING0.getFourierSign(mode)==0){
-                                        two_proton_displaced(resultmats["PN_SING0"],bblockmap[bmodes[b]],block0,PN_SING0.getTensor(swapmode),phases,fft,PN_SING0.getFourierSign(swapmode));
-                                }
-                                else{
-                                        two_proton_displaced(resultmats["PN_SING0"],block0,bblockmap[bmodes[b]],PN_SING0.getTensor(mode),phases,fft,PN_SING0.getFourierSign(mode));
-                                }
-
-                                //P+1
-                                if(PN_TRIPP.getFourierSign(mode)==0){
-                                        two_proton_displaced(resultmats["PN_TRIPP"],bblockmap[bmodes[b]],block0,PN_TRIPP.getTensor(swapmode),phases,fft,PN_TRIPP.getFourierSign(swapmode));
-                                }
-                                else{
-                                        two_proton_displaced(resultmats["PN_TRIPP"],block0,bblockmap[bmodes[b]],PN_TRIPP.getTensor(mode),phases,fft,PN_TRIPP.getFourierSign(mode));
-                                }
-
-                                //P0
-                                if(PN_TRIP0.getFourierSign(mode)==0){
-                                        two_proton_displaced(resultmats["PN_TRIP0"],bblockmap[bmodes[b]],block0,PN_TRIP0.getTensor(swapmode),phases,fft,PN_TRIP0.getFourierSign(swapmode));
-                                }
-                                else{
-                                        two_proton_displaced(resultmats["PN_TRIP0"],block0,bblockmap[bmodes[b]],PN_TRIP0.getTensor(mode),phases,fft,PN_TRIP0.getFourierSign(mode));
-                                }
-
-                                //P-1
-                                if(PN_TRIPM.getFourierSign(mode)==0){
-                                        two_proton_displaced(resultmats["PN_TRIPM"],bblockmap[bmodes[b]],block0,PN_TRIPM.getTensor(swapmode),phases,fft,PN_TRIPM.getFourierSign(swapmode));
-                                }
-                                else{
-                                        two_proton_displaced(resultmats["PN_TRIPM"],block0,bblockmap[bmodes[b]],PN_TRIPM.getTensor(mode),phases,fft,PN_TRIPM.getFourierSign(mode));
-                                }
-                        }
-                        swatch_cont.stop();
-                }
-
-
-                //do symmetrization or anti-symmetrization of result vectors:
+            //store the blocks 101, 110, 011:
+            std::vector<std::string> bmodes(3);
+            bmodes[0]="101";
+            bmodes[1]="110";
+            bmodes[2]="011";
+            std::map<std::string, LatticeHalfBaryonblock> bblockmap;
+            for(unsigned int b=0; b<bmodes.size(); b++){
+                get_barblock(block1,bmodes[b],prop0,prop1,diquark_proj);
                 swatch_fft.start();
-                //PP
-                symmetrize(resultmats["PP_SING0"],phases,fft,PP_SING0.getSymmetry());
-                symmetrize(resultmats["PP_TRIPP"],phases,fft,PP_TRIPP.getSymmetry());
-                symmetrize(resultmats["PP_TRIP0"],phases,fft,PP_TRIP0.getSymmetry());
-                symmetrize(resultmats["PP_TRIPM"],phases,fft,PP_TRIPM.getSymmetry());
+                block1=fft(block1,-1);
+                swatch_fft.stop();
+                bblockmap[bmodes[b]]=block1;
+            }
 
-                //PN
-                symmetrize(resultmats["PN_SING0"],phases,fft,PN_SING0.getSymmetry());
-                symmetrize(resultmats["PN_TRIPP"],phases,fft,PN_TRIPP.getSymmetry());
-                symmetrize(resultmats["PN_TRIP0"],phases,fft,PN_TRIP0.getSymmetry());
-                symmetrize(resultmats["PN_TRIPM"],phases,fft,PN_TRIPM.getSymmetry());
+            //do 000 with 111 first:
+            if(!compute_locals){
+                //first block is boosted:
+                get_barblock_boost(block0,"000",prop0,prop1,diquark_proj,phases);
+                swatch_fft.start();
+                block0=fft(block0,+1);
+                swatch_fft.stop();
+            }
+            get_barblock(block1,"111",prop0,prop1,diquark_proj);
+            swatch_fft.start();
+            block1=fft(block1,-1);
+            swatch_fft.stop();
+
+            //contractions
+            swatch_cont.start();
+            //PP
+            //s-wave:
+            two_proton_displaced(resultmats["PP_SING0"],block0,block1,PP_SING0.getTensor("000|111"),phases,fft,PP_SING0.getFourierSign("000|111"));
+
+            //P+1
+            two_proton_displaced(resultmats["PP_TRIPP"],block0,block1,PP_TRIPP.getTensor("000|111"),phases,fft,PP_TRIPP.getFourierSign("000|111"));
+
+            //P0
+            two_proton_displaced(resultmats["PP_TRIP0"],block0,block1,PP_TRIP0.getTensor("000|111"),phases,fft,PP_TRIP0.getFourierSign("000|111"));
+
+            //P-1
+            two_proton_displaced(resultmats["PP_TRIPM"],block0,block1,PP_TRIPM.getTensor("000|111"),phases,fft,PP_TRIPM.getFourierSign("000|111"));
+
+
+            //PN
+            //s-wave:
+            two_proton_displaced(resultmats["PN_SING0"],block0,block1,PN_SING0.getTensor("111|000"),phases,fft,PN_SING0.getFourierSign("111|000"));
+
+            //P+1
+            two_proton_displaced(resultmats["PN_TRIPP"],block0,block1,PN_TRIPP.getTensor("111|000"),phases,fft,PN_TRIPP.getFourierSign("111|000"));
+
+            //P0
+            two_proton_displaced(resultmats["PN_TRIP0"],block0,block1,PN_TRIP0.getTensor("111|000"),phases,fft,PN_TRIP0.getFourierSign("111|000"));
+
+            //P-1
+            two_proton_displaced(resultmats["PN_TRIPM"],block0,block1,PN_TRIPM.getTensor("111|000"),phases,fft,PN_TRIPM.getFourierSign("111|000"));
+            swatch_cont.stop();
+
+
+            //do the rest with all the others
+            std::vector<std::string> bmodes2(3);
+            bmodes2[0]="001";
+            bmodes2[1]="010";
+            bmodes2[2]="100";
+
+            for(unsigned int c=0; c<bmodes2.size(); c++){
+                //block0 is boosted:
+                get_barblock_boost(block0,bmodes2[c],prop0,prop1,diquark_proj,phases);
+                swatch_fft.start();
+                block0=fft(block0,+1);
                 swatch_fft.stop();
 
-                QDPIO::cout << "done!" << std::endl;
-                QDPIO::cout << "Contract: fourier: time=" << swatch_fft.getTimeInSeconds() << std::endl;
-                QDPIO::cout << "Contract: contrac: time=" << swatch_cont.getTimeInSeconds() << std::endl;
-                END_CODE();
+                swatch_cont.start();
+                std::string mode, swapmode;
+                for(unsigned int b=0; b<bmodes.size(); b++){
+                    //PP
+                    //everything is "normalized" to PP, so the string and orders of blocks can stay as it is:
+                    mode=bmodes2[c]+"|"+bmodes[b];
+                    swapmode=bmodes[b]+"|"+bmodes2[c];
+                    //s-wave:
+                    two_proton_displaced(resultmats["PP_SING0"],block0,bblockmap[bmodes[b]],PP_SING0.getTensor(mode),phases,fft,PP_SING0.getFourierSign(mode));
 
-                return EXIT_SUCCESS;
+                    //P+1
+                    two_proton_displaced(resultmats["PP_TRIPP"],block0,bblockmap[bmodes[b]],PP_TRIPP.getTensor(mode),phases,fft,PP_TRIPP.getFourierSign(mode));
+
+                    //P0
+                    two_proton_displaced(resultmats["PP_TRIP0"],block0,bblockmap[bmodes[b]],PP_TRIP0.getTensor(mode),phases,fft,PP_TRIP0.getFourierSign(mode));
+
+                    //P-1
+                    two_proton_displaced(resultmats["PP_TRIPM"],block0,bblockmap[bmodes[b]],PP_TRIPM.getTensor(mode),phases,fft,PP_TRIPM.getFourierSign(mode));
+
+                    //PN
+                    //here we might need to swap the blocks:
+                    //s-wave:
+                    if(PN_SING0.getFourierSign(mode)==0){
+                        two_proton_displaced(resultmats["PN_SING0"],bblockmap[bmodes[b]],block0,PN_SING0.getTensor(swapmode),phases,fft,PN_SING0.getFourierSign(swapmode));
+                    }
+                    else{
+                        two_proton_displaced(resultmats["PN_SING0"],block0,bblockmap[bmodes[b]],PN_SING0.getTensor(mode),phases,fft,PN_SING0.getFourierSign(mode));
+                    }
+
+                    //P+1
+                    if(PN_TRIPP.getFourierSign(mode)==0){
+                        two_proton_displaced(resultmats["PN_TRIPP"],bblockmap[bmodes[b]],block0,PN_TRIPP.getTensor(swapmode),phases,fft,PN_TRIPP.getFourierSign(swapmode));
+                    }
+                    else{
+                        two_proton_displaced(resultmats["PN_TRIPP"],block0,bblockmap[bmodes[b]],PN_TRIPP.getTensor(mode),phases,fft,PN_TRIPP.getFourierSign(mode));
+                    }
+
+                    //P0
+                    if(PN_TRIP0.getFourierSign(mode)==0){
+                        two_proton_displaced(resultmats["PN_TRIP0"],bblockmap[bmodes[b]],block0,PN_TRIP0.getTensor(swapmode),phases,fft,PN_TRIP0.getFourierSign(swapmode));
+                    }
+                    else{
+                        two_proton_displaced(resultmats["PN_TRIP0"],block0,bblockmap[bmodes[b]],PN_TRIP0.getTensor(mode),phases,fft,PN_TRIP0.getFourierSign(mode));
+                    }
+
+                    //P-1
+                    if(PN_TRIPM.getFourierSign(mode)==0){
+                        two_proton_displaced(resultmats["PN_TRIPM"],bblockmap[bmodes[b]],block0,PN_TRIPM.getTensor(swapmode),phases,fft,PN_TRIPM.getFourierSign(swapmode));
+                    }
+                    else{
+                        two_proton_displaced(resultmats["PN_TRIPM"],block0,bblockmap[bmodes[b]],PN_TRIPM.getTensor(mode),phases,fft,PN_TRIPM.getFourierSign(mode));
+                    }
+                }
+                swatch_cont.stop();
+            }
+
+
+            //do symmetrization or anti-symmetrization of result vectors:
+            swatch_fft.start();
+            //PP
+            symmetrize(resultmats["PP_SING0"],phases,fft,PP_SING0.getSymmetry());
+            symmetrize(resultmats["PP_TRIPP"],phases,fft,PP_TRIPP.getSymmetry());
+            symmetrize(resultmats["PP_TRIP0"],phases,fft,PP_TRIP0.getSymmetry());
+            symmetrize(resultmats["PP_TRIPM"],phases,fft,PP_TRIPM.getSymmetry());
+
+            //PN
+            symmetrize(resultmats["PN_SING0"],phases,fft,PN_SING0.getSymmetry());
+            symmetrize(resultmats["PN_TRIPP"],phases,fft,PN_TRIPP.getSymmetry());
+            symmetrize(resultmats["PN_TRIP0"],phases,fft,PN_TRIP0.getSymmetry());
+            symmetrize(resultmats["PN_TRIPM"],phases,fft,PN_TRIPM.getSymmetry());
+            swatch_fft.stop();
+
+            QDPIO::cout << "done!" << std::endl;
+            QDPIO::cout << "Contract: fourier: time=" << swatch_fft.getTimeInSeconds() << std::endl;
+            QDPIO::cout << "Contract: contrac: time=" << swatch_cont.getTimeInSeconds() << std::endl;
+            END_CODE();
+
+            return EXIT_SUCCESS;
         }
 
         // With arbitrary sink
@@ -1125,7 +1142,7 @@ namespace Chroma {
                 StopWatch swatch_fft, swatch_cont, swatch_proton;
                 swatch_fft.reset();
                 swatch_cont.reset();
-            swatch_proton.reset();
+                swatch_proton.reset();
 
                 //initialize variables and set all input fields to zero:
                 result_P=zero;
@@ -1565,7 +1582,7 @@ namespace Chroma {
 
                 QDPIO::cout << "done!" << std::endl;
                 QDPIO::cout << "Contract: fourier: time=" << swatch_fft.getTimeInSeconds() << std::endl;
-            QDPIO::cout << "Contract: proton: time="  << swatch_proton.getTimeInSeconds() << std::endl;
+                QDPIO::cout << "Contract: proton: time="  << swatch_proton.getTimeInSeconds() << std::endl;
                 QDPIO::cout << "Contract: contrac: time=" << swatch_cont.getTimeInSeconds() << std::endl;
                 END_CODE();
 

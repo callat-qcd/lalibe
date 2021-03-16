@@ -89,6 +89,12 @@ namespace Chroma
         read(paramtop, "contractions_n_sq", par.contractions_n_sq); //FIXME Description needed here.
       else
         par.contractions_n_sq = -1;
+      #if !defined(BUILD_FFTW) && !defined(CUFFT)
+          QDPIO::cerr << "\n###########################################################\n" << std::endl;
+          QDPIO::cerr << "You must link against FFTW or CUFFT for this NN measurement" << std::endl;
+          QDPIO::cerr << "\n###########################################################\n" << std::endl;
+          QDP_abort(1);
+      #endif
       if (paramtop.count("fft_chunksize") != 0)
         read(paramtop, "fft_chunksize", par.fft_chunksize); //originally the only parameter in FFTPar struct
       else
@@ -98,6 +104,13 @@ namespace Chroma
       else
         par.fft_tune = false;
       read(paramtop, "boosts", par.boosts); //boosts
+
+      if (par.boosts.size() > 1 || par.boosts[0][0] != 0 || par.boosts[0][1] != 0 || par.boosts[0][2] != 0){
+          QDPIO::cerr << "For now, only a single boost of (0,0,0) is allowed" << std::endl;
+          QDP_abort(1);
+      }
+
+
       read(paramtop, "output_filename", par.output_filename); //output file
       if (paramtop.count("output_stripesize") != 0)
         read(paramtop, "output_stripesize", par.output_stripesize); //output stripesize; default recommended
