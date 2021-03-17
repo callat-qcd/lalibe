@@ -82,7 +82,10 @@ namespace Chroma
             else
                 par.fft_tune = false;
             read(paramtop, "compute_locals", par.compute_locals);
-            read(paramtop, "negative_parity", par.negative_parity);
+            if (paramtop.count("negative_parity") != 0)
+                read(paramtop, "negative_parity", par.negative_parity);
+            else
+                par.negative_parity = false;
             // list of total momentum boosts
             read(paramtop, "boosts", par.boosts);
             // For now - only support P_tot = (0,0,0)
@@ -371,7 +374,7 @@ namespace Chroma
             Timeshiftmap tshiftmap(protonpos1[j_decay],j_decay,Layout::lattSize()[j_decay]);
 
             //If the propagators aren't specified to already be in the Dirac basis, we rotate them now.
-            if(params.nblockparam.dirac_basis == false)
+            if(params.nblockparam.in_dirac_basis == false)
             {
                 QDPIO::cout << "Rotating the propagators to Dirac basis." << std::endl;
                 rotate_to_Dirac_Basis(prop0);
@@ -434,8 +437,12 @@ namespace Chroma
             // Declare block map
             typedef std::tuple<std::string, std::string, std::string, int, bool> BlockMapKeyType;
             typedef std::map<BlockMapKeyType, LatticeHalfBaryonblock> BlockMapType;
-            // Put it in the NamedObjectMap
-            TheNamedObjMap::Instance().create<BlockMapType>(params.named_obj.block_map);
+            // Put it in the NamedObjectMap (if it doesn't exist yet)
+            if (!TheNamedObjMap::Instance().check(params.named_obj.block_map)){
+                TheNamedObjMap::Instance().create<BlockMapType>(params.named_obj.block_map);
+                QDPIO::cout << "Creating new nucleon block map " << params.named_obj.block_map << std::endl;
+            }
+            else QDPIO::cout << "block map exists, adding to it " << params.named_obj.block_map << std::endl;
             BlockMapType& blockMap = TheNamedObjMap::Instance().getData<BlockMapType>(params.named_obj.block_map);
 
             // Create a local instance to store blocks while we make them

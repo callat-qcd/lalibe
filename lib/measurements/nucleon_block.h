@@ -37,7 +37,7 @@ namespace Chroma
                 bool                    fft_tune;              //tune the fft?
                 bool                    compute_locals;        // make blocks for local NN computation?
                 multi1d< multi1d<int> > boosts;                //boosts
-                bool                    dirac_basis;           //specifies if props are in dirac basis, this is false by default
+                bool                    in_dirac_basis;        //specifies if props are in dirac basis, this is false by default
                 bool                    negative_parity;       //specifies if we will run contractions on the negative parity nucleons
                 //                                               The momentumspace trucation is not used
                 //int                     contractions_n_sq;     // truncate rel-momentum space to this value
