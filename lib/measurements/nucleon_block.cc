@@ -63,8 +63,7 @@ namespace Chroma
             return success;
         }
 
-        void read(XMLReader& xml, const std::string& path, NucleonBlockParams::NucleonBlock_t& par)
-        {
+        void read(XMLReader& xml, const std::string& path, NucleonBlockParams::NucleonBlock_t& par){
             XMLReader paramtop(xml, path);
             #if !defined(BUILD_FFTW) && !defined(CUFFT)
                 QDPIO::cerr << "\n###############################################################\n" << std::endl;
@@ -81,21 +80,16 @@ namespace Chroma
                 read(paramtop, "fft_tune", par.fft_tune); //tune fft?
             else
                 par.fft_tune = false;
-            read(paramtop, "compute_locals", par.compute_locals);
+            // Compute blocks needed for local correlators?
+            if (paramtop.count("compute_locals") > 0)
+                read(paramtop, "compute_locals", par.compute_locals);
+            else
+                par.compute_locals = true;
+            // Are we doing negative parity blocks?
             if (paramtop.count("negative_parity") != 0)
                 read(paramtop, "negative_parity", par.negative_parity);
             else
                 par.negative_parity = false;
-            // list of total momentum boosts
-            read(paramtop, "boosts", par.boosts);
-            // For now - only support P_tot = (0,0,0)
-            if (par.boosts.size() > 1 || par.boosts[0][0] != 0 || par.boosts[0][1] != 0 || par.boosts[0][2] != 0){
-                QDPIO::cerr << "\n###############################################################\n" << std::endl;
-                QDPIO::cerr << "  For now, only a single boost of (0,0,0) is allowed" << std::endl;
-                QDPIO::cerr << "\n###############################################################\n" << std::endl;
-                QDP_abort(1);
-            }
-
             // Are propagators already in Dirac basis?
             if (paramtop.count("in_dirac_basis") != 0)
                 read(paramtop, "in_dirac_basis", par.in_dirac_basis); //specifies props in dirac basis, this is false by default
@@ -136,63 +130,28 @@ namespace Chroma
             pop(xml);
         }
 
-        // Create string for total boost
-        std::string boost_string(const multi1d<int> &boost){
-            std::string boostdir("boost_");
-            for(unsigned int d=0; d<(Nd-1); d++){
-                if(boost[d]>=0) boostdir+="p";
-                else boostdir+="m";
-                boostdir+=dirlist[d]+std::to_string(abs(boost[d]));
-            }
-            if(boost.size() > (Nd-1) && boost[Nd-1] !=0){
-                if(boost[Nd-1]>=0) boostdir+="p";
-                else boostdir+="m";
-                boostdir+=dirlist[Nd-1]+std::to_string(abs(boost[Nd-1]));
-            }
-            return boostdir;
-        }
-
-        // timestamp for simple checkpointing
-        const std::string getTimestamp() {
-            time_t     now = time(0);
-            struct tm  tstruct;
-            char       buf[80];
-            tstruct = *localtime(&now);
-            strftime(buf, sizeof(buf), "%Y-%m-%d-%X", &tstruct);
-            std::string result(buf);
-            result.erase(std::remove(result.begin(), result.end(), ':'), result.end());
-
-            return result;
-        }
-
         // Param stuff
         NucleonBlockParams::NucleonBlockParams()
-        {
-            frequency = 0;
-        }
-
         NucleonBlockParams::NucleonBlockParams(XMLReader& xml_in, const std::string& path)
         {
             try
-                {
-                    XMLReader paramtop(xml_in, path);
-                    if (paramtop.count("Frequency") == 1)
-                        read(paramtop, "Frequency", frequency);
-                    else
-                        frequency = 1;
-
-                    // Parameters for source construction
-                    read(paramtop, "NucleonBlockParams", nblockparam);
-
-                    // Read in the NamedObject info
-                    read(paramtop, "NamedObject", named_obj);
-                }
+            {
+                XMLReader paramtop(xml_in, path);
+                if (paramtop.count("Frequency") == 1)
+                    read(paramtop, "Frequency", frequency);
+                else
+                    frequency = 1;
+                // Parameters for source construction
+                read(paramtop, "NucleonBlockParams", nblockparam);
+                // Read in the NamedObject info
+                read(paramtop, "NamedObject", named_obj);
+            }
             catch(const std::string& e)
-                {
-                    QDPIO::cerr << __func__ << ": Caught Exception reading XML: "
-                                << e << std::endl;
-                    QDP_abort(1);
-                }
+            {
+                QDPIO::cerr << __func__ << ": Caught Exception reading XML: "
+                            << e << std::endl;
+                QDP_abort(1);
+            }
         }
 
         void NucleonBlockParams::writeXML(XMLWriter& xml_out, const std::string& path)
@@ -235,15 +194,9 @@ namespace Chroma
             const multi1d<LatticeColorMatrix>& u =
                 TheNamedObjMap::Instance().getData <multi1d <LatticeColorMatrix> >(params.named_obj.gauge_id);
 
-            //Code from latscat ported below, with comments for missing or adjusted features.
-            //Chroma initialize stuff was here, not needed in lalibe.
-            //Latscat has an option for its own singnal handlers that goes here, not being ported.
 #ifdef DEBUG
             QDPIO::cout << "Warning, DEBUG mode enabled!" << std::endl;
 #endif
-            //Stuff about LatticePars is read next, this is already read in our main function.
-            //For now, this measurement is only going to crunch stuff if we have built with hdf5.
-#ifdef BUILD_HDF5
 
             //set up fourier stuff:
             QDPIO::cout << "Setting up Communicators for FFT..." << std::flush;
@@ -258,11 +211,6 @@ namespace Chroma
             fftblock.print_flops(true);
 #endif
             QDPIO::cout << "done!" << std::endl;
-
-            // Note, the truncation size (2nd arg) is not used in this function anymore.  -1 --> do not truncate
-            int truncate = -1;
-            // comment out while we only make blocks
-            //initTopologies(params.nblockparam.contractions_filename, truncate, j_decay);
 
             if(params.nblockparam.fft_chunksize !=0 )
                 QDPIO::cout << "Using chunksize " << params.nblockparam.fft_chunksize << " for the Baryon-Block FFT!" << std::endl;
@@ -335,7 +283,8 @@ namespace Chroma
                 QDP_abort(1);
             }
 
-            //Now back to latscat logic of calculating displacements and stuff.
+            // Figure out displacement of props so we know if we need to make
+            // multiple sets of blocks or just blocks for local corrs
             QDPIO::cout << "    Propagator 0: " << params.named_obj.prop0_id << std::endl;
             QDPIO::cout << "        Location: "; for(int i = 0; i<Nd; i++){ QDPIO::cout << pos0[i] << " " ;};
             QDPIO::cout << std::endl;
@@ -371,7 +320,7 @@ namespace Chroma
             protonpos2 = pos1;  // I'm sorry.
 
             //set up map
-            Timeshiftmap tshiftmap(protonpos1[j_decay],j_decay,Layout::lattSize()[j_decay]);
+            Timeshiftmap tshiftmap(pos0[j_decay],j_decay,Layout::lattSize()[j_decay]);
 
             //If the propagators aren't specified to already be in the Dirac basis, we rotate them now.
             if(params.nblockparam.in_dirac_basis == false)
@@ -381,16 +330,8 @@ namespace Chroma
                 rotate_to_Dirac_Basis(prop1);
             }
 
-            //Necessary Fields:
+            // Spin projector
             multi1d<BaryOp> Nup=get_local_MA_single(0,"DP");
-            /* comment out while just doing blocks
-            LatticeComplex tmplatcomp_P, tmplatcomp_P_34, token;
-            std::map<std::string,LatticeHalfSpinMatrix> tmplatmats, tmplatmats_34;
-            for(unsigned int s=0; s<12; s++){
-                tmplatmats[contterms[s]]=LatticeHalfSpinMatrix();
-                tmplatmats_34[contterms[s]]=LatticeHalfSpinMatrix();
-            }
-            */
 
             bool neg_par = params.nblockparam.negative_parity;
             std::string neg_par_str = "POS_PARITY";
@@ -419,23 +360,13 @@ namespace Chroma
                     001, 010, 100 [+1]
                     101, 110, 011 [-1]
             */
-            QDPIO::cout << "Creating timers..." << std::flush;
-            // TODO: make timings more meaningful?
-            //timings:
-            StopWatch swatch_pdir, swatch_ploc, swatch_pdisp, swatch_fft, swatch_bblock, swatch_io_read, swatch_io_write;
-            swatch_io_read.reset();
-            swatch_io_write.reset();
-            swatch_pdir.reset();
-            swatch_ploc.reset();
-            swatch_pdisp.reset();
+            // FFT timer
+            StopWatch swatch_fft;
             swatch_fft.reset();
-            swatch_bblock.reset();
-            QDPIO::cout << "done!" << std::endl;
-
             double block_time = 0.;
 
             // Declare block map
-            typedef std::tuple<std::string, std::string, std::string, int, bool> BlockMapKeyType;
+            typedef std::tuple<std::string, std::string, std::string, int, bool, multi1d<int>, std::string> BlockMapKeyType;
             typedef std::map<BlockMapKeyType, LatticeHalfBaryonblock> BlockMapType;
             // Put it in the NamedObjectMap (if it doesn't exist yet)
             if (!TheNamedObjMap::Instance().check(params.named_obj.block_map)){
@@ -453,7 +384,7 @@ namespace Chroma
             std::string propId_1 = params.named_obj.prop1_id;
 
             // Block 000[+1]
-            BlockMapKeyType theKey = {propId_0, propId_0, propId_0, 1, neg_par};
+            BlockMapKeyType theKey = {propId_0, propId_0, propId_0, 1, neg_par, pos0, displacedir};
             std::string block_str = "000[+1]";
             if (blockMap.count(theKey) == 0){
                 block_time += get_barblock(tmpBlock, prop0, prop0, prop0, Nup[0].get_gamma(0));
@@ -468,7 +399,7 @@ namespace Chroma
             // Did the user pass the same prop?
             if (propId_0 == propId_1){
                 // 000[-1]
-                theKey = {propId_0, propId_0, propId_0, -1, neg_par};
+                theKey = {propId_0, propId_0, propId_0, -1, neg_par, pos0, displacedir};
                 block_str = "000[-1]";
                 if (blockMap.count(theKey) == 0){
                     swatch_fft.start();
@@ -480,7 +411,7 @@ namespace Chroma
             }
             else{
                 // 111[-1]
-                theKey = {propId_1, propId_1, propId_1, -1, neg_par};
+                theKey = {propId_1, propId_1, propId_1, -1, neg_par, pos0, displacedir};
                 block_str = "111[-1]";
                 if (blockMap.count(theKey) == 0){
                     block_time += get_barblock(tmpBlock, prop1, prop1, prop1, Nup[0].get_gamma(0));
@@ -494,7 +425,7 @@ namespace Chroma
                 // Do we want to compute the local NN?  If so, need opposite sign FFT
                 if (params.nblockparam.compute_locals){
                     // 111[+1]
-                    theKey = {propId_1, propId_1, propId_1, +1, neg_par};
+                    theKey = {propId_1, propId_1, propId_1, +1, neg_par, pos0, displacedir};
                     block_str = "111[+1]";
                     if (blockMap.count(theKey) == 0){
                         swatch_fft.start();
@@ -504,7 +435,7 @@ namespace Chroma
                     }
                     else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
                     // 000[-1]
-                    theKey = {propId_0, propId_0, propId_0, -1, neg_par};
+                    theKey = {propId_0, propId_0, propId_0, -1, neg_par, pos0, displacedir};
                     block_str = "000[-1]";
                     if (blockMap.count(theKey) == 0){
                         block_time += get_barblock(tmpBlock, prop0, prop0, prop0, Nup[0].get_gamma(0));
@@ -517,7 +448,7 @@ namespace Chroma
                 }
                 // Now make the mixed blocks
                 // 001 [+1]
-                theKey = {propId_0, propId_0, propId_1, 1, neg_par};
+                theKey = {propId_0, propId_0, propId_1, 1, neg_par, pos0, displacedir};
                 block_str = "001[+1]";
                 if (blockMap.count(theKey) == 0){
                     block_time += get_barblock(tmpBlock, prop0, prop0, prop1, Nup[0].get_gamma(0));
@@ -528,7 +459,7 @@ namespace Chroma
                 }
                 else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
                 // 010 [+1]
-                theKey = {propId_0, propId_1, propId_0, 1, neg_par};
+                theKey = {propId_0, propId_1, propId_0, 1, neg_par, pos0, displacedir};
                 block_str = "010[+1]";
                 if (blockMap.count(theKey) == 0){
                     block_time += get_barblock(tmpBlock, prop0, prop1, prop0, Nup[0].get_gamma(0));
@@ -539,7 +470,7 @@ namespace Chroma
                 }
                 else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
                 // 100 [+1]
-                theKey = {propId_1, propId_0, propId_0, 1, neg_par};
+                theKey = {propId_1, propId_0, propId_0, 1, neg_par, pos0, displacedir};
                 block_str = "100[+1]";
                 if (blockMap.count(theKey) == 0){
                     block_time += get_barblock(tmpBlock, prop1, prop0, prop0, Nup[0].get_gamma(0));
@@ -551,7 +482,7 @@ namespace Chroma
                 else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
                 // And the opposite sign FFT blocks
                 // 011 [-1]
-                theKey = {propId_0, propId_1, propId_1, -1, neg_par};
+                theKey = {propId_0, propId_1, propId_1, -1, neg_par, pos0, displacedir};
                 block_str = "011[-1]";
                 if (blockMap.count(theKey) == 0){
                     block_time += get_barblock(tmpBlock, prop0, prop1, prop1, Nup[0].get_gamma(0));
@@ -562,7 +493,7 @@ namespace Chroma
                 }
                 else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
                 // 101 [-1]
-                theKey = {propId_1, propId_0, propId_1, -1, neg_par};
+                theKey = {propId_1, propId_0, propId_1, -1, neg_par, pos0, displacedir};
                 block_str = "101[-1]";
                 if (blockMap.count(theKey) == 0){
                     block_time += get_barblock(tmpBlock, prop1, prop0, prop1, Nup[0].get_gamma(0));
@@ -573,7 +504,7 @@ namespace Chroma
                 }
                 else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
                 // 110 [-1]
-                theKey = {propId_1, propId_1, propId_0, -1, neg_par};
+                theKey = {propId_1, propId_1, propId_0, -1, neg_par, pos0, displacedir};
                 block_str = "110[-1]";
                 if (blockMap.count(theKey) == 0){
                     block_time += get_barblock(tmpBlock, prop1, prop1, prop0, Nup[0].get_gamma(0));
@@ -588,178 +519,8 @@ namespace Chroma
             QDPIO::cout << LalibeNucleonBlockEnv::name << ": total block time " << block_time << std::endl;
             QDPIO::cout << LalibeNucleonBlockEnv::name << ": total FFT time " << swatch_fft.getTimeInSeconds() << std::endl;
 
-
-
-#if 0
-
-            /**********************************************************************
-             *                                                                    *
-             *   LOOP OVER BOOSTS                                                 *
-             *        We don't support boosts now, but we might, so keep the loop *
-             **********************************************************************/
-            for(unsigned int b=0; b < params.nblockparam.boosts.size(); b++){
-                multi1d<int> boost = params.nblockparam.boosts[b];
-                std::string boostdir=boost_string(boost);
-
-                momentum mom(params.nblockparam.boosts[b]);
-
-                QDPIO::cout << mom << "    " << boostdir << std::endl;
-
-                LatticeComplex phases=get_phases(mom,j_decay,+1);
-
-                swatch_pdisp.start();
-                QDPIO::cout << "Computing contractions..." << std::endl;
-                // if displacement between sources of uprop_p{1,2} is nonzero:
-                QDPIO::cout << "    Doing displaced only." << std::endl;
-                QDPIO::cout << "    For now, if you want local, just pass the same propagator twice." << std::endl;
-#if QDP_NC == 3
-                contract(tmplatcomp_P, tmplatmats, prop_0, prop_1, Nup[0].get_gamma(0), phases, fftblock, false, weights);
-#else
-                QDPIO::cout<<"Contractions not yet implemented for NC!=3."<<std::endl;
-#endif
-                QDPIO::cout << "    Contractions done!" << std::endl;
-
-                QDPIO::cout << "Computing contractions with negative parity blocks ..." << std::endl;
-                contract(tmplatcomp_P_34, tmplatmats_34, prop_0_34, prop_1_34, Nup[0].get_gamma(0), phases, fftblock, false, weights);
-                QDPIO::cout << "    done!" << std::endl;
-
-                //QDPIO::cout << "Skipping the single proton." << std::endl;
-                /*******************************************
-                 * SINGLE PROTON
-                 *******************************************/
-                if(b==0){
-                    QDPIO::cout << "Single proton." << std::endl;
-                    //positive parity proton
-                    token=zero;
-                    token+=/* sourcefact * tmpprefact * */ tshiftmap(tmplatcomp_P,true);
-                    swatch_io_write.start();
-                    chk.set_parameter("proton1",token);
-                    swatch_io_write.stop();
-
-                    //negative parity proton
-                    token=zero;
-                    token+=/* sourcefact * tmpprefact * */ tshiftmap(tmplatcomp_P_34,true);
-                    swatch_io_write.start();
-                    chk.set_parameter("proton1_34",token);
-                    swatch_io_write.stop();
-                }
-
-                //TODO: This print comes from latscat, but it also serves as a placeholder to extend this measurement and make it more general in a second or third pass.
-                QDPIO::cout << "Skipping the local sources." << std::endl;
-
-                for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=tmplatmats.begin(); it!=tmplatmats.end(); ++it){
-                    std::string idstring=it->first;
-                    if(idstring.find("loc")!=std::string::npos) continue;
-
-                    size_t firstpos=idstring.find("_");
-                    size_t secondpos=idstring.find(firstpos);
-                    std::string conttype=idstring.substr(0,firstpos);
-                    std::transform(conttype.begin(),conttype.end(),conttype.begin(),::tolower);
-
-                    std::string srcspin=idstring.substr(firstpos+1,secondpos);
-                    std::string srcspinval(&srcspin[srcspin.size()-1]);
-                    srcspin=srcspin.substr(0,srcspin.size()-1);
-
-                    for(std::map<std::string,HalfSpinMatrix>::iterator innerit=projectors.begin(); innerit!=projectors.end(); ++innerit){
-                        std::string inneridstring=innerit->first;
-                        std::string snkspin=inneridstring.substr(0,inneridstring.size()-1);
-                        if(snkspin!=srcspin) continue;
-                        std::string snkspinval(&inneridstring[inneridstring.size()-1]);
-
-                        std::string corrname=conttype+"corr"+"_"+srcspin+"_"+snkspinval+"_"+srcspinval+"_"+displacedir; //s[0]; // 0 = mu hardcoded for this version.
-                        token=zero;
-                        // TODO src always is 0 for this version!!
-                        // if(src==0) token=zero;
-                        // else{
-                        //     swatch_io_read.start();
-                        //     chk.get_parameter(boostdir+"/"+corrname,token);
-                        //     swatch_io_read.stop();
-                        // }
-                        token+=/* sourcefact * tmpprefact * */ tshiftmap(LatticeComplex(trace((innerit->second)*(it->second))));
-                        swatch_io_write.start();
-                        chk.set_parameter(boostdir+"/"+corrname,token);
-                        swatch_io_write.stop();
-                    }
-                }
-
-                // other-parity (34 entries)
-                for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=tmplatmats_34.begin(); it!=tmplatmats_34.end(); ++it){
-                    std::string idstring=it->first;
-                    if(idstring.find("loc")!=std::string::npos) continue;
-
-                    size_t firstpos=idstring.find("_");
-                    size_t secondpos=idstring.find(firstpos);
-                    std::string conttype=idstring.substr(0,firstpos);
-                    std::transform(conttype.begin(),conttype.end(),conttype.begin(),::tolower);
-
-                    std::string srcspin=idstring.substr(firstpos+1,secondpos);
-                    std::string srcspinval(&srcspin[srcspin.size()-1]);
-                    srcspin=srcspin.substr(0,srcspin.size()-1);
-
-                    for(std::map<std::string,HalfSpinMatrix>::iterator innerit=projectors.begin(); innerit!=projectors.end(); ++innerit){
-                        std::string inneridstring=innerit->first;
-                        std::string snkspin=inneridstring.substr(0,inneridstring.size()-1);
-                        if(snkspin!=srcspin) continue;
-                        std::string snkspinval(&inneridstring[inneridstring.size()-1]);
-
-                        std::string corrname=conttype+"corr"+"_"+srcspin+"_"+snkspinval+"_"+srcspinval+"_"+displacedir; //s[0]; // 0 = mu hardcoded for this version.
-                        token=zero;
-                        // TODO src always is 0 for this version!!
-                        // if(src==0) token=zero;
-                        // else{
-                        //     swatch_io_read.start();
-                        //     chk.get_parameter(boostdir+"/"+corrname,token);
-                        //     swatch_io_read.stop();
-                        // }
-                        token+=/* sourcefact * tmpprefact * */ tshiftmap(LatticeComplex(trace((innerit->second)*(it->second))));
-                        swatch_io_write.start();
-                        chk.set_parameter(boostdir+"/"+corrname+"_34",token);
-                        swatch_io_write.stop();
-                    }
-                }
-
-                //state
-                chk.set_parameter("mucurrent",static_cast<unsigned int>(0+1)); // 0 = mu hardcoded for this version.
-                // if((mu+1)<sourcepars.displacements.nrows()) chk.set_consistency(true);
-                chk.set_consistency(true);  // can hardcode THIS too, because mu is always 0!
-                chk.close();
-                swatch_pdisp.stop();
-
-                /*#ifndef NO_SIGNAL_HANDLERS
-                  sighand::exit_code_on_abort();
-                  #endif*/
-                //This signal handling stuff is not necessary. I don't want the baggage of Thorsten's specialized XML readexs.
-
-                QDPIO::cout << "NN-corr-disp: time=" << swatch_pdisp.getTimeInSeconds() << std::endl;
-                swatch_pdisp.reset();
-                // if(src!=0) QDPIO::cout << "NN-corr-io-read: time=" << swatch_io_read.getTimeInSeconds() << std::endl;
-                QDPIO::cout << "NN-corr-io-write: time=" << swatch_io_write.getTimeInSeconds() << std::endl;
-                swatch_io_read.reset();
-                swatch_io_write.reset();
-
-            } //This is manually here to close loop while porting.
-            /********************************************************
-             *                                                       *
-             *   END LOOP OVER BOOSTS                                *
-             *                                                       *
-             ********************************************************/
-
-            //move the checkpoint file:
-            std::string timestamp=getTimestamp();
-            rename(std::string(params.nblockparam.output_filename+".NN_w.chk").c_str(),std::string(params.nblockparam.output_filename).c_str());
-
-#endif
-            //clear baryon blocks:
-            //clearTopologies();
-
-            //This is where latscat's swatch_everything stops. I am going to use the timer that's printed at the end.
-
 #else
             QDPIO::cout << "This measurement only works if we have linked against FFTW. Please rebuild." << std::endl;
-#endif
-
-#else
-            QDPIO::cout << "This measurement only works if we have enabled HDF5. Please rebuild." << std::endl;
 #endif
 
             snoop.stop();
