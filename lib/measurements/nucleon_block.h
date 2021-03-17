@@ -56,6 +56,10 @@ namespace Chroma
         // This is used for boosts
         const std::string dirlist[4]={"x","y","z","t"};
 
+        // Define the nucleon object types
+        typedef std::tuple<std::string, std::string, std::string, int, bool, multi1d<int>, std::string> BlockMapKeyType;
+        typedef std::map<BlockMapKeyType, LatticeHalfBaryonblock> BlockMapType;
+
         class InlineMeas : public AbsInlineMeasurement
             {
             public:
