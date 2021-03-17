@@ -103,7 +103,6 @@ namespace Chroma
             write(xml, "fft_chunksize",   par.fft_chunksize);
             write(xml, "fft_tune",        par.fft_tune);
             write(xml, "compute_locals",  par.compute_locals);
-            write(xml, "boosts",          par.boosts);
             write(xml, "in_dirac_basis",  par.in_dirac_basis);
             write(xml, "negative_parity", par.negative_parity);
             pop(xml);
@@ -131,7 +130,7 @@ namespace Chroma
         }
 
         // Param stuff
-        NucleonBlockParams::NucleonBlockParams()
+        NucleonBlockParams::NucleonBlockParams(){}
         NucleonBlockParams::NucleonBlockParams(XMLReader& xml_in, const std::string& path)
         {
             try
@@ -306,6 +305,15 @@ namespace Chroma
             QDPIO::cout << std::endl;
             QDPIO::cout << "    Real Displacement: "; for(int i = 0; i<Nd; i++){ QDPIO::cout << disp[i] << " " ;};
             QDPIO::cout << std::endl;
+            if (disp[3] != 0)
+            {
+                QDPIO::cerr << "\n###############################################################\n" << std::endl;
+                QDPIO::cerr << LalibeNucleonBlockEnv::name << ": props must be at same time-slice" << std::endl;
+                QDPIO::cerr << "                prop0 t0 = " << pos0[3] << std::endl;
+                QDPIO::cerr << "                prop1 t0 = " << pos1[3] << std::endl;
+                QDPIO::cerr << "\n###############################################################\n" << std::endl;
+                QDP_abort(1);
+            }
 
             // displacement string
             std::string displacedir;
