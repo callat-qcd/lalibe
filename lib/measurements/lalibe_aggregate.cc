@@ -20,6 +20,7 @@
 #include "coherent_seqsource_w.h"
 #include "NN_LC_prop_w.h"
 #include "nucleon_block.h"
+#include "two_nucleons.h"
 #include "laph_smearing_prop_w.h"
 
 // UTILITIES
@@ -68,6 +69,7 @@ namespace Chroma
                 success &= LalibeCoherentSeqsourceEnv::registerAll() ;
                 success &= LalibeNucleonNucleonLinearComboPropagatorEnv::registerAll() ;
                 success &= LalibeNucleonBlockEnv::registerAll() ;
+                success &= LalibeTwoNucleonsEnv::registerAll() ;
                 success &= LalibeLaphSmearingPropagatorEnv::registerAll() ;
 
                 // USEFUL UTILITIES

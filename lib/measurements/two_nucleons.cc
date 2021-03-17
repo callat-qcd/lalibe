@@ -32,7 +32,7 @@
 
 namespace Chroma
 {
-    namespace LalibeNucleonBlockEnv
+    namespace LalibeTwoNucleonsEnv
     {
         namespace
         {
@@ -100,14 +100,14 @@ namespace Chroma
             read(inputtop, "prop0_id"     , input.prop0_id);
             read(inputtop, "prop1_id"     , input.prop1_id);
             // read group xml of blocks
-            par.nucleon_blocks = readXMLArrayGroup(xml_in, "/nucleon_blocks", "block")
+            input.nucleon_blocks = readXMLArrayGroup(inputtop, "nucleon_blocks", "block");
         }
 
         //! NamedObject output
         void write(XMLWriter& xml, const std::string& path, const TwoNucleonsParams::NamedObject_t& input)
         {
             push(xml, path);
-            write(xml, "gauge_id"     , input.gauge_id );
+            write(xml, "gauge_id"     , input.gauge_id);
             write(xml, "prop0_id"     , input.prop0_id);
             write(xml, "prop1_id"     , input.prop1_id);
             // Group writer
@@ -115,7 +115,7 @@ namespace Chroma
             for( int t(0);t<input.nucleon_blocks.size();t++)
             {
                 push(xml,"elem");
-                xml << param.nucleon_blocks[t].xml;
+                xml << input.nucleon_blocks[t].xml;
                 pop(xml);
             }
             pop(xml);
@@ -210,13 +210,13 @@ namespace Chroma
             }
             catch( std::bad_cast )
             {
-                QDPIO::cerr << LalibeNucleonBlockEnv::name
+                QDPIO::cerr << LalibeTwoNucleonsEnv::name
                             << ": caught dynamic cast error" << std::endl;
                 QDP_abort(1);
             }
             catch (const std::string& e)
             {
-                QDPIO::cerr << LalibeNucleonBlockEnv::name
+                QDPIO::cerr << LalibeTwoNucleonsEnv::name
                             << ": map call failed: " << e << std::endl;
                 QDP_abort(1);
             }
@@ -237,11 +237,16 @@ namespace Chroma
                 Complex w;
                 read(block, "weight", w);
                 QDPIO::cout << "     weight: " << w << std::endl;
+                weights[b] = w;
             }
 
 
+#ifndef BUILD_HDF5
+            QDPIO::cerr << LalibeTwoNucleonsEnv::name << " only works if we have enabled HDF5. Please rebuild." << std::endl;
+            QDP_abort(1);
+#else
+
 #if 0
-#ifdef BUILD_HDF5
 
             int j_decay = Nd - 1; // Assume t_dir = j_decay
 
@@ -434,7 +439,7 @@ namespace Chroma
                 blockMap[theKey] = fft(tmpBlock, 1);
                 swatch_fft.stop();
                 QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
-                QDPIO::cout << LalibeNucleonBlockEnv::name << ": 000 FFT time " << swatch_fft.getTimeInSeconds() << std::endl;
+                QDPIO::cout << LalibeTwoNucleonsEnv::name << ": 000 FFT time " << swatch_fft.getTimeInSeconds() << std::endl;
             }
             else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
 
@@ -558,8 +563,8 @@ namespace Chroma
                 else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
             }
 
-            QDPIO::cout << LalibeNucleonBlockEnv::name << ": total block time " << block_time << std::endl;
-            QDPIO::cout << LalibeNucleonBlockEnv::name << ": total FFT time " << swatch_fft.getTimeInSeconds() << std::endl;
+            QDPIO::cout << LalibeTwoNucleonsEnv::name << ": total block time " << block_time << std::endl;
+            QDPIO::cout << LalibeTwoNucleonsEnv::name << ": total FFT time " << swatch_fft.getTimeInSeconds() << std::endl;
 
 
 #endif// commenting out everything for now
@@ -727,15 +732,13 @@ namespace Chroma
 
             //This is where latscat's swatch_everything stops. I am going to use the timer that's printed at the end.
 
-#else
-            QDPIO::cout << "This measurement only works if we have enabled HDF5. Please rebuild." << std::endl;
 #endif
 
             snoop.stop();
-            QDPIO::cout << LalibeNucleonBlockEnv::name << ": total time = " << snoop.getTimeInSeconds() << " secs" << std::endl;
-            QDPIO::cout << LalibeNucleonBlockEnv::name << ": ran successfully" << std::endl;
+            QDPIO::cout << LalibeTwoNucleonsEnv::name << ": total time = " << snoop.getTimeInSeconds() << " secs" << std::endl;
+            QDPIO::cout << LalibeTwoNucleonsEnv::name << ": ran successfully" << std::endl;
             END_CODE();
 
         }// Function Call
-    }// LalibeNucleonBlockEnv
+    }// LalibeTwoNucleonsEnv
 };
