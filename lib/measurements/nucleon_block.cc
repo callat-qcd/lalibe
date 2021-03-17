@@ -82,6 +82,7 @@ namespace Chroma
             else
                 par.fft_tune = false;
             read(paramtop, "compute_locals", par.compute_locals);
+            read(paramtop, "negative_parity", par.negative_parity);
             // list of total momentum boosts
             read(paramtop, "boosts", par.boosts);
             // For now - only support P_tot = (0,0,0)
@@ -93,20 +94,21 @@ namespace Chroma
             }
 
             // Are propagators already in Dirac basis?
-            if (paramtop.count("is_dirac_basis") != 0)
-                read(paramtop, "is_dirac_basis", par.dirac_basis); //specifies props in dirac basis, this is false by default
+            if (paramtop.count("in_dirac_basis") != 0)
+                read(paramtop, "in_dirac_basis", par.in_dirac_basis); //specifies props in dirac basis, this is false by default
             else
-                par.dirac_basis = false;
+                par.in_dirac_basis = false;
         }
 
         void write(XMLWriter& xml, const std::string& path, NucleonBlockParams::NucleonBlock_t& par)
         {
             push(xml, path);
-            write(xml, "fft_chunksize",  par.fft_chunksize);
-            write(xml, "fft_tune",       par.fft_tune);
-            write(xml, "compute_locals", par.compute_locals);
-            write(xml, "boosts",         par.boosts);
-            write(xml, "is_dirac_basis", par.dirac_basis);
+            write(xml, "fft_chunksize",   par.fft_chunksize);
+            write(xml, "fft_tune",        par.fft_tune);
+            write(xml, "compute_locals",  par.compute_locals);
+            write(xml, "boosts",          par.boosts);
+            write(xml, "in_dirac_basis",  par.in_dirac_basis);
+            write(xml, "negative_parity", par.negative_parity);
             pop(xml);
         }
 
@@ -340,8 +342,6 @@ namespace Chroma
             QDPIO::cout << std::endl;
 
             disp = pos1 - pos0;
-            QDPIO::cout << "    Displacement: "; for(int i = 0; i<Nd; i++){ QDPIO::cout << disp[i] << " " ;};
-            QDPIO::cout << std::endl;
 
             for(unsigned int d=0; d<Nd; d++){
                 QDPIO::cout << disp[d] << "%" << Layout::lattSize()[d] ;
@@ -350,6 +350,8 @@ namespace Chroma
                 if(disp[d] > Layout::lattSize()[d]/2){ disp[d] = disp[d] - Layout::lattSize()[d]; }
                 QDPIO::cout << " --> " << disp[d] << std::endl;
             }
+            QDPIO::cout << "         Displacement: "; for(int i = 0; i<Nd; i++){ QDPIO::cout << disp[i] << " " ;};
+            QDPIO::cout << std::endl;
             QDPIO::cout << "    Real Displacement: "; for(int i = 0; i<Nd; i++){ QDPIO::cout << disp[i] << " " ;};
             QDPIO::cout << std::endl;
 
@@ -387,8 +389,16 @@ namespace Chroma
             }
             */
 
-            // Get g5 in Dirac-Pauli (chiral) basis from Degrand-Rossi basis.
-            SpinMatrixD g5_Dirac = adj(PauliToDRMat()) * Gamma(15) * PauliToDRMat();
+            bool neg_par = params.nblockparam.negative_parity;
+            std::string neg_par_str = "POS_PARITY";
+            if (neg_par){
+                // The positive parity code works on the negative parity props
+                // since in Dirac Pauli, g5 flips 1 <--> 3 and 2 <--> 4
+                SpinMatrixD g5_Dirac = adj(PauliToDRMat()) * Gamma(15) * PauliToDRMat();
+                prop0 = g5_Dirac * prop0 * g5_Dirac;
+                prop1 = g5_Dirac * prop1 * g5_Dirac;
+                neg_par_str = "NEG_PARITY";
+            }
 
             /*
             Make blocks and FFT them and return a map of mom-space blocks
@@ -422,7 +432,7 @@ namespace Chroma
             double block_time = 0.;
 
             // Declare block map
-            typedef std::tuple<std::string, std::string, std::string, int> BlockMapKeyType;
+            typedef std::tuple<std::string, std::string, std::string, int, bool> BlockMapKeyType;
             typedef std::map<BlockMapKeyType, LatticeHalfBaryonblock> BlockMapType;
             // Put it in the NamedObjectMap
             TheNamedObjMap::Instance().create<BlockMapType>(params.named_obj.block_map);
@@ -436,81 +446,136 @@ namespace Chroma
             std::string propId_1 = params.named_obj.prop1_id;
 
             // Block 000[+1]
-            BlockMapKeyType theKey = {propId_0, propId_0, propId_0, 1};
-            block_time += get_barblock(tmpBlock, prop0, prop0, prop0, Nup[0].get_gamma(0));
-            swatch_fft.start();
-            blockMap[theKey] = fft(tmpBlock, 1);
-            swatch_fft.stop();
-            QDPIO::cout << LalibeNucleonBlockEnv::name << ": 000 FFT time " << swatch_fft.getTimeInSeconds() << std::endl;
+            BlockMapKeyType theKey = {propId_0, propId_0, propId_0, 1, neg_par};
+            std::string block_str = "000[+1]";
+            if (blockMap.count(theKey) == 0){
+                block_time += get_barblock(tmpBlock, prop0, prop0, prop0, Nup[0].get_gamma(0));
+                swatch_fft.start();
+                blockMap[theKey] = fft(tmpBlock, 1);
+                swatch_fft.stop();
+                QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
+                QDPIO::cout << LalibeNucleonBlockEnv::name << ": 000 FFT time " << swatch_fft.getTimeInSeconds() << std::endl;
+            }
+            else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
 
             // Did the user pass the same prop?
             if (propId_0 == propId_1){
-                // 000[-1]]
-                theKey = {propId_0, propId_0, propId_0, -1};
-                swatch_fft.start();
-                blockMap[theKey] = fft(tmpBlock, -1);
-                swatch_fft.stop();
+                // 000[-1]
+                theKey = {propId_0, propId_0, propId_0, -1, neg_par};
+                block_str = "000[-1]";
+                if (blockMap.count(theKey) == 0){
+                    swatch_fft.start();
+                    blockMap[theKey] = fft(tmpBlock, -1);
+                    swatch_fft.stop();
+                    QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
+                }
+                else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
             }
             else{
                 // 111[-1]
-                theKey = {propId_1, propId_1, propId_1, -1};
-                block_time += get_barblock(tmpBlock, prop1, prop1, prop1, Nup[0].get_gamma(0));
-                swatch_fft.start();
-                blockMap[theKey] = fft(tmpBlock, -1);
-                swatch_fft.stop();
+                theKey = {propId_1, propId_1, propId_1, -1, neg_par};
+                block_str = "111[-1]";
+                if (blockMap.count(theKey) == 0){
+                    block_time += get_barblock(tmpBlock, prop1, prop1, prop1, Nup[0].get_gamma(0));
+                    swatch_fft.start();
+                    blockMap[theKey] = fft(tmpBlock, -1);
+                    swatch_fft.stop();
+                    QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
+                }
+                else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
 
                 // Do we want to compute the local NN?  If so, need opposite sign FFT
                 if (params.nblockparam.compute_locals){
                     // 111[+1]
-                    theKey = {propId_1, propId_1, propId_1, +1};
-                    swatch_fft.start();
-                    blockMap[theKey] = fft(tmpBlock, +1);
-                    swatch_fft.stop();
+                    theKey = {propId_1, propId_1, propId_1, +1, neg_par};
+                    block_str = "111[+1]";
+                    if (blockMap.count(theKey) == 0){
+                        swatch_fft.start();
+                        blockMap[theKey] = fft(tmpBlock, +1);
+                        swatch_fft.stop();
+                        QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
+                    }
+                    else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
                     // 000[-1]
-                    theKey = {propId_0, propId_0, propId_0, -1};
-                    block_time += get_barblock(tmpBlock, prop0, prop0, prop0, Nup[0].get_gamma(0));
-                    swatch_fft.start();
-                    blockMap[theKey] = fft(tmpBlock, -1);
-                    swatch_fft.stop();
+                    theKey = {propId_0, propId_0, propId_0, -1, neg_par};
+                    block_str = "000[-1]";
+                    if (blockMap.count(theKey) == 0){
+                        block_time += get_barblock(tmpBlock, prop0, prop0, prop0, Nup[0].get_gamma(0));
+                        swatch_fft.start();
+                        blockMap[theKey] = fft(tmpBlock, -1);
+                        swatch_fft.stop();
+                        QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
+                    }
+                    else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
                 }
                 // Now make the mixed blocks
                 // 001 [+1]
-                theKey = {propId_0, propId_0, propId_1, 1};
-                block_time += get_barblock(tmpBlock, prop0, prop0, prop1, Nup[0].get_gamma(0));
-                swatch_fft.start();
-                blockMap[theKey] = fft(tmpBlock, 1);
-                swatch_fft.stop();
+                theKey = {propId_0, propId_0, propId_1, 1, neg_par};
+                block_str = "001[+1]";
+                if (blockMap.count(theKey) == 0){
+                    block_time += get_barblock(tmpBlock, prop0, prop0, prop1, Nup[0].get_gamma(0));
+                    swatch_fft.start();
+                    blockMap[theKey] = fft(tmpBlock, 1);
+                    swatch_fft.stop();
+                    QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
+                }
+                else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
                 // 010 [+1]
-                theKey = {propId_0, propId_1, propId_0, 1};
-                block_time += get_barblock(tmpBlock, prop0, prop1, prop0, Nup[0].get_gamma(0));
-                swatch_fft.start();
-                blockMap[theKey] = fft(tmpBlock, 1);
-                swatch_fft.stop();
+                theKey = {propId_0, propId_1, propId_0, 1, neg_par};
+                block_str = "010[+1]";
+                if (blockMap.count(theKey) == 0){
+                    block_time += get_barblock(tmpBlock, prop0, prop1, prop0, Nup[0].get_gamma(0));
+                    swatch_fft.start();
+                    blockMap[theKey] = fft(tmpBlock, 1);
+                    swatch_fft.stop();
+                    QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
+                }
+                else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
                 // 100 [+1]
-                theKey = {propId_1, propId_0, propId_0, 1};
-                block_time += get_barblock(tmpBlock, prop1, prop0, prop0, Nup[0].get_gamma(0));
-                swatch_fft.start();
-                blockMap[theKey] = fft(tmpBlock, 1);
-                swatch_fft.stop();
+                theKey = {propId_1, propId_0, propId_0, 1, neg_par};
+                block_str = "100[+1]";
+                if (blockMap.count(theKey) == 0){
+                    block_time += get_barblock(tmpBlock, prop1, prop0, prop0, Nup[0].get_gamma(0));
+                    swatch_fft.start();
+                    blockMap[theKey] = fft(tmpBlock, 1);
+                    swatch_fft.stop();
+                    QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
+                }
+                else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
                 // And the opposite sign FFT blocks
                 // 011 [-1]
-                theKey = {propId_0, propId_1, propId_1, -1};
-                block_time += get_barblock(tmpBlock, prop0, prop1, prop1, Nup[0].get_gamma(0));
-                swatch_fft.start();
-                blockMap[theKey] = fft(tmpBlock, -1);
-                swatch_fft.stop();
+                theKey = {propId_0, propId_1, propId_1, -1, neg_par};
+                block_str = "011[-1]";
+                if (blockMap.count(theKey) == 0){
+                    block_time += get_barblock(tmpBlock, prop0, prop1, prop1, Nup[0].get_gamma(0));
+                    swatch_fft.start();
+                    blockMap[theKey] = fft(tmpBlock, -1);
+                    swatch_fft.stop();
+                    QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
+                }
+                else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
                 // 101 [-1]
-                theKey = {propId_1, propId_0, propId_1, -1};
-                block_time += get_barblock(tmpBlock, prop1, prop0, prop1, Nup[0].get_gamma(0));
-                swatch_fft.start();
-                blockMap[theKey] = fft(tmpBlock, -1);
-                swatch_fft.stop();
+                theKey = {propId_1, propId_0, propId_1, -1, neg_par};
+                block_str = "101[-1]";
+                if (blockMap.count(theKey) == 0){
+                    block_time += get_barblock(tmpBlock, prop1, prop0, prop1, Nup[0].get_gamma(0));
+                    swatch_fft.start();
+                    blockMap[theKey] = fft(tmpBlock, -1);
+                    swatch_fft.stop();
+                    QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
+                }
+                else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
                 // 110 [-1]
-                theKey = {propId_1, propId_1, propId_0, -1};
-                block_time += get_barblock(tmpBlock, prop1, prop1, prop0, Nup[0].get_gamma(0));
-                swatch_fft.start();
-                blockMap[theKey] = fft(tmpBlock, -1);
-                swatch_fft.stop();
+                theKey = {propId_1, propId_1, propId_0, -1, neg_par};
+                block_str = "110[-1]";
+                if (blockMap.count(theKey) == 0){
+                    block_time += get_barblock(tmpBlock, prop1, prop1, prop0, Nup[0].get_gamma(0));
+                    swatch_fft.start();
+                    blockMap[theKey] = fft(tmpBlock, -1);
+                    swatch_fft.stop();
+                    QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
+                }
+                else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
             }
 
             QDPIO::cout << LalibeNucleonBlockEnv::name << ": total block time " << block_time << std::endl;
