@@ -373,9 +373,6 @@ namespace Chroma
             swatch_fft.reset();
             double block_time = 0.;
 
-            // Declare block map
-            typedef std::tuple<std::string, std::string, std::string, int, bool, multi1d<int>, std::string> BlockMapKeyType;
-            typedef std::map<BlockMapKeyType, LatticeHalfBaryonblock> BlockMapType;
             // Put it in the NamedObjectMap (if it doesn't exist yet)
             if (!TheNamedObjMap::Instance().check(params.named_obj.block_map)){
                 TheNamedObjMap::Instance().create<BlockMapType>(params.named_obj.block_map);

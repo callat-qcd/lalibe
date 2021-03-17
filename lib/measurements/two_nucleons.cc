@@ -18,6 +18,7 @@
 
 // Lalibe Stuff
 #include "../momentum/lalibe_sftmom.h"
+#include "nucleon_block.h"
 #include "two_nucleons.h"
 #include "../matrix_elements/bilinear_gamma.h"
 //TODO: bilinear_gamma above shouldn't be needed once boiler plate is removed.
@@ -154,33 +155,29 @@ namespace Chroma
         }
 
         // Param stuff
-        TwoNucleonsParams::TwoNucleonsParams()
-        {
-            frequency = 0;
-        }
-
+        TwoNucleonsParams::TwoNucleonsParams(){}
         TwoNucleonsParams::TwoNucleonsParams(XMLReader& xml_in, const std::string& path)
         {
             try
-                {
-                    XMLReader paramtop(xml_in, path);
-                    if (paramtop.count("Frequency") == 1)
-                        read(paramtop, "Frequency", frequency);
-                    else
-                        frequency = 1;
+            {
+                XMLReader paramtop(xml_in, path);
+                if (paramtop.count("Frequency") == 1)
+                    read(paramtop, "Frequency", frequency);
+                else
+                    frequency = 1;
 
-                    // Parameters for source construction
-                    read(paramtop, "TwoNucleonsParams", twonucleonsparam);
+                // Parameters for source construction
+                read(paramtop, "TwoNucleonsParams", twonucleonsparam);
 
-                    // Read in the NamedObject info
-                    read(paramtop, "NamedObject", named_obj);
-                }
+                // Read in the NamedObject info
+                read(paramtop, "NamedObject", named_obj);
+            }
             catch(const std::string& e)
-                {
-                    QDPIO::cerr << __func__ << ": Caught Exception reading XML: "
-                                << e << std::endl;
-                    QDP_abort(1);
-                }
+            {
+                QDPIO::cerr << __func__ << ": Caught Exception reading XML: "
+                            << e << std::endl;
+                QDP_abort(1);
+            }
         }
 
         void TwoNucleonsParams::writeXML(XMLWriter& xml_out, const std::string& path)
@@ -240,6 +237,14 @@ namespace Chroma
                 weights[b] = w;
             }
 
+            LalibeNucleonBlockEnv::BlockMapKeyType theKey;
+            for ( const auto &myPair : params.named_obj.nucleon_blocks[0] )
+            {
+                QDPIO::cout << "FFT sign " << myPair.first[3] << std::endl;
+                QDPIO::cout << "parity   " << myPair.first[4] << std::endl;
+                QDPIO::cout << "pos0     " << myPair.first[5] << std::endl;
+                QDPIO::cout << "d_dir    " << myPair.first[6] << std::endl;
+            }
 
 #ifndef BUILD_HDF5
             QDPIO::cerr << LalibeTwoNucleonsEnv::name << " only works if we have enabled HDF5. Please rebuild." << std::endl;
