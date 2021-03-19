@@ -235,34 +235,44 @@ namespace Chroma
             //    required blocks
             // 4. If yes, proceed to do contractions
 
-            // Get propIds
+            // Get propIds and locations
             multi1d<std::string> prop0_Ids(params.named_obj.prop0_list.size());
             multi1d<std::string> prop1_Ids(params.named_obj.prop1_list.size());
+            
             if (prop0_Ids.size() != prop1_Ids.size()){
                 QDPIO::cout << "You must pass the same number of prop0 and prop1 files" << std::endl;
                 QDP_abort(1);
             }
             else
                 QDPIO::cout << "We have " << prop0_Ids.size() << " sets of propagators" << std::endl;
-            for (b=0; b<prop0_Ids.size(); b++){
+            for (int b=0; b<prop0_Ids.size(); b++){
                 prop0_Ids[b] = params.named_obj.prop0_list[b];
                 prop1_Ids[b] = params.named_obj.prop1_list[b];
             }
 
             // Get block keys
             // Start by making list of BlockMapType
-            multi1d<const BlockMapType*> blockMap_list(params.named_obj.nucleon_blocks.size());
+            multi1d<const LalibeNucleonBlockEnv::BlockMapType*> blockMap_list(params.named_obj.nucleon_blocks.size());
             for (int b=0; b<params.named_obj.nucleon_blocks.size(); b++){
-                blockMap_list[b] = &TheNamedObjMap::Instance().getData<BlockMapType>(params.named_obj.nucleon_blocks[b]);
+                std::istringstream xml_block(params.named_obj.nucleon_blocks[b].xml);
+                XMLReader block(xml_block);
+                std::string block_name;
+                read(block, "block", block_name);
+                blockMap_list[b] = &TheNamedObjMap::Instance().getData<LalibeNucleonBlockEnv::BlockMapType>(block_name);
             }
             QDPIO::cout << "We have " << blockMap_list.size() << " sets of blocks" << std::endl;
 
             // Now, loop over keys in block_maps to see if all blocks are present
-            bool have_all_blocks = True;
+            bool have_all_blocks = true;
             std::string parity_str;
-            for (p=0; p<params.twonucleonsparam.parities.size(); p++){
+            for (int p=0; p<params.twonucleonsparam.parities.size(); p++){
                 parity_str = params.twonucleonsparam.parities[p];
                 QDPIO::cout << "  checking " << parity_str << std::endl;
+                // If prop1 = prop0 and not compute_locals - nothing to do - exit
+                // else, we want 000[+1] and 000[-1]
+                std::string prop0_str = prop0_Ids[0];
+                std::string prop1_str = prop1_Ids[0];
+                QDPIO::cout << prop0_str << " " << prop1_str << std::endl;
             }
 
 
