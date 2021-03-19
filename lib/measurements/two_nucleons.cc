@@ -132,7 +132,6 @@ namespace Chroma
             pop(xml);
         }
 
-#if 0
         // Create string for total boost
         std::string boost_string(const multi1d<int> &boost){
             std::string boostdir("boost_");
@@ -148,7 +147,7 @@ namespace Chroma
             }
             return boostdir;
         }
-#endif
+
         // timestamp for simple checkpointing
         const std::string getTimestamp() {
             time_t     now = time(0);
@@ -206,25 +205,7 @@ namespace Chroma
             snoop.start();
             QDPIO::cout << "TWO_NUCLEONS: start" << std::endl;
 
-            // Test and grab a reference to the gauge field
-            XMLBufferWriter gauge_xml;
-            try
-            {
-                TheNamedObjMap::Instance().getData <multi1d <LatticeColorMatrix> >(params.named_obj.gauge_id);
-                TheNamedObjMap::Instance().get(params.named_obj.gauge_id).getRecordXML(gauge_xml);
-            }
-            catch( std::bad_cast )
-            {
-                QDPIO::cerr << LalibeTwoNucleonsEnv::name
-                            << ": caught dynamic cast error" << std::endl;
-                QDP_abort(1);
-            }
-            catch (const std::string& e)
-            {
-                QDPIO::cerr << LalibeTwoNucleonsEnv::name
-                            << ": map call failed: " << e << std::endl;
-                QDP_abort(1);
-            }
+            // Grab a reference to the gauge field
             const multi1d<LatticeColorMatrix>& u =
                 TheNamedObjMap::Instance().getData <multi1d <LatticeColorMatrix> >(params.named_obj.gauge_id);
 
@@ -236,9 +217,14 @@ namespace Chroma
             // 4. If yes, proceed to do contractions
 
             // Get propIds and locations
+
             multi1d<std::string> prop0_Ids(params.named_obj.prop0_list.size());
             multi1d<std::string> prop1_Ids(params.named_obj.prop1_list.size());
-            
+            multi2d< int >       pos0_list(params.named_obj.prop0_list.size(), Nd);
+            multi1d<int>         pos1(Nd), disp(Nd);
+            multi1d<std::string> disp_list(params.named_obj.prop0_list.size());
+            std::string displacedir;
+
             if (prop0_Ids.size() != prop1_Ids.size()){
                 QDPIO::cout << "You must pass the same number of prop0 and prop1 files" << std::endl;
                 QDP_abort(1);
@@ -248,6 +234,19 @@ namespace Chroma
             for (int b=0; b<prop0_Ids.size(); b++){
                 prop0_Ids[b] = params.named_obj.prop0_list[b];
                 prop1_Ids[b] = params.named_obj.prop1_list[b];
+                pos0_list[b] = LalibeUtilsNambedObjEnv::get_prop_position(prop0_Ids[b]);
+                pos1         = LalibeUtilsNambedObjEnv::get_prop_position(prop1_Ids[b]);
+                disp         = pos1 - pos0_list[b];
+                for(unsigned int d=0; d<Nd; d++){
+                    // adjust for boundary conditions
+                    disp[d] = (disp[d] + Layout::lattSize()[d]) % Layout::lattSize()[d];
+                    if(disp[d] > Layout::lattSize()[d]/2){ disp[d] = disp[d] - Layout::lattSize()[d]; }
+                    // make disp string
+                    if(disp[d] >= 0) displacedir+="p";
+                    else displacedir+="m";
+                    displacedir+=dirlist[d]+std::to_string(abs(disp[d]));
+                }
+                disp_list[b] = displacedir;
             }
 
             // Get block keys
@@ -272,7 +271,9 @@ namespace Chroma
                 // else, we want 000[+1] and 000[-1]
                 std::string prop0_str = prop0_Ids[0];
                 std::string prop1_str = prop1_Ids[0];
-                QDPIO::cout << prop0_str << " " << prop1_str << std::endl;
+                QDPIO::cout << prop0_str << " " << prop1_str
+                            << " pos0 = " << pos0_list[0] << " disp = " << disp_list[0]
+                            << std::endl;
             }
 
 

@@ -58,7 +58,7 @@ namespace Chroma
             public:
                 ~InlineMeas() {}
                 InlineMeas(const TwoNucleonsParams& p) : params(p) {}
-                InlineMeas(const InlineMeas& p)         : params(p.params) {}
+                InlineMeas(const InlineMeas& p)        : params(p.params) {}
 
                 unsigned long getFrequency(void) const {return params.frequency;}
 
