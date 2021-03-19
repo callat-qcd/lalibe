@@ -13,6 +13,8 @@ namespace Chroma
 {
     namespace LalibeUtilsNambedObjEnv
     {
+        extern const std::string name;
+
         // Read a Propagator position
         multi1d<int> get_prop_position(const std::string& named_obj_id);
 

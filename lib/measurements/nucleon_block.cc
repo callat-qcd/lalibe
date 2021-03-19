@@ -230,57 +230,25 @@ namespace Chroma
             multi1d<int> pos0(Nd), pos1(Nd), disp(Nd);
 
             //Read/set up prop 0.
-            XMLReader prop0_record_xml;
             LatticePropagator prop0;
             QDPIO::cout << "Attempt to read propagator 0" << std::endl;
+            pos0 = LalibeUtilsNambedObjEnv::get_prop_position(params.named_obj.prop0_id);
             try {
                 prop0 = TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.prop0_id);
-                pos0  = LalibeUtilsNambedObjEnv::get_prop_position(params.named_obj.prop0_id);
-                /*
-                TheNamedObjMap::Instance().get(params.named_obj.prop0_id).getRecordXML(prop0_record_xml);
-                MakeSourceProp_t  orig_header;
-                if (prop0_record_xml.count("/Propagator") != 0){
-                    read(prop0_record_xml, "/Propagator", orig_header);
-                }
-                // Or if we pass a smeared propagator
-                else if (prop0_record_xml.count("/SinkSmear") != 0){
-                    read(prop0_record_xml, "/SinkSmear", orig_header);
-                }
-                pos0 = orig_header.source_header.getTSrce();
-                */
             }
             catch (std::bad_cast) {
                 QDPIO::cerr << name << ": caught dynamic cast error" << std::endl;
-                QDP_abort(1);
-            }
-            catch (const std::string& e) {
-                QDPIO::cerr << name << ": error reading src prop_header: "
-                            << e << std::endl;
                 QDP_abort(1);
             }
             //Now read/set up prop 1.
-            XMLReader prop1_record_xml;
             LatticePropagator prop1;
             QDPIO::cout << "Attempt to read propagator 1" << std::endl;
+            pos1 = LalibeUtilsNambedObjEnv::get_prop_position(params.named_obj.prop1_id);
             try {
                 prop1 = TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.prop1_id);
-                TheNamedObjMap::Instance().get(params.named_obj.prop1_id).getRecordXML(prop1_record_xml);
-                MakeSourceProp_t  orig_header;
-                if (prop1_record_xml.count("/Propagator") != 0){
-                    read(prop1_record_xml, "/Propagator", orig_header);
-                }
-                else if (prop1_record_xml.count("/SinkSmear") != 0){
-                    read(prop1_record_xml, "/SinkSmear", orig_header);
-                }
-                pos1 = orig_header.source_header.getTSrce();
             }
             catch (std::bad_cast) {
                 QDPIO::cerr << name << ": caught dynamic cast error" << std::endl;
-                QDP_abort(1);
-            }
-            catch (const std::string& e) {
-                QDPIO::cerr << name << ": error reading src prop_header: "
-                            << e << std::endl;
                 QDP_abort(1);
             }
 
