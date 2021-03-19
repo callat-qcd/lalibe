@@ -57,7 +57,8 @@ namespace Chroma
         const std::string dirlist[4]={"x","y","z","t"};
 
         // Define the nucleon object types
-        typedef std::tuple<std::string, std::string, std::string, int, bool, multi1d<int>, std::string> BlockMapKeyType;
+        //                      prop0        prop1        prop2   FFT+- parity?,     position0,    displacement string
+        typedef std::tuple<std::string, std::string, std::string, int,  std::string, multi1d<int>, std::string> BlockMapKeyType;
         typedef std::map<BlockMapKeyType, LatticeHalfBaryonblock> BlockMapType;
 
         class InlineMeas : public AbsInlineMeasurement

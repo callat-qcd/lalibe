@@ -65,13 +65,19 @@ namespace Chroma
             read(paramtop, "contractions_filename", par.contractions_filename); //hdf5 file containing contractions
             if (paramtop.count("output_stripesize") != 0)
                 read(paramtop, "output_stripesize", par.output_stripesize); //output stripesize; default recommended
-            /*
-            // Compute blocks needed for local correlators?
+            if (paramtop.count("parities") > 0)
+                read(paramtop, "parities", par.parities);
+            else
+            {
+                par.parities.resize(2);
+                par.parities[0] = "POS_PARITY";
+                par.parities[1] = "NEG_PARITY";
+            }
+            // Do local contractions?  000[+1] + 000[1-]
             if (paramtop.count("compute_locals") > 0)
                 read(paramtop, "compute_locals", par.compute_locals);
             else
                 par.compute_locals = true;
-            */
             // list of total momentum boosts
             read(paramtop, "boosts", par.boosts);
             // For now - only support P_tot = (0,0,0)
@@ -89,6 +95,8 @@ namespace Chroma
             write(xml, "contractions_filename",  par.contractions_filename);
             write(xml, "output_filename",        par.output_filename);
             write(xml, "output_stripesize",      par.output_stripesize);
+            write(xml, "compute_locals",         par.compute_locals);
+            write(xml, "parities",               par.parities);
             write(xml, "boosts",                 par.boosts);
             pop(xml);
         }
@@ -98,8 +106,8 @@ namespace Chroma
         {
             XMLReader inputtop(xml, path);
             read(inputtop, "gauge_id"     , input.gauge_id);
-            read(inputtop, "prop0_id"     , input.prop0_id);
-            read(inputtop, "prop1_id"     , input.prop1_id);
+            read(inputtop, "prop0_list"   , input.prop0_list);
+            read(inputtop, "prop1_list"   , input.prop1_list);
             // read group xml of blocks
             input.nucleon_blocks = readXMLArrayGroup(inputtop, "nucleon_blocks", "block");
         }
@@ -109,8 +117,8 @@ namespace Chroma
         {
             push(xml, path);
             write(xml, "gauge_id"     , input.gauge_id);
-            write(xml, "prop0_id"     , input.prop0_id);
-            write(xml, "prop1_id"     , input.prop1_id);
+            write(xml, "prop0_list"   , input.prop0_list);
+            write(xml, "prop1_list"   , input.prop1_list);
             // Group writer
             push(xml,  "nucleon_blocks");
             for( int t(0);t<input.nucleon_blocks.size();t++)
@@ -220,6 +228,45 @@ namespace Chroma
             const multi1d<LatticeColorMatrix>& u =
                 TheNamedObjMap::Instance().getData <multi1d <LatticeColorMatrix> >(params.named_obj.gauge_id);
 
+            // The structure of this function is
+            // 1. Get list of prop0_Ids and prop1_Ids
+            // 2. Get list of nucleon blocks keys
+            // 3. Based upon requested set of contractions, check if we have all
+            //    required blocks
+            // 4. If yes, proceed to do contractions
+
+            // Get propIds
+            multi1d<std::string> prop0_Ids(params.named_obj.prop0_list.size());
+            multi1d<std::string> prop1_Ids(params.named_obj.prop1_list.size());
+            if (prop0_Ids.size() != prop1_Ids.size()){
+                QDPIO::cout << "You must pass the same number of prop0 and prop1 files" << std::endl;
+                QDP_abort(1);
+            }
+            else
+                QDPIO::cout << "We have " << prop0_Ids.size() << " sets of propagators" << std::endl;
+            for (b=0; b<prop0_Ids.size(); b++){
+                prop0_Ids[b] = params.named_obj.prop0_list[b];
+                prop1_Ids[b] = params.named_obj.prop1_list[b];
+            }
+
+            // Get block keys
+            // Start by making list of BlockMapType
+            multi1d<const BlockMapType*> blockMap_list(params.named_obj.nucleon_blocks.size());
+            for (int b=0; b<params.named_obj.nucleon_blocks.size(); b++){
+                blockMap_list[b] = &TheNamedObjMap::Instance().getData<BlockMapType>(params.named_obj.nucleon_blocks[b]);
+            }
+            QDPIO::cout << "We have " << blockMap_list.size() << " sets of blocks" << std::endl;
+
+            // Now, loop over keys in block_maps to see if all blocks are present
+            bool have_all_blocks = True;
+            std::string parity_str;
+            for (p=0; p<params.twonucleonsparam.parities.size(); p++){
+                parity_str = params.twonucleonsparam.parities[p];
+                QDPIO::cout << "  checking " << parity_str << std::endl;
+            }
+
+
+
             // TMP loop to test block reading
             QDPIO::cout << "Parsing blocks" << std::endl;
             multi1d<std::string> blocks(params.named_obj.nucleon_blocks.size());
@@ -236,7 +283,7 @@ namespace Chroma
                 QDPIO::cout << "     weight: " << w << std::endl;
                 weights[b] = w;
             }
-
+            /*
             LalibeNucleonBlockEnv::BlockMapKeyType theKey;
             for ( const auto &myPair : params.named_obj.nucleon_blocks[0] )
             {
@@ -245,7 +292,7 @@ namespace Chroma
                 QDPIO::cout << "pos0     " << myPair.first[5] << std::endl;
                 QDPIO::cout << "d_dir    " << myPair.first[6] << std::endl;
             }
-
+            */
 #ifndef BUILD_HDF5
             QDPIO::cerr << LalibeTwoNucleonsEnv::name << " only works if we have enabled HDF5. Please rebuild." << std::endl;
             QDP_abort(1);

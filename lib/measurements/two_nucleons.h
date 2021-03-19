@@ -37,15 +37,16 @@ namespace Chroma
                 std::string             contractions_filename;  // filename of hdf5 file that contains contraction terms
                 std::string             output_filename;        // output file
                 int                     output_stripesize;      // output stripesize; default recommended
-                bool                    compute_locals;         // compute hexa-quark sink?
+                multi1d<std::string>    parities;               // specifies list of parity strings
+                bool                    compute_locals;         // compute local sinks (still FFT separately)?
                 multi1d< multi1d<int> > boosts;                 // boosts
             } twonucleonsparam ;
 
             struct NamedObject_t
             {
                 std::string             gauge_id;
-                std::string             prop0_id;
-                std::string             prop1_id;
+                multi1d<std::string>    prop0_list;
+                multi1d<std::string>    prop1_list;
                 multi1d<GroupXML_t>     nucleon_blocks;         // list of blocks and their weights
             } named_obj;
         };
