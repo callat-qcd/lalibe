@@ -17,6 +17,7 @@
 #include "util/ferm/paulitodr.h"
 
 // Lalibe Stuff
+#include "utils_named_object.h"
 #include "../momentum/lalibe_sftmom.h"
 #include "nucleon_block.h"
 #include "two_nucleons.h"

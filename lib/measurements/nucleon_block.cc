@@ -17,6 +17,7 @@
 #include "util/ferm/paulitodr.h"
 
 // Lalibe Stuff
+#include "utils_named_object.h"
 #include "../momentum/lalibe_sftmom.h"
 #include "nucleon_block.h"
 //#include "../NN/blockstuff.h"
@@ -25,7 +26,6 @@
 #include "../contractions/baryon_contractions_func_w.h"
 
 // Latscat Stuff
-#include "utils_named_object.h"
 #ifndef CUFFT
 #include "../NN/fourier_cpu.h"
 #else
