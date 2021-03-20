@@ -219,13 +219,13 @@ namespace Chroma
 
             // Get propIds and locations
 
-            int n_blocks = params.named_obj.prop0_list.size()
-            multi1d<std::string> prop0_Ids();
+            int                  n_blocks = params.named_obj.prop0_list.size();
+            multi1d<std::string> prop0_Ids(n_blocks);
             multi1d<std::string> prop1_Ids(params.named_obj.prop1_list.size());
             multi2d< int >       pos0_list(n_blocks, Nd);
             multi1d<int>         pos1(Nd), disp(Nd);
             multi1d<std::string> disp_list(n_blocks);
-            std::string displacedir;
+            std::string          displacedir;
 
             if (prop0_Ids.size() != prop1_Ids.size()){
                 QDPIO::cout << "You must pass the same number of prop0 and prop1 files" << std::endl;
@@ -239,6 +239,7 @@ namespace Chroma
                 pos0_list[b] = LalibeUtilsNambedObjEnv::get_prop_position(prop0_Ids[b]);
                 pos1         = LalibeUtilsNambedObjEnv::get_prop_position(prop1_Ids[b]);
                 disp         = pos1 - pos0_list[b];
+                displacedir  = "";
                 for(unsigned int d=0; d<Nd; d++){
                     // adjust for boundary conditions
                     disp[d] = (disp[d] + Layout::lattSize()[d]) % Layout::lattSize()[d];
@@ -275,25 +276,36 @@ namespace Chroma
             for (int p=0; p<params.twonucleonsparam.parities.size(); p++){
                 parity_str = params.twonucleonsparam.parities[p];
                 QDPIO::cout << "  checking " << parity_str << std::endl;
-                // If prop1 = prop0 and not compute_locals - nothing to do - exit
-                if (prop1_Ids[0] == prop0_Ids[0] && params.twonucleonsparam.compute_locals){
+                if ( params.twonucleonsparam.compute_locals ){
                     // We need 000[+1] and 000[-1] for all blocks
                     for (int b=0; b<n_blocks; b++){
-                        key0 = {prop0_Ids[b], prop0_Ids[b], prop0_Ids[b], 1, parity_str, pos0_list[b], disp_list[b]};
+                        key0 = {prop0_Ids[b], prop0_Ids[b], prop0_Ids[b],  1, parity_str, pos0_list[b], disp_list[b]};
                         key1 = {prop0_Ids[b], prop0_Ids[b], prop0_Ids[b], -1, parity_str, pos0_list[b], disp_list[b]};
-                        if (!blockMap_list[b].count(key0) && !blockMap_list[b].count(key1))
+                        if (!blockMap_list[b]->count(key0) || !blockMap_list[b]->count(key1))
+                        {
                             have_all_blocks = false;
+                            QDPIO::cout << "key0: " << std::get<0>(key0) << " " << std::get<1>(key0) << " " << std::get<2>(key0) << " "
+                                        << std::get<3>(key0) << " " << std::get<4>(key0) << " " << std::get<5>(key0) << " "
+                                        << std::get<6>(key0) << " " << std::endl;
+                        }
+                        // if prop1 != prop0, we also need 111[+1] and 111[-1]
+                        if (prop1_Ids[0] != prop0_Ids[0]) {
+                            key0 = {prop1_Ids[b], prop1_Ids[b], prop1_Ids[b],  1, parity_str, pos0_list[b], disp_list[b]};
+                            key1 = {prop1_Ids[b], prop1_Ids[b], prop1_Ids[b], -1, parity_str, pos0_list[b], disp_list[b]};
+                            if (!blockMap_list[b]->count(key0) || !blockMap_list[b]->count(key1))
+                                have_all_blocks = false;
+                        }
                     }
-                    if (have_all_blocks){
-                        QDPIO::cout << "  we have all blocks" << std::endl;
-                    }
-                    else
-                        QDPIO::cout << "  we are MISSING blocks" << std::endl;
                 }
             }
+            if (have_all_blocks){
+                QDPIO::cout << "  we have all blocks" << std::endl;
+            }
+            else
+                QDPIO::cout << "  we are MISSING blocks" << std::endl;
 
 
-
+#if 0
             // TMP loop to test block reading
             QDPIO::cout << "Parsing blocks" << std::endl;
             multi1d<std::string> blocks(params.named_obj.nucleon_blocks.size());
@@ -310,6 +322,7 @@ namespace Chroma
                 QDPIO::cout << "     weight: " << w << std::endl;
                 weights[b] = w;
             }
+#endif
             /*
             LalibeNucleonBlockEnv::BlockMapKeyType theKey;
             for ( const auto &myPair : params.named_obj.nucleon_blocks[0] )
