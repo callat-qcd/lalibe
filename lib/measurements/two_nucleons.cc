@@ -219,11 +219,12 @@ namespace Chroma
 
             // Get propIds and locations
 
-            multi1d<std::string> prop0_Ids(params.named_obj.prop0_list.size());
+            int n_blocks = params.named_obj.prop0_list.size()
+            multi1d<std::string> prop0_Ids();
             multi1d<std::string> prop1_Ids(params.named_obj.prop1_list.size());
-            multi2d< int >       pos0_list(params.named_obj.prop0_list.size(), Nd);
+            multi2d< int >       pos0_list(n_blocks, Nd);
             multi1d<int>         pos1(Nd), disp(Nd);
-            multi1d<std::string> disp_list(params.named_obj.prop0_list.size());
+            multi1d<std::string> disp_list(n_blocks);
             std::string displacedir;
 
             if (prop0_Ids.size() != prop1_Ids.size()){
@@ -232,7 +233,7 @@ namespace Chroma
             }
             else
                 QDPIO::cout << "We have " << prop0_Ids.size() << " sets of propagators" << std::endl;
-            for (int b=0; b<prop0_Ids.size(); b++){
+            for (int b=0; b<n_blocks; b++){
                 prop0_Ids[b] = params.named_obj.prop0_list[b];
                 prop1_Ids[b] = params.named_obj.prop1_list[b];
                 pos0_list[b] = LalibeUtilsNambedObjEnv::get_prop_position(prop0_Ids[b]);
@@ -252,8 +253,12 @@ namespace Chroma
 
             // Get block keys
             // Start by making list of BlockMapType
-            multi1d<const LalibeNucleonBlockEnv::BlockMapType*> blockMap_list(params.named_obj.nucleon_blocks.size());
-            for (int b=0; b<params.named_obj.nucleon_blocks.size(); b++){
+            if ( n_blocks != params.named_obj.nucleon_blocks.size()){
+                QDPIO::cout << "You must pass the same number of blocks as props" << std::endl;
+                QDP_abort(1);
+            }
+            multi1d<const LalibeNucleonBlockEnv::BlockMapType*> blockMap_list(n_blocks);
+            for (int b=0; b<n_blocks; b++){
                 std::istringstream xml_block(params.named_obj.nucleon_blocks[b].xml);
                 XMLReader block(xml_block);
                 std::string block_name;
@@ -265,16 +270,26 @@ namespace Chroma
             // Now, loop over keys in block_maps to see if all blocks are present
             bool have_all_blocks = true;
             std::string parity_str;
+            LalibeNucleonBlockEnv::BlockMapKeyType key0, key1;
+
             for (int p=0; p<params.twonucleonsparam.parities.size(); p++){
                 parity_str = params.twonucleonsparam.parities[p];
                 QDPIO::cout << "  checking " << parity_str << std::endl;
                 // If prop1 = prop0 and not compute_locals - nothing to do - exit
-                // else, we want 000[+1] and 000[-1]
-                std::string prop0_str = prop0_Ids[0];
-                std::string prop1_str = prop1_Ids[0];
-                QDPIO::cout << prop0_str << " " << prop1_str
-                            << " pos0 = " << pos0_list[0] << " disp = " << disp_list[0]
-                            << std::endl;
+                if (prop1_Ids[0] == prop0_Ids[0] && params.twonucleonsparam.compute_locals){
+                    // We need 000[+1] and 000[-1] for all blocks
+                    for (int b=0; b<n_blocks; b++){
+                        key0 = {prop0_Ids[b], prop0_Ids[b], prop0_Ids[b], 1, parity_str, pos0_list[b], disp_list[b]};
+                        key1 = {prop0_Ids[b], prop0_Ids[b], prop0_Ids[b], -1, parity_str, pos0_list[b], disp_list[b]};
+                        if (!blockMap_list[b].count(key0) && !blockMap_list[b].count(key1))
+                            have_all_blocks = false;
+                    }
+                    if (have_all_blocks){
+                        QDPIO::cout << "  we have all blocks" << std::endl;
+                    }
+                    else
+                        QDPIO::cout << "  we are MISSING blocks" << std::endl;
+                }
             }
 
 
