@@ -276,18 +276,13 @@ namespace Chroma
             for (int p=0; p<params.twonucleonsparam.parities.size(); p++){
                 parity_str = params.twonucleonsparam.parities[p];
                 QDPIO::cout << "  checking " << parity_str << std::endl;
-                if ( params.twonucleonsparam.compute_locals ){
-                    // We need 000[+1] and 000[-1] for all blocks
-                    for (int b=0; b<n_blocks; b++){
+                for (int b=0; b<n_blocks; b++){
+                    if ( params.twonucleonsparam.compute_locals ){
+                        // We need 000[+1] and 000[-1] for all blocks
                         key0 = {prop0_Ids[b], prop0_Ids[b], prop0_Ids[b],  1, parity_str, pos0_list[b], disp_list[b]};
                         key1 = {prop0_Ids[b], prop0_Ids[b], prop0_Ids[b], -1, parity_str, pos0_list[b], disp_list[b]};
                         if (!blockMap_list[b]->count(key0) || !blockMap_list[b]->count(key1))
-                        {
                             have_all_blocks = false;
-                            QDPIO::cout << "key0: " << std::get<0>(key0) << " " << std::get<1>(key0) << " " << std::get<2>(key0) << " "
-                                        << std::get<3>(key0) << " " << std::get<4>(key0) << " " << std::get<5>(key0) << " "
-                                        << std::get<6>(key0) << " " << std::endl;
-                        }
                         // if prop1 != prop0, we also need 111[+1] and 111[-1]
                         if (prop1_Ids[0] != prop0_Ids[0]) {
                             key0 = {prop1_Ids[b], prop1_Ids[b], prop1_Ids[b],  1, parity_str, pos0_list[b], disp_list[b]};
@@ -295,6 +290,24 @@ namespace Chroma
                             if (!blockMap_list[b]->count(key0) || !blockMap_list[b]->count(key1))
                                 have_all_blocks = false;
                         }
+                    }
+                    // if prop1 != prop0, we need 001, 010, 100 [+1] && 011, 101, 110 [-1]
+                    if (prop1_Ids[0] != prop0_Ids[0]){
+                        // 001 [+1] and 110[1-]
+                        key0 = {prop0_Ids[b], prop0_Ids[b], prop1_Ids[b],  1, parity_str, pos0_list[b], disp_list[b]};
+                        key1 = {prop1_Ids[b], prop1_Ids[b], prop0_Ids[b], -1, parity_str, pos0_list[b], disp_list[b]};
+                        if (!blockMap_list[b]->count(key0) || !blockMap_list[b]->count(key1))
+                            have_all_blocks = false;
+                        // 010 [+1] and 101[1-]
+                        key0 = {prop0_Ids[b], prop1_Ids[b], prop0_Ids[b],  1, parity_str, pos0_list[b], disp_list[b]};
+                        key1 = {prop1_Ids[b], prop0_Ids[b], prop1_Ids[b], -1, parity_str, pos0_list[b], disp_list[b]};
+                        if (!blockMap_list[b]->count(key0) || !blockMap_list[b]->count(key1))
+                            have_all_blocks = false;
+                        // 100 [+1] and 0111[1-]
+                        key0 = {prop1_Ids[b], prop0_Ids[b], prop0_Ids[b],  1, parity_str, pos0_list[b], disp_list[b]};
+                        key1 = {prop0_Ids[b], prop1_Ids[b], prop1_Ids[b], -1, parity_str, pos0_list[b], disp_list[b]};
+                        if (!blockMap_list[b]->count(key0) || !blockMap_list[b]->count(key1))
+                            have_all_blocks = false;
                     }
                 }
             }
