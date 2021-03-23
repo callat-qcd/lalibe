@@ -206,8 +206,8 @@ namespace Chroma
             pop(xml_out);
         }
 
-        void addWeightedHalfBlock(LatticeHalfBaryonblock& res, 
-                                  const Complex& weight, 
+        void addWeightedHalfBlock(LatticeHalfBaryonblock& res,
+                                  const Complex& weight,
                                   const LatticeHalfBaryonblock& in) {
             int nSites = Layout::sitesOnNode();
             for (int iX=0; iX<nSites; ++iX) {
@@ -218,8 +218,8 @@ namespace Chroma
                                 for (int jS2=0; jS2<(Ns>>1); ++jS2) {
                                     for (int iC2=0; iC2<Nc; ++iC2) {
                                         for (int jC2=0; jC2<Nc; ++jC2) {
-                                            res.elem(iX).elem(iS1, jS1).elem(iC1).elem(iS2, jS2).elem(iC2, jC2) 
-                                                += weight.elem().elem().elem() 
+                                            res.elem(iX).elem(iS1, jS1).elem(iC1).elem(iS2, jS2).elem(iC2, jC2)
+                                                += weight.elem().elem().elem()
                                                 * in.elem(iX).elem(iS1, jS1).elem(iC1).elem(iS2, jS2).elem(iC2, jC2);
                                         }
                                     }
@@ -235,20 +235,30 @@ namespace Chroma
         void InlineMeas::operator()(unsigned long update_no, XMLWriter& xml_out)
         {
             START_CODE();
-#ifndef BUILD_HDF5
-            QDPIO::cerr << LalibeTwoNucleonsEnv::name
-                << " only works if we have enabled HDF5. Please rebuild." << std::endl;
-            QDP_abort(1);
-#else
-#if QDP_NC != 3
-            QDPIO::cerr << "Contractions not yet implemented for NC!=3." << std::endl;
-            QDP_abort(1);
-#endif
-
             StopWatch snoop;
             snoop.reset();
             snoop.start();
             QDPIO::cout << "TWO_NUCLEONS: start" << std::endl;
+
+#ifndef BUILD_HDF5
+            QDPIO::cerr << "\n###########################################\n" << std::endl;
+            QDPIO::cerr << LalibeTwoNucleonsEnv::name
+                        << " only works if we have enabled HDF5. Please rebuild." << std::endl;
+            QDPIO::cerr << "\n###########################################\n" << std::endl;
+            QDP_abort(1);
+#else
+#if QDP_NC != 3
+            QDPIO::cerr << "\n###########################################\n" << std::endl;
+            QDPIO::cerr << "Contractions not yet implemented for NC!=3." << std::endl;
+            QDPIO::cerr << "\n###########################################\n" << std::endl;
+            QDP_abort(1);
+#endif
+#ifndef BUILD_FFTW
+            QDPIO::cerr << "\n###########################################\n" << std::endl;
+            QDPIO::cerr << "You must build with FFT or CUFFT" << std::endl;
+            QDPIO::cerr << "\n###########################################\n" << std::endl;
+            QDP_abort(1);
+#endif
 
             // Grab a reference to the gauge field
             const multi1d<LatticeColorMatrix>& u =
@@ -296,6 +306,8 @@ namespace Chroma
                 }
                 disp_list[b] = displacedir;
             }
+            // we need an inner map for the props to simplify looping over block choices
+            map<char, multi1d<std::string>> prop01 { {'0', prop0_Ids}, {'1', prop1_Ids}}
 
             // Get block keys
             // Start by making list of BlockMapType
@@ -318,23 +330,23 @@ namespace Chroma
 
             // Now, loop over keys in block_maps to see if all blocks are present
             bool have_all_blocks = true;
-            std::string parity_str;
+            std::string parity;
             LalibeNucleonBlockEnv::BlockMapKeyType key0, key1;
 
             for (int p=0; p<params.twonucleonsparam.parities.size(); p++){
-                parity_str = params.twonucleonsparam.parities[p];
-                QDPIO::cout << "  checking " << parity_str << std::endl;
+                parity = params.twonucleonsparam.parities[p];
+                QDPIO::cout << "  checking " << parity << std::endl;
                 for (int b=0; b<n_blocks; b++){
                     if ( params.twonucleonsparam.compute_locals ){
                         // We need 000[+1] and 000[-1] for all blocks
-                        key0 = {prop0_Ids[b], prop0_Ids[b], prop0_Ids[b],  1, parity_str, pos0_list[b], disp_list[b]};
-                        key1 = {prop0_Ids[b], prop0_Ids[b], prop0_Ids[b], -1, parity_str, pos0_list[b], disp_list[b]};
+                        key0 = {prop0_Ids[b], prop0_Ids[b], prop0_Ids[b],  1, parity, pos0_list[b], disp_list[b]};
+                        key1 = {prop0_Ids[b], prop0_Ids[b], prop0_Ids[b], -1, parity, pos0_list[b], disp_list[b]};
                         if (!blockMap_list[b]->count(key0) || !blockMap_list[b]->count(key1))
                             have_all_blocks = false;
                         // if prop1 != prop0, we also need 111[+1] and 111[-1]
                         if (prop1_Ids[0] != prop0_Ids[0]) {
-                            key0 = {prop1_Ids[b], prop1_Ids[b], prop1_Ids[b],  1, parity_str, pos0_list[b], disp_list[b]};
-                            key1 = {prop1_Ids[b], prop1_Ids[b], prop1_Ids[b], -1, parity_str, pos0_list[b], disp_list[b]};
+                            key0 = {prop1_Ids[b], prop1_Ids[b], prop1_Ids[b],  1, parity, pos0_list[b], disp_list[b]};
+                            key1 = {prop1_Ids[b], prop1_Ids[b], prop1_Ids[b], -1, parity, pos0_list[b], disp_list[b]};
                             if (!blockMap_list[b]->count(key0) || !blockMap_list[b]->count(key1))
                                 have_all_blocks = false;
                         }
@@ -342,18 +354,18 @@ namespace Chroma
                     // if prop1 != prop0, we need 001, 010, 100 [+1] && 011, 101, 110 [-1]
                     if (prop1_Ids[0] != prop0_Ids[0]){
                         // 001 [+1] and 110[1-]
-                        key0 = {prop0_Ids[b], prop0_Ids[b], prop1_Ids[b],  1, parity_str, pos0_list[b], disp_list[b]};
-                        key1 = {prop1_Ids[b], prop1_Ids[b], prop0_Ids[b], -1, parity_str, pos0_list[b], disp_list[b]};
+                        key0 = {prop0_Ids[b], prop0_Ids[b], prop1_Ids[b],  1, parity, pos0_list[b], disp_list[b]};
+                        key1 = {prop1_Ids[b], prop1_Ids[b], prop0_Ids[b], -1, parity, pos0_list[b], disp_list[b]};
                         if (!blockMap_list[b]->count(key0) || !blockMap_list[b]->count(key1))
                             have_all_blocks = false;
                         // 010 [+1] and 101[1-]
-                        key0 = {prop0_Ids[b], prop1_Ids[b], prop0_Ids[b],  1, parity_str, pos0_list[b], disp_list[b]};
-                        key1 = {prop1_Ids[b], prop0_Ids[b], prop1_Ids[b], -1, parity_str, pos0_list[b], disp_list[b]};
+                        key0 = {prop0_Ids[b], prop1_Ids[b], prop0_Ids[b],  1, parity, pos0_list[b], disp_list[b]};
+                        key1 = {prop1_Ids[b], prop0_Ids[b], prop1_Ids[b], -1, parity, pos0_list[b], disp_list[b]};
                         if (!blockMap_list[b]->count(key0) || !blockMap_list[b]->count(key1))
                             have_all_blocks = false;
                         // 100 [+1] and 0111[1-]
-                        key0 = {prop1_Ids[b], prop0_Ids[b], prop0_Ids[b],  1, parity_str, pos0_list[b], disp_list[b]};
-                        key1 = {prop0_Ids[b], prop1_Ids[b], prop1_Ids[b], -1, parity_str, pos0_list[b], disp_list[b]};
+                        key0 = {prop1_Ids[b], prop0_Ids[b], prop0_Ids[b],  1, parity, pos0_list[b], disp_list[b]};
+                        key1 = {prop0_Ids[b], prop1_Ids[b], prop1_Ids[b], -1, parity, pos0_list[b], disp_list[b]};
                         if (!blockMap_list[b]->count(key0) || !blockMap_list[b]->count(key1))
                             have_all_blocks = false;
                     }
@@ -382,7 +394,9 @@ namespace Chroma
             checkpoint chk(params.twonucleonsparam.output_filename+".NN_w.chk",params.twonucleonsparam.output_stripesize);
 
             int j_decay = Nd - 1; // Assume t_dir = j_decay
-
+            // We need FFT for the non-local contractions
+            Fourier fft(j_decay);
+            Fourier fftblock(j_decay);
             /*
                 Truncate is used to truncate the mom space correlators
                 we do not use this anymore and retain the full mom space
@@ -431,18 +445,18 @@ namespace Chroma
                 LatticeComplex phases=get_phases(mom,j_decay,+1);
 
                 for (int par=0; par < params.twonucleonsparam.parities.size(); par++){
-                    parity_str = params.twonucleonsparam.parities[par];
-                    QDPIO::cout << "Starting " << parity_str << " contractions" << std::endl;
-                    // zero out blocks
-                    block0 = zero;
-                    block1 = zero;
+                    parity = params.twonucleonsparam.parities[par];
+                    QDPIO::cout << "Starting " << parity << " contractions" << std::endl;
                     // For now - only support local contractions if prop1 = prop0
                     if ( params.twonucleonsparam.compute_locals && prop0_Ids[0] == prop1_Ids[0] ){
                         QDPIO::cout << "  local contractions" << std::endl;
+                        // zero out blocks
+                        block0 = zero;
+                        block1 = zero;
                         // b = block
                         for (int b=0; b < n_blocks; b++){
-                            key0 = {prop0_Ids[b], prop0_Ids[b], prop0_Ids[b],  1, parity_str, pos0_list[b], disp_list[b]};
-                            key1 = {prop0_Ids[b], prop0_Ids[b], prop0_Ids[b], -1, parity_str, pos0_list[b], disp_list[b]};
+                            key0 = {prop0_Ids[b], prop0_Ids[b], prop0_Ids[b],  1, parity, pos0_list[b], disp_list[b]};
+                            key1 = {prop0_Ids[b], prop0_Ids[b], prop0_Ids[b], -1, parity, pos0_list[b], disp_list[b]};
                             // add to blocks
                             QDPIO::cout << "  adding " << weights[b] << " * " << block_names[b] << std::endl;
                             swatch_blocks.start();
@@ -470,19 +484,52 @@ namespace Chroma
                         QDPIO::cout << "  Contract time= " << swatch_contract_local.getTimeInSeconds() << std::endl;
                     }
                     // add non-local contractions
+                    else if ( prop0_Ids[0] != prop1_Ids[0] ){
+                        multi1d<std::string> b0(n_blocks), b1(n_blocks);
+                        b0[0] = "001"; b0[1] = "010"; b0[2] = "100";
+                        b1[0] = "110"; b1[1] = "101"; b1[2] = "011";
 
+                        // Begin with 000|111 blocks
+                        // zero out blocks
+                        block0 = zero;
+                        block1 = zero;
+                        for (int b=0; b < n_blocks; b++){
+                            key0 = {prop01['0'][b], prop01['0'][b], prop01]'0'][b],  1, parity, pos0_list[b], disp_list[b]};
+                            key1 = {prop01['1'][b], prop01['1'][b], prop01]'1'][b], -1, parity, pos0_list[b], disp_list[b]};
+                            QDPIO::cout << "  adding " << weights[b] << " * " << block_names[b] << std::endl;
+                            swatch_blocks.start();
+                            addWeightedHalfBlock(block0, weights[b], blockMap_list[b]->at(key0));
+                            addWeightedHalfBlock(block1, weights[b], blockMap_list[b]->at(key1));
+                            swatch_blocks.stop();
+                        }
+                        swatch_contract_nonlocal.start();
+                        // Proton-Proton
+                        //s-wave:
+                        // print fourier signs
+                        QDPIO::cout << "PP_SING0.getFourierSign('000|111') = " << PP_SING0.getFourierSign("000|111") << std::endl;
+                        QDPIO::cout << "PP_TRIPP.getFourierSign('000|111') = " << PP_TRIPP.getFourierSign("000|111") << std::endl;
+                        QDPIO::cout << "PP_TRIP0.getFourierSign('000|111') = " << PP_TRIP0.getFourierSign("000|111") << std::endl;
+                        QDPIO::cout << "PP_TRIPM.getFourierSign('000|111') = " << PP_TRIPM.getFourierSign("000|111") << std::endl;
+
+                        QDPIO::cout << "PN_SING0.getFourierSign('000|111') = " << PN_SING0.getFourierSign("000|111") << std::endl;
+                        QDPIO::cout << "PN_TRIPP.getFourierSign('000|111') = " << PN_TRIPP.getFourierSign("000|111") << std::endl;
+                        QDPIO::cout << "PN_TRIP0.getFourierSign('000|111') = " << PN_TRIP0.getFourierSign("000|111") << std::endl;
+                        QDPIO::cout << "PN_TRIPM.getFourierSign('000|111') = " << PN_TRIPM.getFourierSign("000|111") << std::endl;
+                        //two_proton_displaced(latt_nn_map["PP_SING0"],block0,block1,PP_SING0.getTensor("000|111"),phases,fft,PP_SING0.getFourierSign("000|111"));
+
+                    }
 
                     chk.open();
                     chk.set_consistency(false);
                     /*
                         Single proton
                     */
-                    if (boost==0 && params.twonucleonsparam.compute_proton && params.twonucleonsparam.compute_locals){
+                    if (boost[0]==0 && boost[1] == 0 && boost[2] == 0 && params.twonucleonsparam.compute_proton && params.twonucleonsparam.compute_locals){
                         QDPIO::cout << "Single proton." << std::endl;
                         token=zero;
                         token += tshiftmap(latt_prot, true);
                         swatch_io_write.start();
-                        std::string corrname = "proton_"+parity_str;
+                        std::string corrname = "proton_"+parity;
                         chk.set_parameter(corrname,token);
                         swatch_io_write.stop();
                     }
@@ -514,7 +561,7 @@ namespace Chroma
                             token  = zero;
                             token += tshiftmap(LatticeComplex(trace((innerit->second)*(it->second))));
                             swatch_io_write.start();
-                            if (parity_str == "POS_PAR")
+                            if (parity == "POS_PAR")
                                 chk.set_parameter(boostdir+"/"+corrname,token);
                             else
                                 chk.set_parameter(boostdir+"/"+corrname+"_34",token);
