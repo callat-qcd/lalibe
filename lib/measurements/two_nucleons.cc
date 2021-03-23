@@ -211,8 +211,8 @@ namespace Chroma
                 << " only works if we have enabled HDF5. Please rebuild." << std::endl;
             QDP_abort(1);
 #else
-#ifndef QDP_NC == 3
-            QDPIO::cerr<<"Contractions not yet implemented for NC!=3."<<std::endl;
+#if QDP_NC != 3
+            QDPIO::cerr << "Contractions not yet implemented for NC!=3." << std::endl;
             QDP_abort(1);
 #endif
 
@@ -284,6 +284,7 @@ namespace Chroma
                 blockMap_list[b] = &TheNamedObjMap::Instance().getData<LalibeNucleonBlockEnv::BlockMapType>(block_names[b]);
                 // weights
                 read(block, "weight", weights[b]);
+                QDPIO::cout << b << " weight " << weights[b] << std::endl;
             }
             QDPIO::cout << "We have " << blockMap_list.size() << " sets of blocks" << std::endl;
 
@@ -341,6 +342,13 @@ namespace Chroma
             /*
                 Proceed with NN contractions
             */
+            //relevant spin projectors, in DP rep
+            std::map<std::string,HalfSpinMatrix> projectors;
+            projectors["SING0"]=getHalfProjector("SING0");
+            projectors["TRIPP"]=getHalfProjector("TRIPP1");
+            projectors["TRIP0"]=getHalfProjector("TRIP0");
+            projectors["TRIPM"]=getHalfProjector("TRIPM1");
+
             // Minimal checkpointing
             checkpoint chk(params.twonucleonsparam.output_filename+".NN_w.chk",params.twonucleonsparam.output_stripesize);
 
@@ -352,6 +360,7 @@ namespace Chroma
                 -1 --> do not truncate
             */
             int truncate = -1;
+            Topology PP_SING0, PP_TRIP0, PP_TRIPP, PP_TRIPM, PN_SING0, PN_TRIP0, PN_TRIPP, PN_TRIPM;
             initTopologies(params.twonucleonsparam.contractions_filename, truncate, j_decay);
 
             QDPIO::cout << "Creating timers..." << std::endl;
@@ -370,7 +379,7 @@ namespace Chroma
             // Create objects to store results
             LatticeComplex latt_prot, token;
             std::map<std::string,LatticeHalfSpinMatrix> latt_nn_map;
-            for(unsigned int s=0; s<contterms.size(); s++){
+            for(unsigned int s = 0; s < 8; s++){
                 latt_nn_map[contterms[s]]=LatticeHalfSpinMatrix();
             }
 
@@ -403,20 +412,24 @@ namespace Chroma
                             key1 = {prop0_Ids[b], prop0_Ids[b], prop0_Ids[b], -1, parity_str, pos0_list[b], disp_list[b]};
                             // add to blocks
                             QDPIO::cout << "  adding " << weights[b] << " * " << block_names[b] << std::endl;
-                            block0 += weights[b] * blockMap_list[b][key0];
-                            block1 += weights[b] * blockMap_list[b][key1];
+                            block0 += weights[b] * (blockMap_list[b])->at(key0);
+                            block1 += weights[b] * (blockMap_list[b])->at(key1);
+                            /*
+                            block0 += (blockMap_list[b])->at(key0);
+                            block1 += (blockMap_list[b])->at(key1);
+                            */
                         }
                         swatch_contract_local.start();
                         if ( params.twonucleonsparam.compute_proton){
                             one_proton(latt_prot, block0);
                         }
                         // Proton-Proton
-                        two_proton_source_local(resultmats["PP_SING0"],block0,block1,PP_SING0.getTensor("000|000"));
+                        two_proton_source_local(latt_nn_map["PP_SING0"],block0,block1,PP_SING0.getTensor("000|000"));
 
                         // Proton-Neutron
-                        two_proton_source_local(resultmats["PN_TRIPP"],block0,block1,PN_TRIPP.getTensor("000|000"));
-                        two_proton_source_local(resultmats["PN_TRIP0"],block0,block1,PN_TRIP0.getTensor("000|000"));
-                        two_proton_source_local(resultmats["PN_TRIPM"],block0,block1,PN_TRIPM.getTensor("000|000"));
+                        two_proton_source_local(latt_nn_map["PN_TRIPP"],block0,block1,PN_TRIPP.getTensor("000|000"));
+                        two_proton_source_local(latt_nn_map["PN_TRIP0"],block0,block1,PN_TRIP0.getTensor("000|000"));
+                        two_proton_source_local(latt_nn_map["PN_TRIPM"],block0,block1,PN_TRIPM.getTensor("000|000"));
                         swatch_contract_local.stop();
                         QDPIO::cout << "  Contract time= " << swatch_contract_local.getTimeInSeconds() << std::endl;
                     }
@@ -433,7 +446,7 @@ namespace Chroma
                         token=zero;
                         token += tshiftmap(latt_prot, true);
                         swatch_io_write.start();
-                        std::string corrname = "proton_"+par_string;
+                        std::string corrname = "proton_"+parity_str;
                         chk.set_parameter(corrname,token);
                         swatch_io_write.stop();
                     }
@@ -465,7 +478,7 @@ namespace Chroma
                             token  = zero;
                             token += tshiftmap(LatticeComplex(trace((innerit->second)*(it->second))));
                             swatch_io_write.start();
-                            if (par_string == "POS_PAR")
+                            if (parity_str == "POS_PAR")
                                 chk.set_parameter(boostdir+"/"+corrname,token);
                             else
                                 chk.set_parameter(boostdir+"/"+corrname+"_34",token);
