@@ -312,14 +312,14 @@ namespace Chroma
             multi1d<BaryOp> Nup=get_local_MA_single(0,"DP");
 
             bool neg_par = params.nblockparam.negative_parity;
-            std::string neg_par_str = "POS_PARITY";
+            std::string neg_par_str = "POS_PAR";
             if (neg_par){
                 // The positive parity code works on the negative parity props
                 // since in Dirac Pauli, g5 flips 1 <--> 3 and 2 <--> 4
                 SpinMatrixD g5_Dirac = adj(PauliToDRMat()) * Gamma(15) * PauliToDRMat();
                 prop0 = g5_Dirac * prop0 * g5_Dirac;
                 prop1 = g5_Dirac * prop1 * g5_Dirac;
-                neg_par_str = "NEG_PARITY";
+                neg_par_str = "NEG_PAR";
             }
 
             /*

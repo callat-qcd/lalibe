@@ -72,12 +72,12 @@ namespace Chroma
       //Thorsten's sink types read here.
       //TODO: Change this to completely use chroma's sink smearing.
       XMLReader xml_tmp(paramtop, "sink");
-      
+
       XMLBufferWriter xml_out;
       push(xml_out,"sink");
       xml_out << xml_tmp;
       pop(xml_out);
-      
+
       XMLReader xml_in(xml_out);
       //par.sink_xml = readXMLGroup(xml_in, "/sink", "combo"); //Thorsten's sink smearing
       //Since sink_xml is a multi1d of XMLGroups, we need to array instead.
@@ -132,7 +132,7 @@ namespace Chroma
       write(xml, "boosts", par.boosts);                               //boosts
       write(xml, "output_filename", par.output_filename);             //output filename
       write(xml, "output_stripesize", par.output_stripesize);         //output stripesize; default recommended
-      write(xml, "is_dirac_basis", par.dirac_basis);                     //specifies props in dirac basis, this is false by default
+      write(xml, "is_dirac_basis", par.dirac_basis);                  //specifies props in dirac basis, this is false by default
       //Sink stuff is a GroupXML, we are not writing it.
       //write(xml, "sink_type", par.sink_xml);                          //sink info
       pop(xml);
@@ -157,7 +157,7 @@ namespace Chroma
       pop(xml);
     }
 
-    //This is a function from latscat that should just be local to this translation unit. 
+    //This is a function from latscat that should just be local to this translation unit.
     //I'll just keep it here.
     std::string boost_string(const multi1d<int> &boost){
         std::string boostdir("boost_");
@@ -173,7 +173,7 @@ namespace Chroma
         }
         return boostdir;
     }
-    
+
     //Similar category for this function. This comes from utils.cc, I don't want to take all the other stuff from there.
     //This is an isolated copy.
     const std::string getTimestamp() {
@@ -184,7 +184,7 @@ namespace Chroma
       strftime(buf, sizeof(buf), "%Y-%m-%d-%X", &tstruct);
       std::string result(buf);
       result.erase(std::remove(result.begin(), result.end(), ':'), result.end());
-    
+
       return result;
     }
 
@@ -271,15 +271,15 @@ namespace Chroma
 
       //For now, this measurement is only going to crunch stuff if we have built with hdf5.
 #ifdef BUILD_HDF5
-      
-      //set up fourier stuff:   
+
+      //set up fourier stuff:
       QDPIO::cout << "Setting up Communicators for FFT..." << std::flush;
       /*Fourier fft(latpars.tDir);
       Fourier fftblock(latpars.tDir);*/
       //I am going to assume that tDir is the same as j_decay and manually set it for now.
       //How j_decay is determined/set may change later.
-      int j_decay = Nd - 1; 
-      //This code only works when we link against FFTW. 
+      int j_decay = Nd - 1;
+      //This code only works when we link against FFTW.
       //If there is a need to make FFTW optional for this measurement, this can be changed.
       //After fh prop boiler plate is removed, this directive can be moved up to where latscat code starts.
 #ifdef BUILD_FFTW
@@ -294,16 +294,16 @@ namespace Chroma
       //This struct is not needed anymore either.
       if(params.nnlcparam.contractions_n_sq >= 0)
         QDPIO::cout << "Truncating output files to n_sq <= " << params.nnlcparam.contractions_n_sq <<  "!" << std::endl;
-      initTopologies(params.nnlcparam.contractions_filename, params.nnlcparam.contractions_n_sq, j_decay); 
+      initTopologies(params.nnlcparam.contractions_filename, params.nnlcparam.contractions_n_sq, j_decay);
       //tDir changed to j_decay again in the above line.
-     
+
       //Number of configs reading was done here, but I am going to avoid that altogether.
       //We will read the config the way all other lalibe measurements do.
 
       //QDPIO::cout << "Initializing sourcepars to hold the boosts..." << std::flush;
       //SourcePars sourcepars;
       //We aren't actually going to use SourcePars since the only param read in is boost.
-      if(params.nnlcparam.fft_chunksize !=0 ) 
+      if(params.nnlcparam.fft_chunksize !=0 )
         QDPIO::cout << "Using chunksize " << params.nnlcparam.fft_chunksize << " for the Baryon-Block FFT!" << std::endl;
 
       //Do FFT tuning if it's enabled; comment below comes from latscat.
@@ -319,7 +319,7 @@ namespace Chroma
         QDPIO::cout << "done! Time " << swatch_fftune.getTimeInSeconds() << std::endl;
       }
 
-      //Parsing sinks code goes here in the original latscat. 
+      //Parsing sinks code goes here in the original latscat.
       //I am going to let the sink construction measurement handle that.
       //TODO: Use chroma's smearing to do this. Already done in our c3pt code, will do this on second pass.
       QDPIO::cout << "Parsing sinks..." << std::endl;
@@ -331,7 +331,7 @@ namespace Chroma
         //Last param above used to be latpars.tDir.
         // QDPIO::cout << sinks[s]->type() << std::endl;
       }
-      QDPIO::cout << "Found " << sinks.size() << " sinks." << std::endl; 
+      QDPIO::cout << "Found " << sinks.size() << " sinks." << std::endl;
 
       multi1d<int> pos0(Nd), pos1(Nd), disp(Nd);
       //latscat reads a bunch of prop stuff from XML after this, I am going to directly extract it instead.
@@ -403,7 +403,7 @@ namespace Chroma
           QDPIO::cout << " --> " << disp[d] << std::endl;
       }
       QDPIO::cout << "    Real Displacement: "; for(int i = 0; i<Nd; i++){ QDPIO::cout << disp[i] << " " ;}; QDPIO::cout << std::endl;
-      
+
     // //displacements
     std::string displacedir;
     for(unsigned int d=0; d<Nd; d++){
@@ -412,7 +412,7 @@ namespace Chroma
         displacedir+=dirlist[d]+std::to_string(abs(disp[d]));
 
     }
-    
+
     // TODO: it would be better to make these more object-oriented.
     //relevant spin projectors, in DP rep
     //These are comments from latscat.
@@ -435,7 +435,7 @@ namespace Chroma
 
     //Checkpointing isn't suppose to be supported, I include the bare minimum here...
     checkpoint chk(params.nnlcparam.output_filename+".NN_w.chk",params.nnlcparam.output_stripesize);
-    
+
     QDPIO::cout << "Creating timers..." << std::flush;
     // TODO: make timings more meaningful?
     //timings:
@@ -452,13 +452,13 @@ namespace Chroma
     multi1d<int> protonpos1(Nd), protonpos2(Nd);
     protonpos1 = pos0;  // I know.
     protonpos2 = pos1;  // I'm sorry.
-    
+
     //set up map
     //Timeshiftmap tshiftmap(protonpos1[latpars.tDir],latpars.tDir,latpars.tLength);
     //I do the appropriate lalibe substitutions here.
     Timeshiftmap tshiftmap(protonpos1[j_decay],j_decay,Layout::lattSize()[j_decay]);
     QDPIO::cout << "Skipping source setup --- inversions already accomplished." << std::endl;
-   
+
     //If the propagators aren't specified to already be in the Dirac basis, we rotate them now.
     //This is done the lalibe way, instead of passing a spin_basis string, like in latscat.
     if(params.nnlcparam.dirac_basis == false)
@@ -467,7 +467,7 @@ namespace Chroma
       rotate_to_Dirac_Basis(uprop_p1);
       rotate_to_Dirac_Basis(uprop_p2);
     }
-    
+
     //Necessary Fields:
     multi1d<BaryOp> Nup=get_local_MA_single(0,"DP");
     LatticeComplex tmplatcomp_P, tmplatcomp_P_34, token;
@@ -476,15 +476,15 @@ namespace Chroma
         tmplatmats[contterms[s]]=LatticeHalfSpinMatrix();
         tmplatmats_34[contterms[s]]=LatticeHalfSpinMatrix();
     }
-    
+
     // Get g5 in Dirac-Pauli (chiral) basis from Degrand-Rossi basis.
     SpinMatrixD gamma5= adj(PauliToDRMat()) * Gamma(15) * PauliToDRMat();
-    
+
     multi1d<LatticePropagator> prop_0(sinks.size());
     multi1d<LatticePropagator> prop_0_34(sinks.size());
     multi1d<LatticePropagator> prop_1(sinks.size());
     multi1d<LatticePropagator> prop_1_34(sinks.size());
-    
+
     QDPIO::cout << "Sinking propagator 0:" << std::endl;
     for(unsigned int i=0; i<sinks.size(); i++){
         prop_0[i] = sinks[i]->operator()(uprop_p1);
@@ -557,10 +557,10 @@ namespace Chroma
             chk.set_parameter("proton1_34",token);
             swatch_io_write.stop();
         }
-    
+
         //TODO: This print comes from latscat, but it also serves as a placeholder to extend this measurement and make it more general in a second or third pass.
         QDPIO::cout << "Skipping the local sources." << std::endl;
-        
+
         for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=tmplatmats.begin(); it!=tmplatmats.end(); ++it){
             std::string idstring=it->first;
             if(idstring.find("loc")!=std::string::npos) continue;
@@ -595,7 +595,7 @@ namespace Chroma
                 swatch_io_write.stop();
             }
         }
-        
+
         // other-parity (34 entries)
         for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=tmplatmats_34.begin(); it!=tmplatmats_34.end(); ++it){
             std::string idstring=it->first;
@@ -631,7 +631,7 @@ namespace Chroma
                 swatch_io_write.stop();
             }
         }
-        
+
         //state
         chk.set_parameter("mucurrent",static_cast<unsigned int>(0+1)); // 0 = mu hardcoded for this version.
         // if((mu+1)<sourcepars.displacements.nrows()) chk.set_consistency(true);
@@ -650,7 +650,7 @@ namespace Chroma
         QDPIO::cout << "NN-corr-io-write: time=" << swatch_io_write.getTimeInSeconds() << std::endl;
         swatch_io_read.reset();
         swatch_io_write.reset();
-    
+
     } //This is manually here to close loop while porting.
     /********************************************************
     *                                                       *
@@ -663,10 +663,10 @@ namespace Chroma
     rename(std::string(params.nnlcparam.output_filename+".NN_w.chk").c_str(),std::string(params.nnlcparam.output_filename).c_str());
 
     //This is where the end of the loop over configurations went in latscat, obviously don't need that here.
-    
+
     //clear baryon blocks:
     clearTopologies();
-    
+
     //This is where latscat's swatch_everything stops. I am going to use the timer that's printed at the end.
 
 #else
@@ -676,12 +676,12 @@ namespace Chroma
 #else
       QDPIO::cout << "This measurement only works if we have enabled HDF5. Please rebuild." << std::endl;
 #endif
-     
+
       snoop.stop();
       QDPIO::cout << LalibeNucleonNucleonLinearComboPropagatorEnv::name << ": total time = " << snoop.getTimeInSeconds() << " secs" << std::endl;
       QDPIO::cout << LalibeNucleonNucleonLinearComboPropagatorEnv::name<< ": ran successfully" << std::endl;
       END_CODE();
-    
+
     }
   }// LalibeNucleonNucleonLinearComboPropagatorEnv
 };

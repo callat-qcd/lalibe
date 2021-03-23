@@ -71,14 +71,19 @@ namespace Chroma
             else
             {
                 par.parities.resize(2);
-                par.parities[0] = "POS_PARITY";
-                par.parities[1] = "NEG_PARITY";
+                par.parities[0] = "POS_PAR";
+                par.parities[1] = "NEG_PAR";
             }
             // Do local contractions?  000[+1] + 000[1-]
             if (paramtop.count("compute_locals") > 0)
                 read(paramtop, "compute_locals", par.compute_locals);
             else
                 par.compute_locals = true;
+            // Compute the proton correlation function?
+            if (paramtop.count("compute_proton") > 0)
+                read(paramtop, "compute_proton", par.compute_proton);
+            else
+                par.compute_proton = true;
             // list of total momentum boosts
             read(paramtop, "boosts", par.boosts);
             // For now - only support P_tot = (0,0,0)
@@ -97,6 +102,7 @@ namespace Chroma
             write(xml, "output_filename",        par.output_filename);
             write(xml, "output_stripesize",      par.output_stripesize);
             write(xml, "compute_locals",         par.compute_locals);
+            write(xml, "compute_proton",         par.compute_proton);
             write(xml, "parities",               par.parities);
             write(xml, "boosts",                 par.boosts);
             pop(xml);
@@ -200,6 +206,15 @@ namespace Chroma
         void InlineMeas::operator()(unsigned long update_no, XMLWriter& xml_out)
         {
             START_CODE();
+#ifndef BUILD_HDF5
+            QDPIO::cerr << LalibeTwoNucleonsEnv::name
+                << " only works if we have enabled HDF5. Please rebuild." << std::endl;
+            QDP_abort(1);
+#else
+#ifndef QDP_NC == 3
+            QDPIO::cerr<<"Contractions not yet implemented for NC!=3."<<std::endl;
+            QDP_abort(1);
+#endif
 
             StopWatch snoop;
             snoop.reset();
@@ -220,6 +235,7 @@ namespace Chroma
             // Get propIds and locations
 
             int                  n_blocks = params.named_obj.prop0_list.size();
+            multi1d<std::string> block_names(n_blocks);
             multi1d<std::string> prop0_Ids(n_blocks);
             multi1d<std::string> prop1_Ids(params.named_obj.prop1_list.size());
             multi2d< int >       pos0_list(n_blocks, Nd);
@@ -255,16 +271,19 @@ namespace Chroma
             // Get block keys
             // Start by making list of BlockMapType
             if ( n_blocks != params.named_obj.nucleon_blocks.size()){
-                QDPIO::cout << "You must pass the same number of blocks as props" << std::endl;
+                QDPIO::cerr << "You must pass the same number of blocks as props" << std::endl;
                 QDP_abort(1);
             }
             multi1d<const LalibeNucleonBlockEnv::BlockMapType*> blockMap_list(n_blocks);
+            multi1d<Complex> weights(n_blocks);
             for (int b=0; b<n_blocks; b++){
                 std::istringstream xml_block(params.named_obj.nucleon_blocks[b].xml);
                 XMLReader block(xml_block);
-                std::string block_name;
-                read(block, "block", block_name);
-                blockMap_list[b] = &TheNamedObjMap::Instance().getData<LalibeNucleonBlockEnv::BlockMapType>(block_name);
+                // blocks
+                read(block, "block", block_names[b]);
+                blockMap_list[b] = &TheNamedObjMap::Instance().getData<LalibeNucleonBlockEnv::BlockMapType>(block_names[b]);
+                // weights
+                read(block, "weight", weights[b]);
             }
             QDPIO::cout << "We have " << blockMap_list.size() << " sets of blocks" << std::endl;
 
@@ -315,365 +334,169 @@ namespace Chroma
                 QDPIO::cout << "  we have all blocks" << std::endl;
             }
             else
-                QDPIO::cout << "  we are MISSING blocks" << std::endl;
+                QDPIO::cerr << "  You did not provide all blocks necessary to perform the requested contractions" << std::endl;
+                QDP_abort(1);
 
 
-#if 0
-            // TMP loop to test block reading
-            QDPIO::cout << "Parsing blocks" << std::endl;
-            multi1d<std::string> blocks(params.named_obj.nucleon_blocks.size());
-            multi1d<Complex>     weights(params.named_obj.nucleon_blocks.size());
-            for (int b=0; b<params.named_obj.nucleon_blocks.size(); b++)
-            {
-                std::istringstream xml_block(params.named_obj.nucleon_blocks[b].xml);
-                XMLReader block(xml_block);
-                std::string block_name;
-                read(block, "block", block_name);
-                QDPIO::cout << "BLOCK[" << b << "]: " << block_name << std::endl;
-                Complex w;
-                read(block, "weight", w);
-                QDPIO::cout << "     weight: " << w << std::endl;
-                weights[b] = w;
-            }
-#endif
             /*
-            LalibeNucleonBlockEnv::BlockMapKeyType theKey;
-            for ( const auto &myPair : params.named_obj.nucleon_blocks[0] )
-            {
-                QDPIO::cout << "FFT sign " << myPair.first[3] << std::endl;
-                QDPIO::cout << "parity   " << myPair.first[4] << std::endl;
-                QDPIO::cout << "pos0     " << myPair.first[5] << std::endl;
-                QDPIO::cout << "d_dir    " << myPair.first[6] << std::endl;
-            }
+                Proceed with NN contractions
             */
-#ifndef BUILD_HDF5
-            QDPIO::cerr << LalibeTwoNucleonsEnv::name << " only works if we have enabled HDF5. Please rebuild." << std::endl;
-            QDP_abort(1);
-#else
-
-#if 0
+            // Minimal checkpointing
+            checkpoint chk(params.twonucleonsparam.output_filename+".NN_w.chk",params.twonucleonsparam.output_stripesize);
 
             int j_decay = Nd - 1; // Assume t_dir = j_decay
 
-            // Note, the truncation size (2nd arg) is not used in this function anymore.
-            // -1 --> do not truncate
+            /*
+                Truncate is used to truncate the mom space correlators
+                we do not use this anymore and retain the full mom space
+                -1 --> do not truncate
+            */
             int truncate = -1;
-            // comment out while we only make blocks
             initTopologies(params.twonucleonsparam.contractions_filename, truncate, j_decay);
 
-            // Get the source locations for prop_0 and prop_1
-            multi1d<int> pos0(Nd), pos1(Nd), disp(Nd);
-
-            //Read/set up prop 0.
-            XMLReader prop0_file_xml, prop0_record_xml;
-            LatticePropagator prop0;
-            QDPIO::cout << "Attempt to read propagator 0" << std::endl;
-            try {
-                prop0 = TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.prop0_id);
-                TheNamedObjMap::Instance().get(params.named_obj.prop0_id).getFileXML(prop0_file_xml);
-                TheNamedObjMap::Instance().get(params.named_obj.prop0_id).getRecordXML(prop0_record_xml);
-                MakeSourceProp_t  orig_header;
-                if (prop0_record_xml.count("/Propagator") != 0){
-                    read(prop0_record_xml, "/Propagator", orig_header);
-                }
-                // Or if we pass a smeared propagator
-                else if (prop0_record_xml.count("/SinkSmear") != 0){
-                    read(prop0_record_xml, "/SinkSmear", orig_header);
-                }
-                pos0 = orig_header.source_header.getTSrce();
-            }
-            catch (std::bad_cast) {
-                QDPIO::cerr << name << ": caught dynamic cast error" << std::endl;
-                QDP_abort(1);
-            }
-            catch (const std::string& e) {
-                QDPIO::cerr << name << ": error reading src prop_header: "
-                            << e << std::endl;
-                QDP_abort(1);
-            }
-            //Now read/set up prop 1.
-            XMLReader prop1_file_xml, prop1_record_xml;
-            LatticePropagator prop1;
-            QDPIO::cout << "Attempt to read propagator 1" << std::endl;
-            try {
-                prop1 = TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.prop1_id);
-                TheNamedObjMap::Instance().get(params.named_obj.prop1_id).getFileXML(prop1_file_xml);
-                TheNamedObjMap::Instance().get(params.named_obj.prop1_id).getRecordXML(prop1_record_xml);
-                MakeSourceProp_t  orig_header;
-                if (prop1_record_xml.count("/Propagator") != 0){
-                    read(prop1_record_xml, "/Propagator", orig_header);
-                }
-                else if (prop1_record_xml.count("/SinkSmear") != 0){
-                    read(prop1_record_xml, "/SinkSmear", orig_header);
-                }
-                pos1 = orig_header.source_header.getTSrce();
-            }
-            catch (std::bad_cast) {
-                QDPIO::cerr << name << ": caught dynamic cast error" << std::endl;
-                QDP_abort(1);
-            }
-            catch (const std::string& e) {
-                QDPIO::cerr << name << ": error reading src prop_header: "
-                            << e << std::endl;
-                QDP_abort(1);
-            }
-
-            //Now back to latscat logic of calculating displacements and stuff.
-            QDPIO::cout << "    Propagator 0: " << params.named_obj.prop0_id << std::endl;
-            QDPIO::cout << "        Location: "; for(int i = 0; i<Nd; i++){ QDPIO::cout << pos0[i] << " " ;};
-            QDPIO::cout << std::endl;
-
-            QDPIO::cout << "    Propagator 1: " << params.named_obj.prop1_id << std::endl;
-            QDPIO::cout << "        Location: "; for(int i = 0; i<Nd; i++){ QDPIO::cout << pos1[i] << " " ;};
-            QDPIO::cout << std::endl;
-
-            disp = pos1 - pos0;
-
-            for(unsigned int d=0; d<Nd; d++){
-                QDPIO::cout << disp[d] << "%" << Layout::lattSize()[d] ;
-                disp[d] = (disp[d] + Layout::lattSize()[d]) % Layout::lattSize()[d];
-                QDPIO::cout << " --> " << disp[d] ;
-                if(disp[d] > Layout::lattSize()[d]/2){ disp[d] = disp[d] - Layout::lattSize()[d]; }
-                QDPIO::cout << " --> " << disp[d] << std::endl;
-            }
-            QDPIO::cout << "         Displacement: "; for(int i = 0; i<Nd; i++){ QDPIO::cout << disp[i] << " " ;};
-            QDPIO::cout << std::endl;
-            QDPIO::cout << "    Real Displacement: "; for(int i = 0; i<Nd; i++){ QDPIO::cout << disp[i] << " " ;};
-            QDPIO::cout << std::endl;
-
-            // displacement string
-            std::string displacedir;
-            for(unsigned int d=0; d<Nd; d++){
-                if(disp[d] >= 0) displacedir+="p";
-                else displacedir+="m";
-                displacedir+=dirlist[d]+std::to_string(abs(disp[d]));
-            }
-
-            multi1d<int> protonpos1(Nd), protonpos2(Nd);
-            protonpos1 = pos0;  // I know.
-            protonpos2 = pos1;  // I'm sorry.
-
-            //set up map
-            Timeshiftmap tshiftmap(protonpos1[j_decay],j_decay,Layout::lattSize()[j_decay]);
-
-            //If the propagators aren't specified to already be in the Dirac basis, we rotate them now.
-            if(params.twonucleonsparam.in_dirac_basis == false)
-            {
-                QDPIO::cout << "Rotating the propagators to Dirac basis." << std::endl;
-                rotate_to_Dirac_Basis(prop0);
-                rotate_to_Dirac_Basis(prop1);
-            }
-
-            //Necessary Fields:
-            multi1d<BaryOp> Nup=get_local_MA_single(0,"DP");
-            /* comment out while just doing blocks
-            LatticeComplex tmplatcomp_P, tmplatcomp_P_34, token;
-            std::map<std::string,LatticeHalfSpinMatrix> tmplatmats, tmplatmats_34;
-            for(unsigned int s=0; s<12; s++){
-                tmplatmats[contterms[s]]=LatticeHalfSpinMatrix();
-                tmplatmats_34[contterms[s]]=LatticeHalfSpinMatrix();
-            }
-            */
-
-            bool neg_par = params.twonucleonsparam.negative_parity;
-            std::string neg_par_str = "POS_PARITY";
-            if (neg_par){
-                // The positive parity code works on the negative parity props
-                // since in Dirac Pauli, g5 flips 1 <--> 3 and 2 <--> 4
-                SpinMatrixD g5_Dirac = adj(PauliToDRMat()) * Gamma(15) * PauliToDRMat();
-                prop0 = g5_Dirac * prop0 * g5_Dirac;
-                prop1 = g5_Dirac * prop1 * g5_Dirac;
-                neg_par_str = "NEG_PARITY";
-            }
-
-            /*
-            Make blocks and FFT them and return a map of mom-space blocks
-            so that we can add P and S sinks without needing a 3rd FFT
-
-            make block 000[+1]
-            if prop1 = prop0:
-                make block 000[-1]
-            else:
-                make block 111[-1]
-                if compute_locals:
-                    make block 000[-1]
-                    make block 111[+1]
-                make blocks
-                    001, 010, 100 [+1]
-                    101, 110, 011 [-1]
-            */
-            QDPIO::cout << "Creating timers..." << std::flush;
-            // TODO: make timings more meaningful?
-            //timings:
-            StopWatch swatch_pdir, swatch_ploc, swatch_pdisp, swatch_fft, swatch_bblock, swatch_io_read, swatch_io_write;
-            swatch_io_read.reset();
+            QDPIO::cout << "Creating timers..." << std::endl;
+            StopWatch swatch_io_write, swatch_contract_local, swatch_contract_nonlocal, swatch_fft;
             swatch_io_write.reset();
-            swatch_pdir.reset();
-            swatch_ploc.reset();
-            swatch_pdisp.reset();
+            swatch_contract_local.reset();
+            swatch_contract_nonlocal.reset();
             swatch_fft.reset();
-            swatch_bblock.reset();
-            QDPIO::cout << "done!" << std::endl;
 
-            double block_time = 0.;
+            // all props have the same source, so just use the first prop0 position
+            Timeshiftmap tshiftmap(pos0_list[0][j_decay],j_decay,Layout::lattSize()[j_decay]);
 
-            // Declare block map
-            typedef std::tuple<std::string, std::string, std::string, int, bool> BlockMapKeyType;
-            typedef std::map<BlockMapKeyType, LatticeHalfBaryonblock> BlockMapType;
-            // Put it in the NamedObjectMap (if it doesn't exist yet)
-            if (!TheNamedObjMap::Instance().check(params.named_obj.block_map)){
-                TheNamedObjMap::Instance().create<BlockMapType>(params.named_obj.block_map);
-                QDPIO::cout << "Creating new nucleon block map " << params.named_obj.block_map << std::endl;
+            // Create two baryon block objects to store blocks for contractions
+            LatticeHalfBaryonblock block0, block1;
+
+            // Create objects to store results
+            LatticeComplex latt_prot, token;
+            std::map<std::string,LatticeHalfSpinMatrix> latt_nn_map;
+            for(unsigned int s=0; s<contterms.size(); s++){
+                latt_nn_map[contterms[s]]=LatticeHalfSpinMatrix();
             }
-            else QDPIO::cout << "block map exists, adding to it " << params.named_obj.block_map << std::endl;
-            BlockMapType& blockMap = TheNamedObjMap::Instance().getData<BlockMapType>(params.named_obj.block_map);
 
-            // Create a local instance to store blocks while we make them
-            LatticeHalfBaryonblock tmpBlock;
+            /**********************************************************************
+             *                                                                    *
+             *   LOOP OVER BOOSTS                                                 *
+             *        We don't support boosts now, but we might, so keep the loop *
+             **********************************************************************/
+            for(unsigned int boost=0; boost < params.twonucleonsparam.boosts.size(); boost++){
+                multi1d<int> p_tot = params.twonucleonsparam.boosts[boost];
+                std::string boostdir=boost_string(p_tot);
 
-            // string ids
-            std::string propId_0 = params.named_obj.prop0_id;
-            std::string propId_1 = params.named_obj.prop1_id;
+                momentum mom(params.twonucleonsparam.boosts[boost]);
+                QDPIO::cout << mom << "    " << boostdir << std::endl;
 
-            // Block 000[+1]
-            BlockMapKeyType theKey = {propId_0, propId_0, propId_0, 1, neg_par};
-            std::string block_str = "000[+1]";
-            if (blockMap.count(theKey) == 0){
-                block_time += get_barblock(tmpBlock, prop0, prop0, prop0, Nup[0].get_gamma(0));
-                swatch_fft.start();
-                blockMap[theKey] = fft(tmpBlock, 1);
-                swatch_fft.stop();
-                QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
-                QDPIO::cout << LalibeTwoNucleonsEnv::name << ": 000 FFT time " << swatch_fft.getTimeInSeconds() << std::endl;
-            }
-            else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
+                LatticeComplex phases=get_phases(mom,j_decay,+1);
 
-            // Did the user pass the same prop?
-            if (propId_0 == propId_1){
-                // 000[-1]
-                theKey = {propId_0, propId_0, propId_0, -1, neg_par};
-                block_str = "000[-1]";
-                if (blockMap.count(theKey) == 0){
-                    swatch_fft.start();
-                    blockMap[theKey] = fft(tmpBlock, -1);
-                    swatch_fft.stop();
-                    QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
-                }
-                else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
-            }
-            else{
-                // 111[-1]
-                theKey = {propId_1, propId_1, propId_1, -1, neg_par};
-                block_str = "111[-1]";
-                if (blockMap.count(theKey) == 0){
-                    block_time += get_barblock(tmpBlock, prop1, prop1, prop1, Nup[0].get_gamma(0));
-                    swatch_fft.start();
-                    blockMap[theKey] = fft(tmpBlock, -1);
-                    swatch_fft.stop();
-                    QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
-                }
-                else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
+                for (int par=0; par < params.twonucleonsparam.parities.size(); par++){
+                    parity_str = params.twonucleonsparam.parities[par];
+                    QDPIO::cout << "Starting " << parity_str << " contractions" << std::endl;
+                    // zero out blocks
+                    block0 = zero;
+                    block1 = zero;
+                    // For now - only support local contractions if prop1 = prop0
+                    if ( params.twonucleonsparam.compute_locals && prop0_Ids[0] == prop1_Ids[0] ){
+                        QDPIO::cout << "  local contractions" << std::endl;
+                        // b = block
+                        for (int b=0; b < n_blocks; b++){
+                            key0 = {prop0_Ids[b], prop0_Ids[b], prop0_Ids[b],  1, parity_str, pos0_list[b], disp_list[b]};
+                            key1 = {prop0_Ids[b], prop0_Ids[b], prop0_Ids[b], -1, parity_str, pos0_list[b], disp_list[b]};
+                            // add to blocks
+                            QDPIO::cout << "  adding " << weights[b] << " * " << block_names[b] << std::endl;
+                            block0 += weights[b] * blockMap_list[b][key0];
+                            block1 += weights[b] * blockMap_list[b][key1];
+                        }
+                        swatch_contract_local.start();
+                        if ( params.twonucleonsparam.compute_proton){
+                            one_proton(latt_prot, block0);
+                        }
+                        // Proton-Proton
+                        two_proton_source_local(resultmats["PP_SING0"],block0,block1,PP_SING0.getTensor("000|000"));
 
-                // Do we want to compute the local NN?  If so, need opposite sign FFT
-                if (params.twonucleonsparam.compute_locals){
-                    // 111[+1]
-                    theKey = {propId_1, propId_1, propId_1, +1, neg_par};
-                    block_str = "111[+1]";
-                    if (blockMap.count(theKey) == 0){
-                        swatch_fft.start();
-                        blockMap[theKey] = fft(tmpBlock, +1);
-                        swatch_fft.stop();
-                        QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
+                        // Proton-Neutron
+                        two_proton_source_local(resultmats["PN_TRIPP"],block0,block1,PN_TRIPP.getTensor("000|000"));
+                        two_proton_source_local(resultmats["PN_TRIP0"],block0,block1,PN_TRIP0.getTensor("000|000"));
+                        two_proton_source_local(resultmats["PN_TRIPM"],block0,block1,PN_TRIPM.getTensor("000|000"));
+                        swatch_contract_local.stop();
+                        QDPIO::cout << "  Contract time= " << swatch_contract_local.getTimeInSeconds() << std::endl;
                     }
-                    else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
-                    // 000[-1]
-                    theKey = {propId_0, propId_0, propId_0, -1, neg_par};
-                    block_str = "000[-1]";
-                    if (blockMap.count(theKey) == 0){
-                        block_time += get_barblock(tmpBlock, prop0, prop0, prop0, Nup[0].get_gamma(0));
-                        swatch_fft.start();
-                        blockMap[theKey] = fft(tmpBlock, -1);
-                        swatch_fft.stop();
-                        QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
+                    // add non-local contractions
+
+
+                    chk.open();
+                    chk.set_consistency(false);
+                    /*
+                        Single proton
+                    */
+                    if (boost=0 && params.twonucleonsparam.compute_proton && params.twonucleonsparam.compute_locals){
+                        QDPIO::cout << "Single proton." << std::endl;
+                        token=zero;
+                        token += tshiftmap(latt_prot, true);
+                        swatch_io_write.start();
+                        std::string corrname = "proton_"+par_string;
+                        chk.set_parameter(corrname,token);
+                        swatch_io_write.stop();
                     }
-                    else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
+                    /*
+                        Two nucleons
+                    */
+                    for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=latt_nn_map.begin();
+                        it != latt_nn_map.end(); ++it){
+
+                        std::string idstring=it->first;
+                        size_t firstpos=idstring.find("_");
+                        size_t secondpos=idstring.find(firstpos);
+                        std::string conttype=idstring.substr(0,firstpos);
+                        std::transform(conttype.begin(),conttype.end(),conttype.begin(),::tolower);
+
+                        std::string srcspin=idstring.substr(firstpos+1,secondpos);
+                        std::string srcspinval(&srcspin[srcspin.size()-1]);
+                        srcspin=srcspin.substr(0,srcspin.size()-1);
+
+                        for(std::map<std::string,HalfSpinMatrix>::iterator innerit=projectors.begin();
+                            innerit!=projectors.end(); ++innerit){
+
+                            std::string inneridstring=innerit->first;
+                            std::string snkspin=inneridstring.substr(0,inneridstring.size()-1);
+                            if(snkspin!=srcspin) continue;
+                            std::string snkspinval(&inneridstring[inneridstring.size()-1]);
+
+                            std::string corrname = conttype+"corr"+"_"+srcspin+"_"+snkspinval+"_"+srcspinval+"_"+disp_list[0];
+                            token  = zero;
+                            token += tshiftmap(LatticeComplex(trace((innerit->second)*(it->second))));
+                            swatch_io_write.start();
+                            if (par_string == "POS_PAR")
+                                chk.set_parameter(boostdir+"/"+corrname,token);
+                            else
+                                chk.set_parameter(boostdir+"/"+corrname+"_34",token);
+                            swatch_io_write.stop();
+                        }
+                    }
                 }
-                // Now make the mixed blocks
-                // 001 [+1]
-                theKey = {propId_0, propId_0, propId_1, 1, neg_par};
-                block_str = "001[+1]";
-                if (blockMap.count(theKey) == 0){
-                    block_time += get_barblock(tmpBlock, prop0, prop0, prop1, Nup[0].get_gamma(0));
-                    swatch_fft.start();
-                    blockMap[theKey] = fft(tmpBlock, 1);
-                    swatch_fft.stop();
-                    QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
-                }
-                else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
-                // 010 [+1]
-                theKey = {propId_0, propId_1, propId_0, 1, neg_par};
-                block_str = "010[+1]";
-                if (blockMap.count(theKey) == 0){
-                    block_time += get_barblock(tmpBlock, prop0, prop1, prop0, Nup[0].get_gamma(0));
-                    swatch_fft.start();
-                    blockMap[theKey] = fft(tmpBlock, 1);
-                    swatch_fft.stop();
-                    QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
-                }
-                else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
-                // 100 [+1]
-                theKey = {propId_1, propId_0, propId_0, 1, neg_par};
-                block_str = "100[+1]";
-                if (blockMap.count(theKey) == 0){
-                    block_time += get_barblock(tmpBlock, prop1, prop0, prop0, Nup[0].get_gamma(0));
-                    swatch_fft.start();
-                    blockMap[theKey] = fft(tmpBlock, 1);
-                    swatch_fft.stop();
-                    QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
-                }
-                else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
-                // And the opposite sign FFT blocks
-                // 011 [-1]
-                theKey = {propId_0, propId_1, propId_1, -1, neg_par};
-                block_str = "011[-1]";
-                if (blockMap.count(theKey) == 0){
-                    block_time += get_barblock(tmpBlock, prop0, prop1, prop1, Nup[0].get_gamma(0));
-                    swatch_fft.start();
-                    blockMap[theKey] = fft(tmpBlock, -1);
-                    swatch_fft.stop();
-                    QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
-                }
-                else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
-                // 101 [-1]
-                theKey = {propId_1, propId_0, propId_1, -1, neg_par};
-                block_str = "101[-1]";
-                if (blockMap.count(theKey) == 0){
-                    block_time += get_barblock(tmpBlock, prop1, prop0, prop1, Nup[0].get_gamma(0));
-                    swatch_fft.start();
-                    blockMap[theKey] = fft(tmpBlock, -1);
-                    swatch_fft.stop();
-                    QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
-                }
-                else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
-                // 110 [-1]
-                theKey = {propId_1, propId_1, propId_0, -1, neg_par};
-                block_str = "110[-1]";
-                if (blockMap.count(theKey) == 0){
-                    block_time += get_barblock(tmpBlock, prop1, prop1, prop0, Nup[0].get_gamma(0));
-                    swatch_fft.start();
-                    blockMap[theKey] = fft(tmpBlock, -1);
-                    swatch_fft.stop();
-                    QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
-                }
-                else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
             }
+            // 0 = mu hardcoded for this version.
+            // if((mu+1)<sourcepars.displacements.nrows()) chk.set_consistency(true);
+            chk.set_parameter("mucurrent",static_cast<unsigned int>(0+1));
+            chk.set_consistency(true);  // can hardcode THIS too, because mu is always 0!
+            chk.close();
 
-            QDPIO::cout << LalibeTwoNucleonsEnv::name << ": total block time " << block_time << std::endl;
-            QDPIO::cout << LalibeTwoNucleonsEnv::name << ": total FFT time " << swatch_fft.getTimeInSeconds() << std::endl;
+            //move the checkpoint file:
+            std::string timestamp=getTimestamp();
+            rename(std::string(params.twonucleonsparam.output_filename+".NN_w.chk").c_str(),
+                    std::string(params.twonucleonsparam.output_filename).c_str());
+
+            //clear baryon blocks:
+            clearTopologies();
 
 
-#endif// commenting out everything for now
+            QDPIO::cout << LalibeTwoNucleonsEnv::name << " NN local: time="
+                        << swatch_contract_local.getTimeInSeconds() << std::endl;
+            QDPIO::cout << LalibeTwoNucleonsEnv::name << " NN non-local: time="
+                        << swatch_contract_nonlocal.getTimeInSeconds() << std::endl;
+            QDPIO::cout << LalibeTwoNucleonsEnv::name << " NN I/O: time="
+                        << swatch_io_write.getTimeInSeconds() << std::endl;
 #if 0
+            // moved from block code
 
             /**********************************************************************
              *                                                                    *
@@ -681,25 +504,16 @@ namespace Chroma
              *        We don't support boosts now, but we might, so keep the loop *
              **********************************************************************/
             for(unsigned int b=0; b < params.twonucleonsparam.boosts.size(); b++){
-                multi1d<int> boost = params.twonucleonsparam.boosts[b];
-                std::string boostdir=boost_string(boost);
 
-                momentum mom(params.twonucleonsparam.boosts[b]);
 
-                QDPIO::cout << mom << "    " << boostdir << std::endl;
-
-                LatticeComplex phases=get_phases(mom,j_decay,+1);
 
                 swatch_pdisp.start();
                 QDPIO::cout << "Computing contractions..." << std::endl;
                 // if displacement between sources of uprop_p{1,2} is nonzero:
                 QDPIO::cout << "    Doing displaced only." << std::endl;
                 QDPIO::cout << "    For now, if you want local, just pass the same propagator twice." << std::endl;
-#if QDP_NC == 3
+
                 contract(tmplatcomp_P, tmplatmats, prop_0, prop_1, Nup[0].get_gamma(0), phases, fftblock, false, weights);
-#else
-                QDPIO::cout<<"Contractions not yet implemented for NC!=3."<<std::endl;
-#endif
                 QDPIO::cout << "    Contractions done!" << std::endl;
 
                 QDPIO::cout << "Computing contractions with negative parity blocks ..." << std::endl;

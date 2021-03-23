@@ -39,6 +39,7 @@ namespace Chroma
                 int                     output_stripesize;      // output stripesize; default recommended
                 multi1d<std::string>    parities;               // specifies list of parity strings
                 bool                    compute_locals;         // compute local sinks (still FFT separately)?
+                bool                    compute_proton;         // compute local sinks (still FFT separately)?
                 multi1d< multi1d<int> > boosts;                 // boosts
             } twonucleonsparam ;
 
@@ -52,6 +53,9 @@ namespace Chroma
         };
         // This is used for boosts
         const std::string dirlist[4]={"x","y","z","t"};
+        const std::string contterms[8]={
+            "PP_SING0","PP_TRIPP","PP_TRIP0","PP_TRIPM",
+            "PN_SING0","PN_TRIPP","PN_TRIP0","PN_TRIPM"};
 
         class InlineMeas : public AbsInlineMeasurement
         {
