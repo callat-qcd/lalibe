@@ -77,13 +77,17 @@ namespace Chroma
             // Do local contractions?  000[+1] + 000[1-]
             if (paramtop.count("compute_locals") > 0)
                 read(paramtop, "compute_locals", par.compute_locals);
-            else
+            else{
+                QDPIO::cout << "compute_locals not set, default = true" << std::endl;
                 par.compute_locals = true;
+            }
             // Compute the proton correlation function?
             if (paramtop.count("compute_proton") > 0)
                 read(paramtop, "compute_proton", par.compute_proton);
-            else
+            else{
+                QDPIO::cout << "compute_proton not set, default = true" << std::endl;
                 par.compute_proton = true;
+            }
             // list of total momentum boosts
             read(paramtop, "boosts", par.boosts);
             // For now - only support P_tot = (0,0,0)
@@ -198,8 +202,33 @@ namespace Chroma
         {
             push(xml_out, path);
             write(xml_out, "TwoNucleonsParams", twonucleonsparam);
-            write(xml_out, "NamedObject"       , named_obj);
+            write(xml_out, "NamedObject"      , named_obj);
             pop(xml_out);
+        }
+
+        void addWeightedHalfBlock(LatticeHalfBaryonblock& res, 
+                                  const Complex& weight, 
+                                  const LatticeHalfBaryonblock& in) {
+            int nSites = Layout::sitesOnNode();
+            for (int iX=0; iX<nSites; ++iX) {
+                for (int iS1=0; iS1<(Ns>>1); ++iS1) {
+                    for (int jS1=0; jS1<(Ns>>1); ++jS1) {
+                        for (int iC1=0; iC1<Nc; ++iC1) {
+                            for (int iS2=0; iS2<(Ns>>1); ++iS2) {
+                                for (int jS2=0; jS2<(Ns>>1); ++jS2) {
+                                    for (int iC2=0; iC2<Nc; ++iC2) {
+                                        for (int jC2=0; jC2<Nc; ++jC2) {
+                                            res.elem(iX).elem(iS1, jS1).elem(iC1).elem(iS2, jS2).elem(iC2, jC2) 
+                                                += weight.elem().elem().elem() 
+                                                * in.elem(iX).elem(iS1, jS1).elem(iC1).elem(iS2, jS2).elem(iC2, jC2);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         // Function call
@@ -244,7 +273,7 @@ namespace Chroma
             std::string          displacedir;
 
             if (prop0_Ids.size() != prop1_Ids.size()){
-                QDPIO::cout << "You must pass the same number of prop0 and prop1 files" << std::endl;
+                QDPIO::cerr << "You must pass the same number of prop0 and prop1 files" << std::endl;
                 QDP_abort(1);
             }
             else
@@ -284,7 +313,6 @@ namespace Chroma
                 blockMap_list[b] = &TheNamedObjMap::Instance().getData<LalibeNucleonBlockEnv::BlockMapType>(block_names[b]);
                 // weights
                 read(block, "weight", weights[b]);
-                QDPIO::cout << b << " weight " << weights[b] << std::endl;
             }
             QDPIO::cout << "We have " << blockMap_list.size() << " sets of blocks" << std::endl;
 
@@ -334,9 +362,10 @@ namespace Chroma
             if (have_all_blocks){
                 QDPIO::cout << "  we have all blocks" << std::endl;
             }
-            else
+            else{
                 QDPIO::cerr << "  You did not provide all blocks necessary to perform the requested contractions" << std::endl;
                 QDP_abort(1);
+            }
 
 
             /*
@@ -364,11 +393,12 @@ namespace Chroma
             initTopologies(params.twonucleonsparam.contractions_filename, truncate, j_decay);
 
             QDPIO::cout << "Creating timers..." << std::endl;
-            StopWatch swatch_io_write, swatch_contract_local, swatch_contract_nonlocal, swatch_fft;
+            StopWatch swatch_io_write, swatch_contract_local, swatch_contract_nonlocal, swatch_fft, swatch_blocks;
             swatch_io_write.reset();
             swatch_contract_local.reset();
             swatch_contract_nonlocal.reset();
             swatch_fft.reset();
+            swatch_blocks.reset();
 
             // all props have the same source, so just use the first prop0 position
             Timeshiftmap tshiftmap(pos0_list[0][j_decay],j_decay,Layout::lattSize()[j_decay]);
@@ -395,6 +425,9 @@ namespace Chroma
                 momentum mom(params.twonucleonsparam.boosts[boost]);
                 QDPIO::cout << mom << "    " << boostdir << std::endl;
 
+                chk.create_directory(boostdir);
+                chk.close();
+
                 LatticeComplex phases=get_phases(mom,j_decay,+1);
 
                 for (int par=0; par < params.twonucleonsparam.parities.size(); par++){
@@ -412,11 +445,13 @@ namespace Chroma
                             key1 = {prop0_Ids[b], prop0_Ids[b], prop0_Ids[b], -1, parity_str, pos0_list[b], disp_list[b]};
                             // add to blocks
                             QDPIO::cout << "  adding " << weights[b] << " * " << block_names[b] << std::endl;
+                            swatch_blocks.start();
+                            addWeightedHalfBlock(block0, weights[b], blockMap_list[b]->at(key0));
+                            addWeightedHalfBlock(block1, weights[b], blockMap_list[b]->at(key1));
+                            swatch_blocks.stop();
+                            /*
                             block0 += weights[b] * (blockMap_list[b])->at(key0);
                             block1 += weights[b] * (blockMap_list[b])->at(key1);
-                            /*
-                            block0 += (blockMap_list[b])->at(key0);
-                            block1 += (blockMap_list[b])->at(key1);
                             */
                         }
                         swatch_contract_local.start();
@@ -431,6 +466,7 @@ namespace Chroma
                         two_proton_source_local(latt_nn_map["PN_TRIP0"],block0,block1,PN_TRIP0.getTensor("000|000"));
                         two_proton_source_local(latt_nn_map["PN_TRIPM"],block0,block1,PN_TRIPM.getTensor("000|000"));
                         swatch_contract_local.stop();
+                        QDPIO::cout << "  Block add time " << swatch_blocks.getTimeInSeconds() << std::endl;
                         QDPIO::cout << "  Contract time= " << swatch_contract_local.getTimeInSeconds() << std::endl;
                     }
                     // add non-local contractions
@@ -441,7 +477,7 @@ namespace Chroma
                     /*
                         Single proton
                     */
-                    if (boost=0 && params.twonucleonsparam.compute_proton && params.twonucleonsparam.compute_locals){
+                    if (boost==0 && params.twonucleonsparam.compute_proton && params.twonucleonsparam.compute_locals){
                         QDPIO::cout << "Single proton." << std::endl;
                         token=zero;
                         token += tshiftmap(latt_prot, true);
@@ -502,6 +538,8 @@ namespace Chroma
             clearTopologies();
 
 
+            QDPIO::cout << LalibeTwoNucleonsEnv::name << " Block add time="
+                        << swatch_blocks.getTimeInSeconds() << std::endl;
             QDPIO::cout << LalibeTwoNucleonsEnv::name << " NN local: time="
                         << swatch_contract_local.getTimeInSeconds() << std::endl;
             QDPIO::cout << LalibeTwoNucleonsEnv::name << " NN non-local: time="
