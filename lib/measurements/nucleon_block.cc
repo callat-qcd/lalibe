@@ -227,12 +227,14 @@ namespace Chroma
             }
 
             // Get the source locations for prop_0 and prop_1
-            multi1d<int> pos0(Nd), pos1(Nd), disp(Nd);
+            multi1d<int> pos0(Nd), pos1(Nd), disp(Nd), origin(Nd);
 
             //Read/set up prop 0.
             LatticePropagator prop0;
             QDPIO::cout << "Attempt to read propagator 0" << std::endl;
             pos0 = LalibeUtilsNambedObjEnv::get_prop_position(params.named_obj.prop0_id);
+            // prop0 defines the origin
+            origin = pos0;
             try {
                 prop0 = TheNamedObjMap::Instance().getData<LatticePropagator>(params.named_obj.prop0_id);
             }
@@ -287,7 +289,7 @@ namespace Chroma
 
             // displacement string
             std::string displacedir;
-            for(unsigned int d=0; d<Nd; d++){
+            for(unsigned int d=0; d<(Nd-1); d++){// we will not set t0 != t1, so only use spatial displacement in string
                 if(disp[d] >= 0) displacedir+="p";
                 else displacedir+="m";
                 displacedir+=dirlist[d]+std::to_string(abs(disp[d]));
@@ -359,22 +361,24 @@ namespace Chroma
             std::string propId_1 = params.named_obj.prop1_id;
 
             // Block 000[+1]
-            BlockMapKeyType theKey = {propId_0, propId_0, propId_0, 1, neg_par_str, pos0, displacedir};
+            std::string nodisplace = "px0py0pz0";
+            //QDPIO::cout << "DEBUG: dispdir = "<<displacedir << "  nodisplace = "<<nodisplace << std::endl;
+            BlockMapKeyType theKey = {propId_0, propId_0, propId_0, 1, neg_par_str, origin, nodisplace};
             std::string block_str = "000[+1]";
             if (blockMap.count(theKey) == 0){
                 block_time += get_barblock(tmpBlock, prop0, prop0, prop0, Nup[0].get_gamma(0));
                 swatch_fft.start();
                 blockMap[theKey] = fft(tmpBlock, 1);
                 swatch_fft.stop();
-                QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
+                QDPIO::cout << "created block " << block_str << " " << neg_par_str << " " << origin << " " << nodisplace << std::endl;
                 QDPIO::cout << LalibeNucleonBlockEnv::name << ": 000 FFT time " << swatch_fft.getTimeInSeconds() << std::endl;
             }
             else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
 
-            // Did the user pass the same prop?
-            if (propId_0 == propId_1){
+            // Did the user ask to compute blocks for local contractions or pass the same prop?
+            if ( params.nblockparam.compute_locals || propId_0 == propId_1){
                 // 000[-1]
-                theKey = {propId_0, propId_0, propId_0, -1, neg_par_str, pos0, displacedir};
+                theKey = {propId_0, propId_0, propId_0, -1, neg_par_str, origin, nodisplace};
                 block_str = "000[-1]";
                 if (blockMap.count(theKey) == 0){
                     swatch_fft.start();
@@ -384,9 +388,9 @@ namespace Chroma
                 }
                 else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
             }
-            else{
+            if ( propId_0 != propId_1){// if we have different props, need more blocks
                 // 111[-1]
-                theKey = {propId_1, propId_1, propId_1, -1, neg_par_str, pos0, displacedir};
+                theKey = {propId_1, propId_1, propId_1, -1, neg_par_str, origin, displacedir};
                 block_str = "111[-1]";
                 if (blockMap.count(theKey) == 0){
                     block_time += get_barblock(tmpBlock, prop1, prop1, prop1, Nup[0].get_gamma(0));
@@ -400,7 +404,7 @@ namespace Chroma
                 // Do we want to compute the local NN?  If so, need opposite sign FFT
                 if (params.nblockparam.compute_locals){
                     // 111[+1]
-                    theKey = {propId_1, propId_1, propId_1, +1, neg_par_str, pos0, displacedir};
+                    theKey = {propId_1, propId_1, propId_1, +1, neg_par_str, origin, displacedir};
                     block_str = "111[+1]";
                     if (blockMap.count(theKey) == 0){
                         swatch_fft.start();
@@ -410,7 +414,8 @@ namespace Chroma
                     }
                     else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
                     // 000[-1]
-                    theKey = {propId_0, propId_0, propId_0, -1, neg_par_str, pos0, displacedir};
+                    /*
+                    theKey = {propId_0, propId_0, propId_0, -1, neg_par_str, origin, displacedir};
                     block_str = "000[-1]";
                     if (blockMap.count(theKey) == 0){
                         block_time += get_barblock(tmpBlock, prop0, prop0, prop0, Nup[0].get_gamma(0));
@@ -420,10 +425,11 @@ namespace Chroma
                         QDPIO::cout << "created block " << block_str << " " << neg_par_str << std::endl;
                     }
                     else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
+                    */
                 }
                 // Now make the mixed blocks
                 // 001 [+1]
-                theKey = {propId_0, propId_0, propId_1, 1, neg_par_str, pos0, displacedir};
+                theKey = {propId_0, propId_0, propId_1, 1, neg_par_str, origin, displacedir};
                 block_str = "001[+1]";
                 if (blockMap.count(theKey) == 0){
                     block_time += get_barblock(tmpBlock, prop0, prop0, prop1, Nup[0].get_gamma(0));
@@ -434,7 +440,7 @@ namespace Chroma
                 }
                 else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
                 // 010 [+1]
-                theKey = {propId_0, propId_1, propId_0, 1, neg_par_str, pos0, displacedir};
+                theKey = {propId_0, propId_1, propId_0, 1, neg_par_str, origin, displacedir};
                 block_str = "010[+1]";
                 if (blockMap.count(theKey) == 0){
                     block_time += get_barblock(tmpBlock, prop0, prop1, prop0, Nup[0].get_gamma(0));
@@ -445,7 +451,7 @@ namespace Chroma
                 }
                 else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
                 // 100 [+1]
-                theKey = {propId_1, propId_0, propId_0, 1, neg_par_str, pos0, displacedir};
+                theKey = {propId_1, propId_0, propId_0, 1, neg_par_str, origin, displacedir};
                 block_str = "100[+1]";
                 if (blockMap.count(theKey) == 0){
                     block_time += get_barblock(tmpBlock, prop1, prop0, prop0, Nup[0].get_gamma(0));
@@ -457,7 +463,7 @@ namespace Chroma
                 else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
                 // And the opposite sign FFT blocks
                 // 011 [-1]
-                theKey = {propId_0, propId_1, propId_1, -1, neg_par_str, pos0, displacedir};
+                theKey = {propId_0, propId_1, propId_1, -1, neg_par_str, origin, displacedir};
                 block_str = "011[-1]";
                 if (blockMap.count(theKey) == 0){
                     block_time += get_barblock(tmpBlock, prop0, prop1, prop1, Nup[0].get_gamma(0));
@@ -468,7 +474,7 @@ namespace Chroma
                 }
                 else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
                 // 101 [-1]
-                theKey = {propId_1, propId_0, propId_1, -1, neg_par_str, pos0, displacedir};
+                theKey = {propId_1, propId_0, propId_1, -1, neg_par_str, origin, displacedir};
                 block_str = "101[-1]";
                 if (blockMap.count(theKey) == 0){
                     block_time += get_barblock(tmpBlock, prop1, prop0, prop1, Nup[0].get_gamma(0));
@@ -479,7 +485,7 @@ namespace Chroma
                 }
                 else QDPIO::cout << "exists  block " << block_str << " " << neg_par_str << std::endl;
                 // 110 [-1]
-                theKey = {propId_1, propId_1, propId_0, -1, neg_par_str, pos0, displacedir};
+                theKey = {propId_1, propId_1, propId_0, -1, neg_par_str, origin, displacedir};
                 block_str = "110[-1]";
                 if (blockMap.count(theKey) == 0){
                     block_time += get_barblock(tmpBlock, prop1, prop1, prop0, Nup[0].get_gamma(0));

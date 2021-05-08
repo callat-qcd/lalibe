@@ -33,9 +33,9 @@ namespace Chroma
 
             // only same flavor bilinear operators are used
             struct NucleonBlock_t{
-                unsigned int            fft_chunksize;         //originally the only parameter in FFTPar struct
-                bool                    fft_tune;              //tune the fft?
-                bool                    compute_locals;        // make blocks for local NN computation?
+                unsigned int            fft_chunksize;         // originally the only parameter in FFTPar struct
+                bool                    fft_tune;              // tune the fft?
+                bool                    compute_locals;        // compute blocks needed for local contractions?
                 bool                    in_dirac_basis;        //specifies if props are in dirac basis, this is false by default
                 bool                    negative_parity;       //specifies if we will run contractions on the negative parity nucleons
                 //                                               The momentumspace trucation is not used
@@ -57,7 +57,7 @@ namespace Chroma
         const std::string dirlist[4]={"x","y","z","t"};
 
         // Define the nucleon object types
-        //                      prop0        prop1        prop2   FFT+- parity?,     position0,    displacement string
+        //                      prop0        prop1        prop2   FFT+- parity?,     origin,       displacement
         typedef std::tuple<std::string, std::string, std::string, int,  std::string, multi1d<int>, std::string> BlockMapKeyType;
         typedef std::map<BlockMapKeyType, LatticeHalfBaryonblock> BlockMapType;
 

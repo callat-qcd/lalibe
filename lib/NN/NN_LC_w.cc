@@ -40,9 +40,10 @@ namespace Chroma {
                         const SpinMatrix& diquark_proj){
         StopWatch swatch_block;
         swatch_block.reset();
-
         swatch_block.start();
+
         block=getHalfBaryonblock(prop0,prop1,prop2,diquark_proj);
+
         swatch_block.stop();
         QDPIO::cout << "Build block: time=" << swatch_block.getTimeInSeconds() << std::endl;
         return swatch_block.getTimeInSeconds();
@@ -632,6 +633,7 @@ namespace Chroma {
         START_CODE();
 
         if(psign!=0){
+            QDPIO::cout << "DEBUG: doing contractions" << std::endl;
             unsigned int nsites=Layout::sitesOnNode();
 
             //now do contraction:
@@ -705,6 +707,9 @@ namespace Chroma {
             QDPIO::cout << "done!" << std::endl;
             QDPIO::cout << "NN-disp: internal-contrac: time=" << swatch_cont.getTimeInSeconds() << std::endl;
             if(psign==-1) QDPIO::cout << "NN-disp: internal-fourier: time=" << swatch_fft.getTimeInSeconds() << std::endl;
+        }
+        else{
+            QDPIO::cout << "DEBUG: not doing anything" << std::endl;
         }
 
         END_CODE();
