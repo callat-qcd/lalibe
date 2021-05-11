@@ -10,6 +10,7 @@
 #include "blockstuff.h"
 //GetWithDef is in mapstuff
 #include "mapstuff.h"
+#include "../measurements/nucleon_block.h"
 
 namespace Chroma {
 
@@ -88,6 +89,22 @@ namespace Chroma {
     int contract(LatticeComplex& result_P, std::map<std::string,LatticeHalfSpinMatrix>& resultmats, const multi1d<LatticePropagator>& prop0, const multi1d<LatticePropagator>& prop1, const SpinMatrix& diquark_proj, const LatticeComplex& phases, Fourier& fft, const bool& compute_locals, const multi1d<Complex>& weights);
 
     int contract_local(LatticeComplex& result_P, std::map<std::string,LatticeHalfSpinMatrix>& resultmats, const LatticePropagator& prop0, const LatticePropagator& prop1, const SpinMatrix& diquark_proj, const LatticeComplex& phases, Fourier& fft, const multi1d<sink*>& snk, const multi1d<Complex>& weights);
+
+    // contract blocks
+    int contract(LatticeComplex& result_N,
+                 std::map<std::string, LatticeHalfSpinMatrix>& result_NN,
+                 const multi1d<const LalibeNucleonBlockEnv::BlockMapType*>& blockMap_list,
+                 const multi1d<std::string>& prop0_Ids,
+                 const multi1d<std::string>& prop1_Ids,
+                 const multi1d<int>& origin,
+                 const multi1d<Complex>& weights,
+                 const multi1d<std::string>& disp_list,
+                 const std::string& parity,
+                 const LatticeComplex& phases,
+                 Fourier& fft,
+                 const bool& compute_locals,
+                 const bool& compute_loc_origin);
+
 
 }
 #endif
