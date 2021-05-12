@@ -269,7 +269,7 @@ namespace Chroma
             multi2d< int >       pos1_list(n_blocks, Nd);
             multi1d<int>         pos0(Nd), pos1(Nd), disp(Nd);
             multi1d<std::string> disp_list(n_blocks);
-            std::string          displacedir;
+            std::string          displacedir, pos0_str, pos1_str;
             std::string          nodisplace="px0py0pz0";
             multi1d<int>         origin = params.twonucleonsparam.origin;
 
@@ -288,20 +288,24 @@ namespace Chroma
                 //             pos0 = origin so no need to compute disp
                 disp         = pos1 - origin;
                 displacedir  = "";
+                pos0_str     = "";
+                pos1_str     = "";
                 for(unsigned int d=0; d<Nd; d++){
                     if (pos0[d] - origin[d] != 0){
                         QDPIO::cerr << prop0_Ids[b] << " not located at origin! " << std::endl;
                         QDP_abort(1);
                     }
+                    // make disp string
+                    // adjust for boundary conditions
+                    disp[d] = (disp[d] + Layout::lattSize()[d]) % Layout::lattSize()[d];
+                    if(disp[d] > Layout::lattSize()[d]/2){ disp[d] = disp[d] - Layout::lattSize()[d]; }
                     if (d < Nd-1){// only use spatial coords for displacement
-                        // adjust for boundary conditions
-                        disp[d] = (disp[d] + Layout::lattSize()[d]) % Layout::lattSize()[d];
-                        if(disp[d] > Layout::lattSize()[d]/2){ disp[d] = disp[d] - Layout::lattSize()[d]; }
-                        // make disp string
                         if(disp[d] >= 0) displacedir+="p";
                         else displacedir+="m";
                         displacedir+=dirlist[d]+std::to_string(abs(disp[d]));
                     }
+                    pos0_str += dirlist[d]+std::to_string(pos0[d]);
+                    pos1_str += dirlist[d]+std::to_string(pos1[d]);
                 }
                 disp_list[b] = displacedir;
             }
@@ -399,6 +403,7 @@ namespace Chroma
             projectors["TRIP0"]=getHalfProjector("TRIP0");
             projectors["TRIPM"]=getHalfProjector("TRIPM1");
 
+
             // Minimal checkpointing
             checkpoint chk(params.twonucleonsparam.output_filename+".NN_w.chk",params.twonucleonsparam.output_stripesize);
 
@@ -424,18 +429,78 @@ namespace Chroma
 
             // all props have the same source, so just use the first prop0 position
             Timeshiftmap tshiftmap(pos0_list[0][j_decay],j_decay,Layout::lattSize()[j_decay]);
-            QDPIO::cout << "DEBUG: tshiftmap, pos0_list[0][j_decay] " << pos0_list[0][j_decay] << std::endl;
 
             // Create objects to store results
-            LatticeComplex latt_prot0, latt_prot1, latt_prot0_34, latt_prot1_34, token;
-            std::map<std::string,LatticeHalfSpinMatrix> latt_nn_map;
-            for(unsigned int s = 0; s < 8; s++){
-                latt_nn_map[contterms[s]]=LatticeHalfSpinMatrix();
+            LatticeComplex proton0, proton1, proton0_34, proton1_34, token;
+            proton0    = zero;
+            proton0_34 = zero;
+            proton1    = zero;
+            proton1_34 = zero;
+            std::map<std::string,LatticeHalfSpinMatrix> NN_map, NN_map_34;
+            // zero out the memory
+            for (int par=0; par < params.twonucleonsparam.parities.size(); par++){
+                parity = params.twonucleonsparam.parities[par];
+                
+                auto& NN_map_iterator = (parity == "POS_PAR") ? NN_map : NN_map_34;
+                for(unsigned int s = 0; s < nonlocalterms.size(); s++){
+                    NN_map_iterator[nonlocalterms[s]]=LatticeHalfSpinMatrix();
+                }
+                if( params.twonucleonsparam.compute_locals ){
+                    for (unsigned int s = 0; s < localterms1.size(); s++){
+                        NN_map_iterator[localterms1[s]]=LatticeHalfSpinMatrix();
+                    }
+                    if( params.twonucleonsparam.compute_loc_o ){
+                        for (unsigned int s = 0; s < localterms0.size(); s++){
+                            NN_map_iterator[localterms0[s]]=LatticeHalfSpinMatrix();
+                        }
+                    }
+                }
+                // We must zero out the data before adding to it
+                for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=NN_map_iterator.begin(); it!=NN_map_iterator.end(); ++it){
+                    it->second=zero;
+                }
             }
-            // We must zero out the data before adding to it
-            for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=latt_nn_map.begin(); it!=latt_nn_map.end(); ++it){
-                it->second=zero;
+
+            /*
+            if( params.twonucleonsparam.parities.find("POS_PAR") != params.twonucleonsparam.parities.end() ){
+                for(unsigned int s = 0; s < nonlocalterms.size(); s++){
+                    NN_map[nonlocalterms[s]]=LatticeHalfSpinMatrix();
+                }
+                if( params.twonucleonsparam.compute_locals ){
+                    for (unsigned int s = 0; s < localterms1.size(); s++){
+                        NN_map[localterms1[s]]=LatticeHalfSpinMatrix();
+                    }
+                    if( params.twonucleonsparam.compute_loc_o ){
+                        for (unsigned int s = 0; s < localterms0.size(); s++){
+                            NN_map[localterms0[s]]=LatticeHalfSpinMatrix();
+                        }
+                    }
+                }
+                // We must zero out the data before adding to it
+                for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=NN_map.begin(); it!=NN_map.end(); ++it){
+                    it->second=zero;
+                }
             }
+            if( params.twonucleonsparam.parities.find("NEG_PAR") != params.twonucleonsparam.parities.end() ){
+                for(unsigned int s = 0; s < nonlocalterms.size(); s++){
+                    NN_map_34[nonlocalterms[s]]=LatticeHalfSpinMatrix();
+                }
+                if( params.twonucleonsparam.compute_locals ){
+                    for (unsigned int s = 0; s < localterms1.size(); s++){
+                        NN_map_34[localterms1[s]]=LatticeHalfSpinMatrix();
+                    }
+                    if( params.twonucleonsparam.compute_loc_o ){
+                        for (unsigned int s = 0; s < localterms0.size(); s++){
+                            NN_map_34[localterms0[s]]=LatticeHalfSpinMatrix();
+                        }
+                    }
+                }                
+                // We must zero out the data before adding to it
+                for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=NN_map_34.begin(); it!=NN_map_34.end(); ++it){
+                    it->second=zero;
+                }
+            }
+            */
 
             /**********************************************************************
              *                                                                    *
@@ -458,33 +523,61 @@ namespace Chroma
                     parity = params.twonucleonsparam.parities[par];
                     QDPIO::cout << "Starting " << parity << " contractions" << std::endl;
                     // positive parity contraction
-                    contract(latt_prot0, latt_nn_map, 
-                             blockMap_list, prop0_Ids, prop1_Ids, 
-                             weights, origin, disp_list, parity,
-                             phases, fft, 
-                             params.twonucleonsparam.compute_locals, params.twonucleonsparam.compute_loc_o);
-
+                    if( parity == "POS_PAR"){
+                        contract(proton0, proton1, NN_map, 
+                                 blockMap_list, prop0_Ids, prop1_Ids, 
+                                 weights, origin, disp_list, parity,
+                                 phases, fft, 
+                                 params.twonucleonsparam.compute_locals, params.twonucleonsparam.compute_loc_o);
+                    } else if (parity == "NEG_PAR"){
+                        contract(proton0_34, proton1_34, NN_map_34, 
+                                 blockMap_list, prop0_Ids, prop1_Ids, 
+                                 weights, origin, disp_list, parity,
+                                 phases, fft, 
+                                 params.twonucleonsparam.compute_locals, params.twonucleonsparam.compute_loc_o);
+                    }
 
                     // now write data
                     chk.open();
                     chk.set_consistency(false);
-                    /*
-                        Single proton
+                   
+                    //Single proton
                     if (p_tot[0]==0 && p_tot[1] == 0 && p_tot[2] == 0 && params.twonucleonsparam.compute_proton && params.twonucleonsparam.compute_locals){
-                        QDPIO::cout << "Single proton." << std::endl;
+                        const auto& prot0_obj = (parity == "POS_PAR") ? proton0 : proton0_34;
+                        const auto& prot1_obj = (parity == "POS_PAR") ? proton1 : proton1_34;
+                        QDPIO::cout << "Single proton1." << std::endl;
                         token=zero;
-                        token += tshiftmap(latt_prot0, true);
+                        token += tshiftmap(prot1_obj, true);
                         swatch_io_write.start();
-                        std::string corrname = "proton_"+parity;
+                        std::string corrname = "proton_"+pos1_str+"_"+parity;
                         chk.set_parameter(corrname,token);
                         swatch_io_write.stop();
+
+                        if ( params.twonucleonsparam.compute_loc_o){
+                            QDPIO::cout << "Single proton0." << std::endl;
+                            token=zero;
+                            token += tshiftmap(prot0_obj, true);
+                            swatch_io_write.start();
+                            std::string corrname = "proton_"+pos0_str+"_"+parity;
+                            chk.set_parameter(corrname,token);
+                            swatch_io_write.stop();
+                        }
                     }
-                    */
+
                     /*
                         Two nucleons
                     */
-                    for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=latt_nn_map.begin();
-                        it != latt_nn_map.end(); ++it){
+                    // make directory for origin of contractions
+                    std::string p0_dir = "O_"+pos0_str;
+                    std::string p1_dir = "O_"+pos1_str;
+                    chk.create_directory(boostdir+"/"+p0_dir);
+                    if( params.twonucleonsparam.compute_locals ){
+                        chk.create_directory(boostdir+"/"+p1_dir);
+                    }
+
+                    const auto& NN_map_iterator = (parity == "POS_PAR") ? NN_map : NN_map_34;
+                    //for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=NN_map.begin(); it != NN_map.end(); ++it){
+                    for(auto it=NN_map_iterator.cbegin(); it != NN_map_iterator.cend(); ++it){
 
                         std::string idstring=it->first;
                         size_t firstpos=idstring.find("_");
@@ -492,33 +585,40 @@ namespace Chroma
                         std::string conttype=idstring.substr(0,firstpos);
                         std::transform(conttype.begin(),conttype.end(),conttype.begin(),::tolower);
 
-                        std::string srcspin=idstring.substr(firstpos+1,secondpos);
-                        std::string srcspinval(&srcspin[srcspin.size()-1]);
-                        srcspin=srcspin.substr(0,srcspin.size()-1);
+                        std::string srcspin, srcspinval;
+                        if( idstring.find("SING") != std::string::npos){
+                            srcspin    = "SING";
+                            srcspinval = "0";
+                        } else if (idstring.find("TRIP") != std::string::npos ){
+                            srcspin = "TRIP";
+                            srcspinval = idstring.substr(idstring.find("TRIP")+4,1);
+                        }
 
-                        for(std::map<std::string,HalfSpinMatrix>::iterator innerit=projectors.begin();
-                            innerit!=projectors.end(); ++innerit){
+                        for(std::map<std::string,HalfSpinMatrix>::iterator innerit=projectors.begin(); innerit!=projectors.end(); ++innerit){
 
                             std::string inneridstring=innerit->first;
                             std::string snkspin=inneridstring.substr(0,inneridstring.size()-1);
                             if(snkspin!=srcspin) continue;
                             std::string snkspinval(&inneridstring[inneridstring.size()-1]);
 
-                            // the disp_list[0] needs to get replaced
-                            std::string corrname = conttype+"corr"+"_"+srcspin+"_"+snkspinval+"_"+srcspinval+"_"+disp_list[0];
+                            std::string corrname;
+                            if( idstring.find("loc") != std::string::npos){
+                                corrname = conttype+"_"+srcspin+"_"+snkspinval+"_"+srcspinval+"_"+nodisplace;
+                            } else {
+                                corrname = conttype+"_"+srcspin+"_"+snkspinval+"_"+srcspinval+"_"+disp_list[0];
+                            }
+                            if (parity == "NEG_PAR")
+                                corrname += "_34";
+                            
                             token  = zero;
                             token += tshiftmap(LatticeComplex(trace((innerit->second)*(it->second))));
-                            // DEBUG PRINT
-                            /*
-                            for(int nt=0; nt<8; nt++){
-                                QDPIO::cout << "nt = " << nt << " " << corrname << " = " << token.elem(nt).elem(0).elem(0).elem(0);
-                            }
-                            */
+
                             swatch_io_write.start();
-                            if (parity == "POS_PAR")
-                                chk.set_parameter(boostdir+"/"+corrname,token);
-                            else
-                                chk.set_parameter(boostdir+"/"+corrname+"_34",token);
+                            if (idstring.find("loc1") != std::string::npos){
+                                chk.set_parameter(boostdir+"/"+p1_dir+"/"+corrname,token);
+                            } else {
+                                chk.set_parameter(boostdir+"/"+p0_dir+"/"+corrname,token);
+                            }
                             swatch_io_write.stop();
                         }
                     }
@@ -544,161 +644,8 @@ namespace Chroma
                         << swatch_contract_nonlocal.getTimeInSeconds() << std::endl;
             QDPIO::cout << LalibeTwoNucleonsEnv::name << " NN I/O: time="
                         << swatch_io_write.getTimeInSeconds() << std::endl;
-#if 0
-            // moved from block code
-
-            /**********************************************************************
-             *                                                                    *
-             *   LOOP OVER BOOSTS                                                 *
-             *        We don't support boosts now, but we might, so keep the loop *
-             **********************************************************************/
-            for(unsigned int b=0; b < params.twonucleonsparam.boosts.size(); b++){
-
-
-
-                swatch_pdisp.start();
-                QDPIO::cout << "Computing contractions..." << std::endl;
-                // if displacement between sources of uprop_p{1,2} is nonzero:
-                QDPIO::cout << "    Doing displaced only." << std::endl;
-                QDPIO::cout << "    For now, if you want local, just pass the same propagator twice." << std::endl;
-
-                contract(tmplatcomp_P, tmplatmats, prop_0, prop_1, Nup[0].get_gamma(0), phases, fftblock, false, weights);
-                QDPIO::cout << "    Contractions done!" << std::endl;
-
-                QDPIO::cout << "Computing contractions with negative parity blocks ..." << std::endl;
-                contract(tmplatcomp_P_34, tmplatmats_34, prop_0_34, prop_1_34, Nup[0].get_gamma(0), phases, fftblock, false, weights);
-                QDPIO::cout << "    done!" << std::endl;
-
-                //QDPIO::cout << "Skipping the single proton." << std::endl;
-                /*******************************************
-                 * SINGLE PROTON
-                 *******************************************/
-                if(b==0){
-                    QDPIO::cout << "Single proton." << std::endl;
-                    //positive parity proton
-                    token=zero;
-                    token+=/* sourcefact * tmpprefact * */ tshiftmap(tmplatcomp_P,true);
-                    swatch_io_write.start();
-                    chk.set_parameter("proton1",token);
-                    swatch_io_write.stop();
-
-                    //negative parity proton
-                    token=zero;
-                    token+=/* sourcefact * tmpprefact * */ tshiftmap(tmplatcomp_P_34,true);
-                    swatch_io_write.start();
-                    chk.set_parameter("proton1_34",token);
-                    swatch_io_write.stop();
-                }
-
-                //TODO: This print comes from latscat, but it also serves as a placeholder to extend this measurement and make it more general in a second or third pass.
-                QDPIO::cout << "Skipping the local sources." << std::endl;
-
-                for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=tmplatmats.begin(); it!=tmplatmats.end(); ++it){
-                    std::string idstring=it->first;
-                    if(idstring.find("loc")!=std::string::npos) continue;
-
-                    size_t firstpos=idstring.find("_");
-                    size_t secondpos=idstring.find(firstpos);
-                    std::string conttype=idstring.substr(0,firstpos);
-                    std::transform(conttype.begin(),conttype.end(),conttype.begin(),::tolower);
-
-                    std::string srcspin=idstring.substr(firstpos+1,secondpos);
-                    std::string srcspinval(&srcspin[srcspin.size()-1]);
-                    srcspin=srcspin.substr(0,srcspin.size()-1);
-
-                    for(std::map<std::string,HalfSpinMatrix>::iterator innerit=projectors.begin(); innerit!=projectors.end(); ++innerit){
-                        std::string inneridstring=innerit->first;
-                        std::string snkspin=inneridstring.substr(0,inneridstring.size()-1);
-                        if(snkspin!=srcspin) continue;
-                        std::string snkspinval(&inneridstring[inneridstring.size()-1]);
-
-                        std::string corrname=conttype+"corr"+"_"+srcspin+"_"+snkspinval+"_"+srcspinval+"_"+displacedir; //s[0]; // 0 = mu hardcoded for this version.
-                        token=zero;
-                        // TODO src always is 0 for this version!!
-                        // if(src==0) token=zero;
-                        // else{
-                        //     swatch_io_read.start();
-                        //     chk.get_parameter(boostdir+"/"+corrname,token);
-                        //     swatch_io_read.stop();
-                        // }
-                        token+=/* sourcefact * tmpprefact * */ tshiftmap(LatticeComplex(trace((innerit->second)*(it->second))));
-                        swatch_io_write.start();
-                        chk.set_parameter(boostdir+"/"+corrname,token);
-                        swatch_io_write.stop();
-                    }
-                }
-
-                // other-parity (34 entries)
-                for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=tmplatmats_34.begin(); it!=tmplatmats_34.end(); ++it){
-                    std::string idstring=it->first;
-                    if(idstring.find("loc")!=std::string::npos) continue;
-
-                    size_t firstpos=idstring.find("_");
-                    size_t secondpos=idstring.find(firstpos);
-                    std::string conttype=idstring.substr(0,firstpos);
-                    std::transform(conttype.begin(),conttype.end(),conttype.begin(),::tolower);
-
-                    std::string srcspin=idstring.substr(firstpos+1,secondpos);
-                    std::string srcspinval(&srcspin[srcspin.size()-1]);
-                    srcspin=srcspin.substr(0,srcspin.size()-1);
-
-                    for(std::map<std::string,HalfSpinMatrix>::iterator innerit=projectors.begin(); innerit!=projectors.end(); ++innerit){
-                        std::string inneridstring=innerit->first;
-                        std::string snkspin=inneridstring.substr(0,inneridstring.size()-1);
-                        if(snkspin!=srcspin) continue;
-                        std::string snkspinval(&inneridstring[inneridstring.size()-1]);
-
-                        std::string corrname=conttype+"corr"+"_"+srcspin+"_"+snkspinval+"_"+srcspinval+"_"+displacedir; //s[0]; // 0 = mu hardcoded for this version.
-                        token=zero;
-                        // TODO src always is 0 for this version!!
-                        // if(src==0) token=zero;
-                        // else{
-                        //     swatch_io_read.start();
-                        //     chk.get_parameter(boostdir+"/"+corrname,token);
-                        //     swatch_io_read.stop();
-                        // }
-                        token+=/* sourcefact * tmpprefact * */ tshiftmap(LatticeComplex(trace((innerit->second)*(it->second))));
-                        swatch_io_write.start();
-                        chk.set_parameter(boostdir+"/"+corrname+"_34",token);
-                        swatch_io_write.stop();
-                    }
-                }
-
-                //state
-                chk.set_parameter("mucurrent",static_cast<unsigned int>(0+1)); // 0 = mu hardcoded for this version.
-                // if((mu+1)<sourcepars.displacements.nrows()) chk.set_consistency(true);
-                chk.set_consistency(true);  // can hardcode THIS too, because mu is always 0!
-                chk.close();
-                swatch_pdisp.stop();
-
-                /*#ifndef NO_SIGNAL_HANDLERS
-                  sighand::exit_code_on_abort();
-                  #endif*/
-                //This signal handling stuff is not necessary. I don't want the baggage of Thorsten's specialized XML readexs.
-
-                QDPIO::cout << "NN-corr-disp: time=" << swatch_pdisp.getTimeInSeconds() << std::endl;
-                swatch_pdisp.reset();
-                // if(src!=0) QDPIO::cout << "NN-corr-io-read: time=" << swatch_io_read.getTimeInSeconds() << std::endl;
-                QDPIO::cout << "NN-corr-io-write: time=" << swatch_io_write.getTimeInSeconds() << std::endl;
-                swatch_io_read.reset();
-                swatch_io_write.reset();
-
-            } //This is manually here to close loop while porting.
-            /********************************************************
-             *                                                       *
-             *   END LOOP OVER BOOSTS                                *
-             *                                                       *
-             ********************************************************/
-
-            //move the checkpoint file:
-            std::string timestamp=getTimestamp();
-            rename(std::string(params.twonucleonsparam.output_filename+".NN_w.chk").c_str(),std::string(params.twonucleonsparam.output_filename).c_str());
-
-#endif
             //clear baryon blocks:
             clearTopologies();
-
-            //This is where latscat's swatch_everything stops. I am going to use the timer that's printed at the end.
 
 #endif
 

@@ -55,9 +55,22 @@ namespace Chroma
         };
         // This is used for boosts
         const std::string dirlist[4]={"x","y","z","t"};
-        const std::string contterms[8]={
+
+        const std::vector<std::string> nonlocalterms = {"PP_SING0","PP_TRIPP","PP_TRIP0","PP_TRIPM", "PN_SING0","PN_TRIPP","PN_TRIP0","PN_TRIPM"};
+        const std::vector<std::string> localterms0   = {"PP_SING0_loc0", "PN_TRIPP_loc0","PN_TRIP0_loc0","PN_TRIPM_loc0"};
+        const std::vector<std::string> localterms1   = {"PP_SING0_loc1", "PN_TRIPP_loc1","PN_TRIP0_loc1","PN_TRIPM_loc1"};
+
+        /*
+        nonlocalterms = {"PP_SING0","PP_TRIPP","PP_TRIP0","PP_TRIPM", "PN_SING0","PN_TRIPP","PN_TRIP0","PN_TRIPM"};
+        localterms0   = {"PP_SING0_loc0", "PN_TRIPP_loc0","PN_TRIP0_loc0","PN_TRIPM_loc0"};
+        localterms1   = {"PP_SING0_loc1", "PN_TRIPP_loc1","PN_TRIP0_loc1","PN_TRIPM_loc1"};
+        const std::string nonlocalterms[8]={
             "PP_SING0","PP_TRIPP","PP_TRIP0","PP_TRIPM",
-            "PN_SING0","PN_TRIPP","PN_TRIP0","PN_TRIPM"};
+            "PN_SING0","PN_TRIPP","PN_TRIP0","PN_TRIPM"
+        };
+        const std::string localterms0[4] = {"PP_SING0_loc0", "PN_TRIPP_loc0","PN_TRIP0_loc0","PN_TRIPM_loc0"};
+        const std::string localterms1[4] = {"PP_SING0_loc1", "PN_TRIPP_loc1","PN_TRIP0_loc1","PN_TRIPM_loc1"};
+        */
 
         class InlineMeas : public AbsInlineMeasurement
         {

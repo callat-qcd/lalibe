@@ -91,7 +91,8 @@ namespace Chroma {
     int contract_local(LatticeComplex& result_P, std::map<std::string,LatticeHalfSpinMatrix>& resultmats, const LatticePropagator& prop0, const LatticePropagator& prop1, const SpinMatrix& diquark_proj, const LatticeComplex& phases, Fourier& fft, const multi1d<sink*>& snk, const multi1d<Complex>& weights);
 
     // contract blocks
-    int contract(LatticeComplex& result_N,
+    int contract(LatticeComplex& result_N0,
+                 LatticeComplex& result_N1,
                  std::map<std::string, LatticeHalfSpinMatrix>& result_NN,
                  const multi1d<const LalibeNucleonBlockEnv::BlockMapType*>& blockMap_list,
                  const multi1d<std::string>& prop0_Ids,

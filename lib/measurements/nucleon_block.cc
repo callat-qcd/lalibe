@@ -362,7 +362,7 @@ namespace Chroma
 
             // Block 000[+1]
             std::string nodisplace = "px0py0pz0";
-            //QDPIO::cout << "DEBUG: dispdir = "<<displacedir << "  nodisplace = "<<nodisplace << std::endl;
+
             BlockMapKeyType theKey = {propId_0, propId_0, propId_0, 1, neg_par_str, origin, nodisplace};
             std::string block_str = "000[+1]";
             if (blockMap.count(theKey) == 0){

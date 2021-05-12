@@ -628,7 +628,6 @@ namespace Chroma {
         START_CODE();
 
         if(psign!=0){
-            QDPIO::cout << "DEBUG: doing contractions" << std::endl;
             unsigned int nsites=Layout::sitesOnNode();
 
             //now do contraction:
@@ -702,9 +701,6 @@ namespace Chroma {
             QDPIO::cout << "done!" << std::endl;
             QDPIO::cout << "NN-disp: internal-contrac: time=" << swatch_cont.getTimeInSeconds() << std::endl;
             if(psign==-1) QDPIO::cout << "NN-disp: internal-fourier: time=" << swatch_fft.getTimeInSeconds() << std::endl;
-        }
-        else{
-            QDPIO::cout << "DEBUG: not doing anything" << std::endl;
         }
 
         END_CODE();
@@ -1512,7 +1508,6 @@ namespace Chroma {
                 mode=bmodes2[c]+"|"+bmodes[b];
                 swapmode=bmodes[b]+"|"+bmodes2[c];
                 //s-wave:
-                QDPIO::cout << "DEBUG: PP_SING0 " << mode << " FT sign " << PP_SING0.getFourierSign(mode) << std::endl;
                 two_proton_displaced(resultmats["PP_SING0"],block0,bblockmap[bmodes[b]],PP_SING0.getTensor(mode),phases,fft,PP_SING0.getFourierSign(mode));
 
                 //P+1
@@ -1615,7 +1610,8 @@ namespace Chroma {
     }
 
     // Perform contractions on blocks
-    int contract(LatticeComplex& result_N,
+    int contract(LatticeComplex& result_N0,
+                 LatticeComplex& result_N1,
                  std::map<std::string, LatticeHalfSpinMatrix>& result_NN,
                  const multi1d<const LalibeNucleonBlockEnv::BlockMapType*>& blockMap_list,
                  const multi1d<std::string>& prop0_Ids,
@@ -1661,24 +1657,18 @@ namespace Chroma {
                     addWeightedHalfBlock(block0, weights[b], blockMap_list[b]->at(key0));
                     addWeightedHalfBlock(block1, weights[b], blockMap_list[b]->at(key1));
                     swatch_blocks.stop();
-                    /*
-                                  block0 += weights[b] * (blockMap_list[b])->at(key0);
-                                  block1 += weights[b] * (blockMap_list[b])->at(key1);
-                    */
                 }
 
                 swatch_contract_local.start();
-                /*
-                if ( params.twonucleonsparam.compute_proton){
-                    one_proton(latt_prot0, block0);
-                }
-                */
+                one_proton(result_N0, block0);
+
                 // Proton-Proton
-                two_proton_source_local(result_NN["PP_SING0_loc"],block0,block1,PP_SING0.getTensor("000|000"));
+                two_proton_source_local(result_NN["PP_SING0_loc0"],block0,block1,PP_SING0.getTensor("000|000"));
                 // Proton-Neutron
-                two_proton_source_local(result_NN["PN_TRIPP_loc"],block0,block1,PN_TRIPP.getTensor("000|000"));
-                two_proton_source_local(result_NN["PN_TRIP0_loc"],block0,block1,PN_TRIP0.getTensor("000|000"));
-                two_proton_source_local(result_NN["PN_TRIPM_loc"],block0,block1,PN_TRIPM.getTensor("000|000"));
+                two_proton_source_local(result_NN["PN_TRIPP_loc0"],block0,block1,PN_TRIPP.getTensor("000|000"));
+                two_proton_source_local(result_NN["PN_TRIP0_loc0"],block0,block1,PN_TRIP0.getTensor("000|000"));
+                two_proton_source_local(result_NN["PN_TRIPM_loc0"],block0,block1,PN_TRIPM.getTensor("000|000"));
+
                 swatch_contract_local.stop();
                 QDPIO::cout << "  Block add time " << swatch_blocks.getTimeInSeconds() << std::endl;
                 QDPIO::cout << "  Contract time= " << swatch_contract_local.getTimeInSeconds() << std::endl;
@@ -1705,12 +1695,12 @@ namespace Chroma {
             }
             */
             // Proton-Proton
-            two_proton_source_local(result_NN["PP_SING0_loc"],block0,block1,PP_SING0.getTensor("000|000"));
+            two_proton_source_local(result_NN["PP_SING0_loc1"],block0,block1,PP_SING0.getTensor("000|000"));
 
             // Proton-Neutron
-            two_proton_source_local(result_NN["PN_TRIPP_loc"],block0,block1,PN_TRIPP.getTensor("000|000"));
-            two_proton_source_local(result_NN["PN_TRIP0_loc"],block0,block1,PN_TRIP0.getTensor("000|000"));
-            two_proton_source_local(result_NN["PN_TRIPM_loc"],block0,block1,PN_TRIPM.getTensor("000|000"));
+            two_proton_source_local(result_NN["PN_TRIPP_loc1"],block0,block1,PN_TRIPP.getTensor("000|000"));
+            two_proton_source_local(result_NN["PN_TRIP0_loc1"],block0,block1,PN_TRIP0.getTensor("000|000"));
+            two_proton_source_local(result_NN["PN_TRIPM_loc1"],block0,block1,PN_TRIPM.getTensor("000|000"));
             swatch_contract_local.stop();
             QDPIO::cout << "  Block add time " << swatch_blocks.getTimeInSeconds() << std::endl;
             QDPIO::cout << "  Contract time= " << swatch_contract_local.getTimeInSeconds() << std::endl;
@@ -1779,7 +1769,6 @@ namespace Chroma {
                         swatch_blocks.stop();
                     }
                     // S-wave:
-                    QDPIO::cout << "DEBUG: PP_SING0 " << mode << " FT sign " << PP_SING0.getFourierSign(mode) << std::endl;
                     two_proton_displaced(result_NN["PP_SING0"],block0,block1,PP_SING0.getTensor(mode),phases,fft,PP_SING0.getFourierSign(mode));
                     // P+1
                     two_proton_displaced(result_NN["PP_TRIPP"],block0,block1,PP_TRIPP.getTensor(mode),phases,fft,PP_TRIPP.getFourierSign(mode));
