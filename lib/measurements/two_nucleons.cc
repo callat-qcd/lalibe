@@ -219,31 +219,6 @@ namespace Chroma
             pop(xml_out);
         }
 
-        void addWeightedHalfBlock(LatticeHalfBaryonblock& res,
-                                  const Complex& weight,
-                                  const LatticeHalfBaryonblock& in) {
-            int nSites = Layout::sitesOnNode();
-            for (int iX=0; iX<nSites; ++iX) {
-                for (int iS1=0; iS1<(Ns>>1); ++iS1) {
-                    for (int jS1=0; jS1<(Ns>>1); ++jS1) {
-                        for (int iC1=0; iC1<Nc; ++iC1) {
-                            for (int iS2=0; iS2<(Ns>>1); ++iS2) {
-                                for (int jS2=0; jS2<(Ns>>1); ++jS2) {
-                                    for (int iC2=0; iC2<Nc; ++iC2) {
-                                        for (int jC2=0; jC2<Nc; ++jC2) {
-                                            res.elem(iX).elem(iS1, jS1).elem(iC1).elem(iS2, jS2).elem(iC2, jC2)
-                                                += weight.elem().elem().elem()
-                                                * in.elem(iX).elem(iS1, jS1).elem(iC1).elem(iS2, jS2).elem(iC2, jC2);
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
         // Function call
         void InlineMeas::operator()(unsigned long update_no, XMLWriter& xml_out)
         {
@@ -308,6 +283,7 @@ namespace Chroma
                 prop0_Ids[b] = params.named_obj.prop0_list[b];
                 prop1_Ids[b] = params.named_obj.prop1_list[b];
                 pos0         = LalibeUtilsNambedObjEnv::get_prop_position(prop0_Ids[b]);
+                pos0_list[b] = pos0;
                 pos1         = LalibeUtilsNambedObjEnv::get_prop_position(prop1_Ids[b]);
                 //             pos0 = origin so no need to compute disp
                 disp         = pos1 - origin;
@@ -448,15 +424,17 @@ namespace Chroma
 
             // all props have the same source, so just use the first prop0 position
             Timeshiftmap tshiftmap(pos0_list[0][j_decay],j_decay,Layout::lattSize()[j_decay]);
-
-            // Create two baryon block objects to store blocks for contractions
-            LatticeHalfBaryonblock block0, block1;
+            QDPIO::cout << "DEBUG: tshiftmap, pos0_list[0][j_decay] " << pos0_list[0][j_decay] << std::endl;
 
             // Create objects to store results
-            LatticeComplex latt_prot0, latt_prot1, token;
+            LatticeComplex latt_prot0, latt_prot1, latt_prot0_34, latt_prot1_34, token;
             std::map<std::string,LatticeHalfSpinMatrix> latt_nn_map;
             for(unsigned int s = 0; s < 8; s++){
                 latt_nn_map[contterms[s]]=LatticeHalfSpinMatrix();
+            }
+            // We must zero out the data before adding to it
+            for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=latt_nn_map.begin(); it!=latt_nn_map.end(); ++it){
+                it->second=zero;
             }
 
             /**********************************************************************
@@ -482,7 +460,7 @@ namespace Chroma
                     // positive parity contraction
                     contract(latt_prot0, latt_nn_map, 
                              blockMap_list, prop0_Ids, prop1_Ids, 
-                             origin, weights, disp_list, parity,
+                             weights, origin, disp_list, parity,
                              phases, fft, 
                              params.twonucleonsparam.compute_locals, params.twonucleonsparam.compute_loc_o);
 
