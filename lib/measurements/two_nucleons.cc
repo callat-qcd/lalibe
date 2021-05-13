@@ -405,7 +405,14 @@ namespace Chroma
 
 
             // Minimal checkpointing
-            checkpoint chk(params.twonucleonsparam.output_filename+".NN_w.chk",params.twonucleonsparam.output_stripesize);
+            //checkpoint chk(params.twonucleonsparam.output_filename+".NN_w.chk",params.twonucleonsparam.output_stripesize);
+            /* turn off checkpointing now as we do not use it
+               also, we will set the write mode to HDF5Base::ate which will not allow writing to the same file
+             */
+            HDF5Base::writemode h5mode;
+            h5mode = HDF5Base::ate;
+            checkpoint chk(params.twonucleonsparam.output_filename,params.twonucleonsparam.output_stripesize);
+            
 
             int j_decay = Nd - 1; // Assume t_dir = j_decay
             // We need FFT for the non-local contractions
@@ -510,7 +517,7 @@ namespace Chroma
                         token += tshiftmap(prot1_obj, true);
                         swatch_io_write.start();
                         std::string corrname = "proton1_"+pos1_str+"_"+parity;
-                        chk.set_parameter(corrname,token);
+                        chk.set_parameter(corrname,token, h5mode);
                         swatch_io_write.stop();
 
                         if ( params.twonucleonsparam.compute_loc_o){
@@ -519,7 +526,7 @@ namespace Chroma
                             token += tshiftmap(prot0_obj, true);
                             swatch_io_write.start();
                             std::string corrname = "proton0_"+pos0_str+"_"+parity;
-                            chk.set_parameter(corrname,token);
+                            chk.set_parameter(corrname,token, h5mode);
                             swatch_io_write.stop();
                         }
                     }
@@ -575,9 +582,9 @@ namespace Chroma
 
                             swatch_io_write.start();
                             if (idstring.find("loc1") != std::string::npos){
-                                chk.set_parameter(boostdir+"/"+p1_dir+"/"+corrname,token);
+                                chk.set_parameter(boostdir+"/"+p1_dir+"/"+corrname,token, h5mode);
                             } else {
-                                chk.set_parameter(boostdir+"/"+p0_dir+"/"+corrname,token);
+                                chk.set_parameter(boostdir+"/"+p0_dir+"/"+corrname,token, h5mode);
                             }
                             swatch_io_write.stop();
                         }
@@ -586,15 +593,17 @@ namespace Chroma
             }
             // 0 = mu hardcoded for this version.
             // if((mu+1)<sourcepars.displacements.nrows()) chk.set_consistency(true);
-            chk.set_parameter("mucurrent",static_cast<unsigned int>(0+1));
+            chk.set_parameter("mucurrent",static_cast<unsigned int>(0+1), h5mode);
             chk.set_consistency(true);  // can hardcode THIS too, because mu is always 0!
             chk.close();
 
             //move the checkpoint file:
+            // We are turning off checkpointing for now
+            /*
             std::string timestamp=getTimestamp();
             rename(std::string(params.twonucleonsparam.output_filename+".NN_w.chk").c_str(),
                     std::string(params.twonucleonsparam.output_filename).c_str());
-
+            */
 
             QDPIO::cout << LalibeTwoNucleonsEnv::name << " Block add time="
                         << swatch_blocks.getTimeInSeconds() << std::endl;

@@ -435,6 +435,8 @@ namespace Chroma
 
     //Checkpointing isn't suppose to be supported, I include the bare minimum here...
     checkpoint chk(params.nnlcparam.output_filename+".NN_w.chk",params.nnlcparam.output_stripesize);
+    HDF5Base::writemode h5mode;
+    h5mode = HDF5Base::trunc; // trunc = allow overwrite existing data
 
     QDPIO::cout << "Creating timers..." << std::flush;
     // TODO: make timings more meaningful?
@@ -547,14 +549,14 @@ namespace Chroma
             token=zero;
             token+=/* sourcefact * tmpprefact * */ tshiftmap(tmplatcomp_P,true);
             swatch_io_write.start();
-            chk.set_parameter("proton1",token);
+            chk.set_parameter("proton1",token, h5mode);
             swatch_io_write.stop();
 
             //negative parity proton
             token=zero;
             token+=/* sourcefact * tmpprefact * */ tshiftmap(tmplatcomp_P_34,true);
             swatch_io_write.start();
-            chk.set_parameter("proton1_34",token);
+            chk.set_parameter("proton1_34",token, h5mode);
             swatch_io_write.stop();
         }
 
@@ -591,7 +593,7 @@ namespace Chroma
                 // }
                 token+=/* sourcefact * tmpprefact * */ tshiftmap(LatticeComplex(trace((innerit->second)*(it->second))));
                 swatch_io_write.start();
-                chk.set_parameter(boostdir+"/"+corrname,token);
+                chk.set_parameter(boostdir+"/"+corrname,token, h5mode);
                 swatch_io_write.stop();
             }
         }
@@ -627,13 +629,13 @@ namespace Chroma
                 // }
                 token+=/* sourcefact * tmpprefact * */ tshiftmap(LatticeComplex(trace((innerit->second)*(it->second))));
                 swatch_io_write.start();
-                chk.set_parameter(boostdir+"/"+corrname+"_34",token);
+                chk.set_parameter(boostdir+"/"+corrname+"_34",token, h5mode);
                 swatch_io_write.stop();
             }
         }
 
         //state
-        chk.set_parameter("mucurrent",static_cast<unsigned int>(0+1)); // 0 = mu hardcoded for this version.
+        chk.set_parameter("mucurrent",static_cast<unsigned int>(0+1), h5mode); // 0 = mu hardcoded for this version.
         // if((mu+1)<sourcepars.displacements.nrows()) chk.set_consistency(true);
         chk.set_consistency(true);  // can hardcode THIS too, because mu is always 0!
         chk.close();
