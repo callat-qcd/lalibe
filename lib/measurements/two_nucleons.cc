@@ -461,46 +461,6 @@ namespace Chroma
                 }
             }
 
-            /*
-            if( params.twonucleonsparam.parities.find("POS_PAR") != params.twonucleonsparam.parities.end() ){
-                for(unsigned int s = 0; s < nonlocalterms.size(); s++){
-                    NN_map[nonlocalterms[s]]=LatticeHalfSpinMatrix();
-                }
-                if( params.twonucleonsparam.compute_locals ){
-                    for (unsigned int s = 0; s < localterms1.size(); s++){
-                        NN_map[localterms1[s]]=LatticeHalfSpinMatrix();
-                    }
-                    if( params.twonucleonsparam.compute_loc_o ){
-                        for (unsigned int s = 0; s < localterms0.size(); s++){
-                            NN_map[localterms0[s]]=LatticeHalfSpinMatrix();
-                        }
-                    }
-                }
-                // We must zero out the data before adding to it
-                for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=NN_map.begin(); it!=NN_map.end(); ++it){
-                    it->second=zero;
-                }
-            }
-            if( params.twonucleonsparam.parities.find("NEG_PAR") != params.twonucleonsparam.parities.end() ){
-                for(unsigned int s = 0; s < nonlocalterms.size(); s++){
-                    NN_map_34[nonlocalterms[s]]=LatticeHalfSpinMatrix();
-                }
-                if( params.twonucleonsparam.compute_locals ){
-                    for (unsigned int s = 0; s < localterms1.size(); s++){
-                        NN_map_34[localterms1[s]]=LatticeHalfSpinMatrix();
-                    }
-                    if( params.twonucleonsparam.compute_loc_o ){
-                        for (unsigned int s = 0; s < localterms0.size(); s++){
-                            NN_map_34[localterms0[s]]=LatticeHalfSpinMatrix();
-                        }
-                    }
-                }                
-                // We must zero out the data before adding to it
-                for(std::map<std::string,LatticeHalfSpinMatrix>::iterator it=NN_map_34.begin(); it!=NN_map_34.end(); ++it){
-                    it->second=zero;
-                }
-            }
-            */
 
             /**********************************************************************
              *                                                                    *
@@ -549,7 +509,7 @@ namespace Chroma
                         token=zero;
                         token += tshiftmap(prot1_obj, true);
                         swatch_io_write.start();
-                        std::string corrname = "proton_"+pos1_str+"_"+parity;
+                        std::string corrname = "proton1_"+pos1_str+"_"+parity;
                         chk.set_parameter(corrname,token);
                         swatch_io_write.stop();
 
@@ -558,7 +518,7 @@ namespace Chroma
                             token=zero;
                             token += tshiftmap(prot0_obj, true);
                             swatch_io_write.start();
-                            std::string corrname = "proton_"+pos0_str+"_"+parity;
+                            std::string corrname = "proton0_"+pos0_str+"_"+parity;
                             chk.set_parameter(corrname,token);
                             swatch_io_write.stop();
                         }
@@ -568,8 +528,8 @@ namespace Chroma
                         Two nucleons
                     */
                     // make directory for origin of contractions
-                    std::string p0_dir = "O_"+pos0_str;
-                    std::string p1_dir = "O_"+pos1_str;
+                    std::string p0_dir = "O0_"+pos0_str;
+                    std::string p1_dir = "O1_"+pos1_str;
                     chk.create_directory(boostdir+"/"+p0_dir);
                     if( params.twonucleonsparam.compute_locals ){
                         chk.create_directory(boostdir+"/"+p1_dir);
