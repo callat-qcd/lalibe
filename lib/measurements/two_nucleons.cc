@@ -117,6 +117,13 @@ namespace Chroma
                 QDPIO::cout << "compute_proton not set, default = true" << std::endl;
                 par.compute_proton = true;
             }
+            // write spin-flip correlators?
+            if (paramtop.count("spin_flip") > 0)
+                read(paramtop, "spin_flip", par.spin_flip);
+            else{
+                QDPIO::cout << "spin_flip not set, default = false" << std::endl;
+                par.spin_flip = false;
+            }
             // list of total momentum boosts
             read(paramtop, "boosts", par.boosts);
             // For now - only support P_tot = (0,0,0)
@@ -141,6 +148,7 @@ namespace Chroma
             write(xml, "output_stripesize",      par.output_stripesize);
             write(xml, "compute_locals",         par.compute_locals);
             write(xml, "compute_proton",         par.compute_proton);
+            write(xml, "spin_flip",              par.spin_flip);
             write(xml, "parities",               par.parities);
             write(xml, "boosts",                 par.boosts);
             pop(xml);
@@ -430,8 +438,9 @@ namespace Chroma
             /* turn off checkpointing now as we do not use it
                also, we will set the write mode to HDF5Base::ate which will not allow writing to the same file
              */
-            HDF5Base::writemode h5mode;
+            HDF5Base::writemode h5mode, mucurr_mode;
             h5mode = HDF5Base::ate;
+            mucurr_mode = HDF5Base::trunc;
             checkpoint chk(params.twonucleonsparam.output_filename,params.twonucleonsparam.output_stripesize);
             
 
@@ -589,32 +598,35 @@ namespace Chroma
                             if(snkspin!=srcspin) continue;
                             std::string snkspinval(&inneridstring[inneridstring.size()-1]);
 
-                            std::string corrname;
-                            if( idstring.find("loc") != std::string::npos){
-                                corrname = conttype+"_"+srcspin+"_"+snkspinval+"_"+srcspinval+"_"+nodisplace;
-                            } else {
-                                corrname = conttype+"_"+srcspin+"_"+snkspinval+"_"+srcspinval+"_"+disp_list[0];
-                            }
-                            if (parity == "NEG_PAR")
-                                corrname += "_34";
-                            
-                            token  = zero;
-                            token += tshiftmap(LatticeComplex(trace((innerit->second)*(it->second))));
+                            if( snkspinval == srcspinval || params.twonucleonsparam.spin_flip){
+                                std::string corrname;
+                                if( idstring.find("loc") != std::string::npos){
+                                    corrname = conttype+"_"+srcspin+"_"+snkspinval+"_"+srcspinval+"_"+nodisplace;
+                                } else {
+                                    corrname = conttype+"_"+srcspin+"_"+snkspinval+"_"+srcspinval+"_"+disp_list[0];
+                                }
+                                if (parity == "NEG_PAR")
+                                    corrname += "_34";
 
-                            swatch_io_write.start();
-                            if (idstring.find("loc1") != std::string::npos){
-                                chk.set_parameter(boostdir+"/"+p1_dir+"/"+corrname,token, h5mode);
-                            } else {
-                                chk.set_parameter(boostdir+"/"+p0_dir+"/"+corrname,token, h5mode);
+                                token  = zero;
+                                token += tshiftmap(LatticeComplex(trace((innerit->second)*(it->second))));
+
+                                swatch_io_write.start();
+                                if (idstring.find("loc1") != std::string::npos){
+                                    chk.set_parameter(boostdir+"/"+p1_dir+"/"+corrname,token, h5mode);
+                                } else {
+                                    chk.set_parameter(boostdir+"/"+p0_dir+"/"+corrname,token, h5mode);
+                                }
+                                swatch_io_write.stop();
                             }
-                            swatch_io_write.stop();
                         }
                     }
                 }
             }
             // 0 = mu hardcoded for this version.
             // if((mu+1)<sourcepars.displacements.nrows()) chk.set_consistency(true);
-            chk.set_parameter("mucurrent",static_cast<unsigned int>(0+1), h5mode);
+            // we can overwrite the mucurrent - so change this h5mode
+            chk.set_parameter("mucurrent",static_cast<unsigned int>(0+1), mucurr_mode);
             chk.set_consistency(true);  // can hardcode THIS too, because mu is always 0!
             chk.close();
 

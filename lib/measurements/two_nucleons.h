@@ -42,6 +42,7 @@ namespace Chroma
                 bool                    compute_locals;         // compute local sinks (still FFT separately)?
                 bool                    compute_loc_o;          // compute local origin sinks?
                 bool                    compute_proton;         // compute local sinks (still FFT separately)?
+                bool                    spin_flip;              // compute write spin-flip TRIPP <- TRIPM like correlators?
                 multi1d< multi1d<int> > boosts;                 // boosts
                 multi1d<std::string>    prop_list_delete;       // list of prop ids to detele associated blocks
             } twonucleonsparam ;
