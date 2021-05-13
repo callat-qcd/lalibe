@@ -94,7 +94,7 @@ namespace Chroma {
     int contract(LatticeComplex& result_N0,
                  LatticeComplex& result_N1,
                  std::map<std::string, LatticeHalfSpinMatrix>& result_NN,
-                 const multi1d<const LalibeNucleonBlockEnv::BlockMapType*>& blockMap_list,
+                 const multi1d<LalibeNucleonBlockEnv::BlockMapType*>& blockMap_list,
                  const multi1d<std::string>& prop0_Ids,
                  const multi1d<std::string>& prop1_Ids,
                  const multi1d<Complex>& weights,

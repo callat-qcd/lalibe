@@ -43,6 +43,7 @@ namespace Chroma
                 bool                    compute_loc_o;          // compute local origin sinks?
                 bool                    compute_proton;         // compute local sinks (still FFT separately)?
                 multi1d< multi1d<int> > boosts;                 // boosts
+                multi1d<std::string>    prop_list_delete;       // list of prop ids to detele associated blocks
             } twonucleonsparam ;
 
             struct NamedObject_t

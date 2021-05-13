@@ -126,6 +126,11 @@ namespace Chroma
                 QDPIO::cerr << "\n###############################################################\n" << std::endl;
                 QDP_abort(1);
             }
+
+            // Do we want to delete blocks?
+            if( paramtop.count("prop_list_delete") > 0){
+                read(paramtop, "prop_list_delete", par.prop_list_delete);
+            }
         }
 
         void write(XMLWriter& xml, const std::string& path, TwoNucleonsParams::TwoNucleons_t& par)
@@ -334,7 +339,7 @@ namespace Chroma
                 QDPIO::cerr << "You must pass the same number of blocks as props" << std::endl;
                 QDP_abort(1);
             }
-            multi1d<const LalibeNucleonBlockEnv::BlockMapType*> blockMap_list(n_blocks);
+            multi1d<LalibeNucleonBlockEnv::BlockMapType*> blockMap_list(n_blocks);
             multi1d<Complex> weights(n_blocks);
             for (int b=0; b<n_blocks; b++){
                 std::istringstream xml_block(params.named_obj.nucleon_blocks[b].xml);
@@ -632,7 +637,38 @@ namespace Chroma
             //clear baryon blocks:
             clearTopologies();
 
-#endif
+#endif //BUILD_HDF5
+
+            // Now - delete any blocks the user requests
+            for( int bList=0; bList < blockMap_list.size(); bList++){
+                for (int prop_i = 0; prop_i < params.twonucleonsparam.prop_list_delete.size(); prop_i++){
+                    for (auto it=blockMap_list[bList]->begin(); it != blockMap_list[bList]->end();) {
+
+                        if (std::get<0>(it->first) == params.twonucleonsparam.prop_list_delete[prop_i] 
+                            || std::get<1>(it->first) == params.twonucleonsparam.prop_list_delete[prop_i]
+                            || std::get<2>(it->first) == params.twonucleonsparam.prop_list_delete[prop_i]) {
+                            QDPIO::cout << "Deleting block with key: " 
+                                        << std::get<0>(it->first) << " "
+                                        << std::get<1>(it->first) << " "
+                                        << std::get<2>(it->first) << " "
+                                        << std::get<3>(it->first) << " "
+                                        << std::get<4>(it->first) << " "
+                                        << "x"<<std::get<5>(it->first)[0] << " "
+                                        << "y"<<std::get<5>(it->first)[1] << " "
+                                        << "z"<<std::get<5>(it->first)[2] << " "
+                                        << "t"<<std::get<5>(it->first)[3] << " "
+                                        << std::get<6>(it->first) << std::endl;
+                            // Delete the block
+                            blockMap_list[bList]->erase(it++);
+                            
+                        }
+                        else {
+                            ++it;
+                        }
+                    }
+                }
+            }
+
 
             snoop.stop();
             QDPIO::cout << LalibeTwoNucleonsEnv::name << ": total time = " << snoop.getTimeInSeconds() << " secs" << std::endl;
