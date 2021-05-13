@@ -32,6 +32,9 @@
 #include "../NN/checkpointstuff.h"
 #include "../NN/momstuff.h"
 
+// For checking file existence
+#include <unistd.h>
+
 namespace Chroma
 {
     namespace LalibeTwoNucleonsEnv
@@ -59,10 +62,23 @@ namespace Chroma
             return success;
         }
 
+        bool file_exists( const std::string &filename )
+        {
+            return access( filename.c_str(), 0 ) == 0;
+        }
+
         void read(XMLReader& xml, const std::string& path, TwoNucleonsParams::TwoNucleons_t& par)
         {
             XMLReader paramtop(xml, path);
             read(paramtop, "output_filename",       par.output_filename); //output file
+
+            // check if file already exists
+            if( file_exists(par.output_filename) ){
+                QDPIO::cout << "\nyour H5 file already exists - exit before doing work" << std::endl;
+                QDPIO::cout << par.output_filename << std::endl;
+                QDP_abort(1);
+            }
+
             read(paramtop, "contractions_filename", par.contractions_filename); //hdf5 file containing contractions
             if (paramtop.count("output_stripesize") != 0)
                 read(paramtop, "output_stripesize", par.output_stripesize); //output stripesize; default recommended
