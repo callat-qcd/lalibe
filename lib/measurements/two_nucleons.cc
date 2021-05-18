@@ -82,6 +82,8 @@ namespace Chroma
             read(paramtop, "contractions_filename", par.contractions_filename); //hdf5 file containing contractions
             if (paramtop.count("output_stripesize") != 0)
                 read(paramtop, "output_stripesize", par.output_stripesize); //output stripesize; default recommended
+            else
+                par.output_stripesize = 0;
             if (paramtop.count("parities") > 0)
                 read(paramtop, "parities", par.parities);
             else
