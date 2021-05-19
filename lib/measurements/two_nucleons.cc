@@ -472,11 +472,17 @@ namespace Chroma
                 we do not use this anymore and retain the full mom space
                 -1 --> do not truncate
             */
+            QDPIO::cout << "Creating timers..." << std::endl;
+            StopWatch swatch_topologies, swatch_io_write, swatch_contract_local, swatch_contract_nonlocal, swatch_fft, swatch_blocks;
+
+            swatch_topologies.reset();
+            swatch_topologies.start();
             int truncate = -1;
             initTopologies(params.twonucleonsparam.contractions_filename, truncate, j_decay);
+            swatch_topologies.stop();
+            QDPIO::cout << LalibeTwoNucleonsEnv::name << ": initTopologies time = "
+                        << swatch_topologies.getTimeInSeconds() << " secs" << std::endl;
 
-            QDPIO::cout << "Creating timers..." << std::endl;
-            StopWatch swatch_io_write, swatch_contract_local, swatch_contract_nonlocal, swatch_fft, swatch_blocks;
             swatch_io_write.reset();
             swatch_contract_local.reset();
             swatch_contract_nonlocal.reset();
