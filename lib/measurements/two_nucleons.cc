@@ -674,7 +674,8 @@ namespace Chroma
             QDPIO::cout << LalibeTwoNucleonsEnv::name << " NN I/O: time="
                         << swatch_io_write.getTimeInSeconds() << std::endl;
             //clear baryon blocks:
-            clearTopologies();
+            // add user xml switch to turn this on - only important if we want do multiple runs in one go
+            //clearTopologies();
 
 #endif //BUILD_HDF5
 
