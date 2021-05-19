@@ -19,7 +19,8 @@ namespace Chroma {
     //global variables:
     sparsearr<Real> single_neutron;
     Topology PP_SING0, PP_TRIP0, PP_TRIPP, PP_TRIPM, PN_SING0, PN_TRIP0, PN_TRIPP, PN_TRIPM;
-
+    bool isTopologyInitialized = false;
+    
     //const unsigned int barblocksize=6912;
     //const unsigned int halfbarblocksize=432;
     const unsigned int redblocksize=1728;
@@ -375,6 +376,11 @@ namespace Chroma {
      */
 
     void initTopologies(const std::string& filename, const int& truncsize, const unsigned int& j_decay){
+        if( isTopologyInitialized ){
+            QDPIO::cout << "Topologies already initialized" << std::endl;
+            return;
+        }
+        
         //compute 3-Volume:
         vol3=1;
         for(int nu = 0; nu < Nd; ++nu){
@@ -466,6 +472,7 @@ namespace Chroma {
         tensor=readTensor(filename,"/deuteron/TRIPM1/all").split_indices(halfredblocksize);
         PN_TRIPM.addDiagram("000|000",tensor,+1);
 
+        isTopologyInitialized=true;
         QDPIO::cout << "done!" << std::endl;
     }
 
@@ -481,6 +488,7 @@ namespace Chroma {
         PN_TRIPP.clear();
         PN_TRIP0.clear();
         PN_TRIPM.clear();
+        isTopologyInitialized=false;
     }
 
 
