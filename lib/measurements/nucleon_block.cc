@@ -502,8 +502,8 @@ namespace Chroma
                 }
             }
             
-            QDPIO::cout << LalibeNucleonBlockEnv::name << ": total block time " << block_time << std::endl;
-            QDPIO::cout << LalibeNucleonBlockEnv::name << ": total FFT time " << swatch_fft.getTimeInSeconds() << std::endl;
+            QDPIO::cout << LalibeNucleonBlockEnv::name << ": block time " << block_time << std::endl;
+            QDPIO::cout << LalibeNucleonBlockEnv::name << ": FFT time " << swatch_fft.getTimeInSeconds() << std::endl;
 
 #else
             QDPIO::cout << "This measurement only works if we have linked against FFTW. Please rebuild." << std::endl;

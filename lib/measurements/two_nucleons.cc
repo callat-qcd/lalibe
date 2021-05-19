@@ -657,12 +657,14 @@ namespace Chroma
                     std::string(params.twonucleonsparam.output_filename).c_str());
             */
 
+            /* these timers are in the contract() function
             QDPIO::cout << LalibeTwoNucleonsEnv::name << " Block add time="
                         << swatch_blocks.getTimeInSeconds() << std::endl;
             QDPIO::cout << LalibeTwoNucleonsEnv::name << " NN local: time="
                         << swatch_contract_local.getTimeInSeconds() << std::endl;
             QDPIO::cout << LalibeTwoNucleonsEnv::name << " NN non-local: time="
                         << swatch_contract_nonlocal.getTimeInSeconds() << std::endl;
+            */
             QDPIO::cout << LalibeTwoNucleonsEnv::name << " NN I/O: time="
                         << swatch_io_write.getTimeInSeconds() << std::endl;
             //clear baryon blocks:
