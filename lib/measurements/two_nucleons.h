@@ -40,6 +40,7 @@ namespace Chroma
                 int                     output_stripesize;      // output stripesize; default recommended
                 multi1d<std::string>    parities;               // specifies list of parity strings
                 multi1d<int>            origin;                 // X0 Y0 Z0 T0 of origin
+                multi1d<int>            displacement;           // X0 Y0 Z0 T0 of displaced source
                 bool                    compute_locals;         // compute local sinks (still FFT separately)?
                 bool                    compute_loc_o;          // compute local origin sinks?
                 bool                    compute_proton;         // compute local sinks (still FFT separately)?

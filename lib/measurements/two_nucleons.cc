@@ -104,6 +104,12 @@ namespace Chroma
                 QDPIO::cerr << "You must tell us what the origin is" << std::endl;
                 QDP_abort(1);
             }
+            if( paramtop.count("displacement") > 0 )
+                read(paramtop, "displacement", par.displacement);
+            else{
+                QDPIO::cerr << "You must tell us what the displacement is" << std::endl;
+                QDP_abort(1);
+            }
             // Do local contractions?  111[+1] + 111[1-]
             if (paramtop.count("compute_locals") > 0)
                 read(paramtop, "compute_locals", par.compute_locals);
@@ -155,6 +161,8 @@ namespace Chroma
             write(xml, "output_filename",        par.output_filename);
             write(xml, "fft_tune",               par.fft_tune);
             write(xml, "output_stripesize",      par.output_stripesize);
+            write(xml, "origin",                 par.origin);
+            write(xml, "displacement",           par.displacement);
             write(xml, "compute_locals",         par.compute_locals);
             write(xml, "compute_proton",         par.compute_proton);
             write(xml, "spin_flip",              par.spin_flip);
@@ -307,7 +315,7 @@ namespace Chroma
             multi2d< int >       pos1_list(n_blocks, Nd);
             multi1d<int>         pos0(Nd), pos1(Nd), disp(Nd);
             multi1d<std::string> disp_list(n_blocks);
-            std::string          displacedir, pos0_str, pos1_str;
+            std::string          displacedir, pos0_str, pos1_str;// NOTE pos1_str is the displacement vs pos1
             std::string          nodisplace="px0py0pz0";
             multi1d<int>         origin = params.twonucleonsparam.origin;
 
@@ -327,10 +335,19 @@ namespace Chroma
                 disp         = pos1 - origin;
                 displacedir  = "";
                 pos0_str     = "";
-                pos1_str     = "";
+                pos1_str     = "D_";
                 for(unsigned int d=0; d<Nd; d++){
                     if (pos0[d] - origin[d] != 0){
                         QDPIO::cerr << prop0_Ids[b] << " not located at origin! " << std::endl;
+                        QDP_abort(1);
+                    }
+                    // when comparing - add L before mod to make value positive - thanks Ben
+                    if( pos1[d] != (pos0[d] + params.twonucleonsparam.displacement[d] + Layout::lattSize()[d]) % Layout::lattSize()[d] ){
+                        QDPIO::cerr << "prop1["<<d<<"] != prop0["<<d<<"] + displacement["<<d<<"] mod L["<<d<<"]" << std::endl;
+                        QDPIO::cerr << "     "<<pos1[d]<<" != ("<<pos0[d]<<" + "<<params.twonucleonsparam.displacement[d]<<") % "
+                                    <<Layout::lattSize()[d] << std::endl;
+                        QDPIO::cerr << "     ("<<pos0[d]<< " + "<<params.twonucleonsparam.displacement[d]<<") % "<<Layout::lattSize()[d]
+                                    << " = "<<(pos0[d] + params.twonucleonsparam.displacement[d]) % Layout::lattSize()[d] << std::endl;
                         QDP_abort(1);
                     }
                     // make disp string
@@ -341,9 +358,14 @@ namespace Chroma
                         if(disp[d] >= 0) displacedir+="p";
                         else displacedir+="m";
                         displacedir+=dirlist[d]+std::to_string(abs(disp[d]));
+                        // disp string for writing
+                        if( params.twonucleonsparam.displacement[d] < 0)
+                            pos1_str += "m"+dirlist[d];
+                        else
+                            pos1_str += "p"+dirlist[d];
+                        pos1_str += std::to_string(abs(params.twonucleonsparam.displacement[d]));
                     }
                     pos0_str += dirlist[d]+std::to_string(pos0[d]);
-                    pos1_str += dirlist[d]+std::to_string(pos1[d]);
                 }
                 disp_list[b] = displacedir;
             }
@@ -626,9 +648,9 @@ namespace Chroma
                             if( snkspinval == srcspinval || params.twonucleonsparam.spin_flip){
                                 std::string corrname;
                                 if( idstring.find("loc") != std::string::npos){
-                                    corrname = conttype+"_"+srcspin+"_"+snkspinval+"_"+srcspinval+"_"+nodisplace;
+                                    corrname = conttype+"_"+srcspin+"_"+snkspinval+"_"+srcspinval+"_D_"+nodisplace;
                                 } else {
-                                    corrname = conttype+"_"+srcspin+"_"+snkspinval+"_"+srcspinval+"_"+disp_list[0];
+                                    corrname = conttype+"_"+srcspin+"_"+snkspinval+"_"+srcspinval+"_"+pos1_str;
                                 }
                                 if (parity == "NEG_PAR")
                                     corrname += "_34";
