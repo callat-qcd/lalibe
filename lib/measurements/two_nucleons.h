@@ -36,6 +36,7 @@ namespace Chroma
             {
                 std::string             contractions_filename;  // filename of hdf5 file that contains contraction terms
                 std::string             output_filename;        // output file
+                bool                    fft_tune;               // tune the FFT?
                 int                     output_stripesize;      // output stripesize; default recommended
                 multi1d<std::string>    parities;               // specifies list of parity strings
                 multi1d<int>            origin;                 // X0 Y0 Z0 T0 of origin

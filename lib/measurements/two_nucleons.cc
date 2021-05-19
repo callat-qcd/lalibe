@@ -80,6 +80,12 @@ namespace Chroma
             }
 
             read(paramtop, "contractions_filename", par.contractions_filename); //hdf5 file containing contractions
+            // FFT tuning?
+            if (paramtop.count("fft_tune") != 0)
+                read(paramtop, "fft_tune", par.fft_tune); //tune fft?
+            else
+                par.fft_tune = false;
+            // LUSTRE striping
             if (paramtop.count("output_stripesize") != 0)
                 read(paramtop, "output_stripesize", par.output_stripesize); //output stripesize; default recommended
             else
@@ -147,6 +153,7 @@ namespace Chroma
             push(xml, path);
             write(xml, "contractions_filename",  par.contractions_filename);
             write(xml, "output_filename",        par.output_filename);
+            write(xml, "fft_tune",               par.fft_tune);
             write(xml, "output_stripesize",      par.output_stripesize);
             write(xml, "compute_locals",         par.compute_locals);
             write(xml, "compute_proton",         par.compute_proton);
@@ -450,6 +457,16 @@ namespace Chroma
             // We need FFT for the non-local contractions
             Fourier fft(j_decay);
             Fourier fftblock(j_decay);
+            // TUNE the FFT?
+            if(params.twonucleonsparam.fft_tune){
+                QDPIO::cout << "Tuning FFT for better performance..." << std::flush;
+                StopWatch swatch_fftune;
+                swatch_fftune.reset();
+                swatch_fftune.start();
+                fftblock.tune(sizeof(HalfBaryonblock),true);
+                swatch_fftune.stop();
+                QDPIO::cout << "done! Time " << swatch_fftune.getTimeInSeconds() << std::endl;
+            }
             /*
                 Truncate is used to truncate the mom space correlators
                 we do not use this anymore and retain the full mom space
