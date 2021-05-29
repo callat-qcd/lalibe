@@ -1,0 +1,44 @@
+target_include_directories( lalibe
+   PRIVATE
+   ${CMAKE_CURRENT_LIST_DIR})
+
+target_sources(lalibe
+   PRIVATE
+   baryon_contractions_w.cc
+   flavor_conserving_fh_baryon_contractions_w.cc
+   HP_fh_prop_w.cc
+   lalibe_seqsource_w.cc
+   multi_prop_add.h
+   baryon_contractions_w.h
+   flavor_conserving_fh_baryon_contractions_w.h
+   HP_fh_prop_w.h
+   lalibe_seqsource_w.h
+   stochastic_fh_prop_w.cc
+   coherent_seqsource_w.cc
+   hdf5_read_obj.cc
+   HP_prop_w.cc
+   stochastic_fh_prop_w.h
+   coherent_seqsource_w.h
+   hdf5_read_obj.h
+   HP_prop_w.h
+   meson_contractions_w.cc
+   stochastic_four_quark_fh_prop_w.cc
+   fh_prop_w.cc
+   hdf5_write_erase_obj.cc
+   lalibe_aggregate.cc
+   meson_contractions_w.h
+   stochastic_four_quark_fh_prop_w.h
+   fh_prop_w.h
+   hdf5_write_erase_obj.h
+   lalibe_aggregate.h
+   moments_fh_prop_w.cc
+   ZN_prop_w.cc
+   flavor_changing_fh_baryon_contractions_w.cc
+   hdf5_write_obj.cc
+   lalibe_bar3ptfn_w.cc
+   moments_fh_prop_w.h
+   ZN_prop_w.h
+   flavor_changing_fh_baryon_contractions_w.h
+   hdf5_write_obj.h
+   lalibe_bar3ptfn_w.h
+   multi_prop_add.cc )
