@@ -21,7 +21,8 @@ list_of_h5_files = [
     'lalibe_fh_proton.h5',
     'lalibe_3ptfn.h5',
     'lalibe_3ptfn_coherent_sink.h5',
-    'lalibe_3ptfn_2src_coherent_sink.h5'
+    'lalibe_3ptfn_2src_coherent_sink.h5',
+    'lalibe_pipi.h5',
 ]
 
 diff_1_2 = dict()
@@ -32,7 +33,7 @@ PARSER = argparse.ArgumentParser(description='Perform revision test after files 
 PARSER.add_argument('known_file_path', type=str, help='known_result_folder')
 PARSER.add_argument('new_file_path',   type=str, help='new_result_folder')
 PARSER.add_argument('-a','--atol',   type=float, default=0., help='absolute tolerance for comparison')
-PARSER.add_argument('-r','--rtol',   type=float, default=1.e-9, help='relative tolerance for comparison')
+PARSER.add_argument('-r','--rtol',   type=float, default=5.e-9, help='relative tolerance for comparison')
 PARSER.add_argument('-v','--verbose',default=False,action='store_const',const=True,help='verbose? [%(default)s]')
 args = PARSER.parse_args()
 

@@ -17,8 +17,6 @@
 namespace Chroma 
 {
 
-  void rotate_to_Dirac_Basis(LatticePropagator & quark_to_be_rotated);
- 
   void color_contraction(const LatticeColorMatrix & quark_1,
 			 const LatticeColorMatrix & quark_2,
 			 const LatticeColorMatrix & quark_3,

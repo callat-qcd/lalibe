@@ -19,12 +19,13 @@ ini_files=(
     fh-corrs_h5.ini.xml
     proton_seqprop_h5.ini.xml
     proton_formfac_h5.ini.xml
+    source_prop_pipi.ini.xml
 )
 
 for ini in "${ini_files[@]}"; do
     $mpirun -i $input_decks/$ini
 done
 
-$my_python $lalibe_tests/py_scripts/perform_revision_test.py $lalibe_tests/known_results `pwd`
+$my_python $lalibe_tests/py_scripts/perform_revision_test.py $lalibe_tests/known_results $new_dir
 
 popd

@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<lalibe>
+<annotation>
+;
+; Test input file for lalibe
+;
+</annotation>
+<Param>
+<InlineMeasurements>
+
+<elem>
+  <Name>HDF5_READ_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>PS_prop_light</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./light0100_0.05.h5</file_name>
+    <path>/sh_sig2p0_n5</path>
+    <obj_name>PS_prop</obj_name>
+  </File>
+</elem>
+
+<elem>
+  <Name>HDF5_READ_NAMED_OBJECT</Name>
+  <Frequency>1</Frequency>
+  <NamedObject>
+    <object_id>PS_prop_strange</object_id>
+    <object_type>LatticePropagator</object_type>
+  </NamedObject>
+  <File>
+    <file_name>./strange0100_0.1.h5</file_name>
+    <path>/sh_sig2p0_n5</path>
+    <obj_name>PS_prop</obj_name>
+  </File>
+</elem>
+
+
+<elem>
+  <Name>PIPI_SCATTERING</Name>
+  <PipiParams>
+    <p2_max>1</p2_max>
+    <ptot2_max>2</ptot2_max>
+    <diagrams>0</diagrams>
+    <h5_file_name>./lalibe_pipi_spectrum.h5</h5_file_name>
+    <obj_path>/PS</obj_path>
+  </PipiParams>
+  <NamedObject>
+    <light_prop>PS_prop_light</light_prop>
+    <strange_prop>PS_prop_strange</strange_prop>
+  </NamedObject>
+</elem>
+
+
+</InlineMeasurements>
+<nrow>4 4 4 8</nrow>
+</Param>
+
+<RNG>
+  <Seed>
+    <elem>11</elem>
+    <elem>11</elem>
+    <elem>11</elem>
+    <elem>0</elem>
+  </Seed>
+</RNG>
+
+<Cfg>
+  <cfg_type>WEAK_FIELD</cfg_type>
+  <cfg_file>dummy</cfg_file>
+</Cfg>
+</lalibe>

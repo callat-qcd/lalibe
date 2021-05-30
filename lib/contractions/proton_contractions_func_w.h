@@ -14,8 +14,6 @@ namespace Chroma
 {
 namespace LegacyProton {
 
-  void rotate_to_Dirac_Basis(LatticePropagator & quark_to_be_rotated);
-  
   void get_spin_wavefunctions(multi2d<int> & src_spins,       
 			multi2d<int> & snk_spins,       
 			multi1d<Real> & src_weights,  
