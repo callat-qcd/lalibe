@@ -67,11 +67,16 @@ mark_as_advanced(CHROMA_VERSION CHROMA_LIBRARIES CHROMA_CXX_FLAGS
 
 # Create imported target
 if (CHROMA_FOUND AND NOT TARGET CHROMA)
+    if(CHROMA_CXX_FLAGS)
+        string(REPLACE " " ";" CHROMA_CXX_FLAGS "${CHROMA_CXX_FLAGS}")
+       endif()
+     if(CHROMA_LD_FLAGS)
+        string(REPLACE " " ";" CHROMA_LD_FLAGS "${CHROMA_LD_FLAGS}")
+    endif()
    # add_library(CHROMA UNKNOWN IMPORTED GLOBAL)
-   add_library(CHROMA INTERFACE)
-   set_target_properties(CHROMA
+    add_library(CHROMA INTERFACE)
+    set_target_properties(CHROMA
       PROPERTIES
-      #IMPORTED_LOCATION "${CHROMA_LIBRARIES}"
       INTERFACE_COMPILE_OPTIONS "${CHROMA_CXX_FLAGS}"
       INTERFACE_INCLUDE_DIRECTORIES "${CHROMA_INCLUDE_DIRS}"
       INTERFACE_LINK_OPTIONS "${CHROMA_LD_FLAGS}"

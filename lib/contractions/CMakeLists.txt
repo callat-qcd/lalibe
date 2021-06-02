@@ -13,4 +13,8 @@ target_sources(lalibe
    seqsource_contractions_func_w.h
    baryon_seqsource_w.cc
    meson_contractions_func_w.cc
-   proton_contractions_func_w.h )
+   proton_contractions_func_w.h 
+    pipi_scattering_func_w.cc
+    pipi_scattering_func_w.h
+)
+

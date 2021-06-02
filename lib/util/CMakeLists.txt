@@ -4,5 +4,5 @@ target_include_directories( lalibe
 
 target_sources(lalibe
    PRIVATE
-   binaryRecursiveColoring.cc
-   binaryRecursiveColoring.h)
+    spin_basis.h
+    spin_basis.cc)

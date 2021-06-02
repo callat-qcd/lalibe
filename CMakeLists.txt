@@ -4,7 +4,8 @@ project(LALIBE
    LANGUAGES CXX )
 
 # Add path to Lalibe CMake modules
-list(APPEND CMAKE_PREFIX_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/configuration)
+
 
 # Build Options
 option(BUILD_HDF5 "build with hdf5 reading/writing" OFF)
@@ -34,7 +35,9 @@ add_subdirectory(lib)
 
 # Find dependencies and link them to lalibe
 find_package(CHROMA)
+find_package(OpenMP)
 target_link_libraries(lalibe PRIVATE CHROMA)
+target_link_libraries(lalibe PRIVATE OpenMP::OpenMP_CXX)
 
 # Compile definitions
 if (BUILD_HDF5)

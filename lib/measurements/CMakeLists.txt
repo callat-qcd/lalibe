@@ -41,4 +41,9 @@ target_sources(lalibe
    flavor_changing_fh_baryon_contractions_w.h
    hdf5_write_obj.h
    lalibe_bar3ptfn_w.h
-   multi_prop_add.cc )
+   multi_prop_add.cc 
+    pipi_scattering_w.cc
+    pipi_scattering_w.h
+    qedm_product_field.cc 
+    qedm_product_field.h
+)
