@@ -38,6 +38,7 @@ find_package(CHROMA)
 find_package(OpenMP)
 target_link_libraries(lalibe PRIVATE CHROMA)
 target_link_libraries(lalibe PRIVATE OpenMP::OpenMP_CXX)
+target_link_libraries(lalibe PRIVATE qio lime)
 
 # Compile definitions
 if (BUILD_HDF5)
