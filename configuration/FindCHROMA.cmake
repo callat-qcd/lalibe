@@ -79,6 +79,7 @@ if (CHROMA_FOUND AND NOT TARGET CHROMA)
     # If we build QUDA and CHROMA with QIO, then Lalibe has difficulty 
     # linking with QIO/LIME unless we re-specify the linking
     if(QIO_LINK)
+        message("We are appending \"-lqio -llime\" to the end of the linker line.\nThis seems necessary when QUDA and CHROMA are separately linked to QIO")
         set_target_properties(CHROMA
           PROPERTIES
           INTERFACE_COMPILE_OPTIONS "${CHROMA_CXX_FLAGS}"
