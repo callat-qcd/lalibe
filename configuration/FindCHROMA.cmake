@@ -73,13 +73,26 @@ if (CHROMA_FOUND AND NOT TARGET CHROMA)
      if(CHROMA_LD_FLAGS)
         string(REPLACE " " ";" CHROMA_LD_FLAGS "${CHROMA_LD_FLAGS}")
     endif()
-   # add_library(CHROMA UNKNOWN IMPORTED GLOBAL)
+    # add_library(CHROMA UNKNOWN IMPORTED GLOBAL)
     add_library(CHROMA INTERFACE)
-    set_target_properties(CHROMA
-      PROPERTIES
-      INTERFACE_COMPILE_OPTIONS "${CHROMA_CXX_FLAGS}"
-      INTERFACE_INCLUDE_DIRECTORIES "${CHROMA_INCLUDE_DIRS}"
-      INTERFACE_LINK_OPTIONS "${CHROMA_LD_FLAGS}"
-      INTERFACE_LINK_LIBRARIES "${CHROMA_LIBRARIES}"
-      )
+
+    # If we build QUDA and CHROMA with QIO, then Lalibe has difficulty 
+    # linking with QIO/LIME unless we re-specify the linking
+    if(QIO_LINK)
+        set_target_properties(CHROMA
+          PROPERTIES
+          INTERFACE_COMPILE_OPTIONS "${CHROMA_CXX_FLAGS}"
+          INTERFACE_INCLUDE_DIRECTORIES "${CHROMA_INCLUDE_DIRS}"
+          INTERFACE_LINK_OPTIONS "${CHROMA_LD_FLAGS}"
+          INTERFACE_LINK_LIBRARIES "${CHROMA_LIBRARIES} -lqio -llime"
+          )
+    else()
+        set_target_properties(CHROMA
+          PROPERTIES
+          INTERFACE_COMPILE_OPTIONS "${CHROMA_CXX_FLAGS}"
+          INTERFACE_INCLUDE_DIRECTORIES "${CHROMA_INCLUDE_DIRS}"
+          INTERFACE_LINK_OPTIONS "${CHROMA_LD_FLAGS}"
+          INTERFACE_LINK_LIBRARIES "${CHROMA_LIBRARIES}"
+          )
+    endif()
 endif ()
