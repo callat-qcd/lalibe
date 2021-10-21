@@ -35,6 +35,12 @@ add_subdirectory(lib)
 
 # Find dependencies and link them to lalibe
 find_package(CHROMA)
+if ( CHROMA_FOUND )
+    message("\nCHROMA_ROOT = ${CHROMA_ROOT}\n")
+else()
+    message(FATAL_ERROR "we could not find CHROMA_ROOT: ${CHROMA_ROOT}")
+endif()
+
 find_package(OpenMP)
 target_link_libraries(lalibe PRIVATE CHROMA)
 target_link_libraries(lalibe PRIVATE OpenMP::OpenMP_CXX)
