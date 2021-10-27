@@ -35,19 +35,24 @@ find_program( _chroma_config_exe
    )
 
 if ( _chroma_config_exe )
-   set(CHROMA_INCLUDE_DIRS ${CHROMA_ROOT}/include)
-   execute_process(COMMAND ${_chroma_config_exe} --version
-      OUTPUT_VARIABLE CHROMA_VERSION
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-   execute_process(COMMAND ${_chroma_config_exe} --cxxflags
-      OUTPUT_VARIABLE CHROMA_CXX_FLAGS
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-   execute_process(COMMAND ${_chroma_config_exe} --ldflags
-      OUTPUT_VARIABLE CHROMA_LD_FLAGS
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
-   execute_process(COMMAND ${_chroma_config_exe} --libs
-      OUTPUT_VARIABLE CHROMA_LIBRARIES
-      OUTPUT_STRIP_TRAILING_WHITESPACE)
+    set(CHROMA_INCLUDE_DIRS ${CHROMA_ROOT}/include)
+    execute_process(COMMAND ${_chroma_config_exe} --version
+        OUTPUT_VARIABLE CHROMA_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(COMMAND ${_chroma_config_exe} --cxxflags
+        OUTPUT_VARIABLE CHROMA_CXX_FLAGS
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(COMMAND ${_chroma_config_exe} --ldflags
+        OUTPUT_VARIABLE CHROMA_LD_FLAGS
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    execute_process(COMMAND ${_chroma_config_exe} --libs
+        OUTPUT_VARIABLE CHROMA_LIBRARIES
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if(QIO_LIME_LIBS)
+        message("\nWe are appending \"-lqio -llime\" to the end of the linker line.\nThis is necessary when QUDA is built as a shared (.so) library \nand QUDA and CHROMA are separately linked to QIO")
+        set(CHROMA_LIBRARIES "${CHROMA_LIBRARIES} ${QIO_LIME_LIBS}")
+    endif()
+
 endif ()
 
 include(FindPackageHandleStandardArgs)
@@ -76,24 +81,12 @@ if (CHROMA_FOUND AND NOT TARGET CHROMA)
     # add_library(CHROMA UNKNOWN IMPORTED GLOBAL)
     add_library(CHROMA INTERFACE)
 
-    # If we build QUDA and CHROMA with QIO, then Lalibe has difficulty 
-    # linking with QIO/LIME unless we re-specify the linking
-    if(QIO_LINK)
-        message("We are appending \"-lqio -llime\" to the end of the linker line.\nThis seems necessary when QUDA and CHROMA are separately linked to QIO")
-        set_target_properties(CHROMA
-          PROPERTIES
-          INTERFACE_COMPILE_OPTIONS "${CHROMA_CXX_FLAGS}"
-          INTERFACE_INCLUDE_DIRECTORIES "${CHROMA_INCLUDE_DIRS}"
-          INTERFACE_LINK_OPTIONS "${CHROMA_LD_FLAGS}"
-          INTERFACE_LINK_LIBRARIES "${CHROMA_LIBRARIES} -lqio -llime"
-          )
-    else()
-        set_target_properties(CHROMA
-          PROPERTIES
-          INTERFACE_COMPILE_OPTIONS "${CHROMA_CXX_FLAGS}"
-          INTERFACE_INCLUDE_DIRECTORIES "${CHROMA_INCLUDE_DIRS}"
-          INTERFACE_LINK_OPTIONS "${CHROMA_LD_FLAGS}"
-          INTERFACE_LINK_LIBRARIES "${CHROMA_LIBRARIES}"
-          )
-    endif()
+    set_target_properties(CHROMA
+        PROPERTIES
+        INTERFACE_COMPILE_OPTIONS "${CHROMA_CXX_FLAGS}"
+        INTERFACE_INCLUDE_DIRECTORIES "${CHROMA_INCLUDE_DIRS}"
+        INTERFACE_LINK_OPTIONS "${CHROMA_LD_FLAGS}"
+        INTERFACE_LINK_LIBRARIES "${CHROMA_LIBRARIES}"
+        )
 endif ()
+
