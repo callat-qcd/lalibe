@@ -502,7 +502,7 @@ namespace Chroma {
         START_CODE();
 
         //protonblock is already in momentum space:
-        QDPIO::cout << "Performing one_proton contractions on the CPU..." << std::flush;
+        QDPIO::cout << "Performing one_proton contractions on the CPU..." << std::endl;
 
         StopWatch swatch_cont;
         swatch_cont.reset();
@@ -556,7 +556,7 @@ namespace Chroma {
     int two_proton_source_local(LatticeHalfSpinMatrix& result, const LatticeHalfBaryonblock& block_plus, const LatticeHalfBaryonblock& block_minus, const sparsearr2<Real>& tensor){
         START_CODE();
 
-        QDPIO::cout << "Performing source-local two-proton contractions on the CPU..." << std::flush;
+        QDPIO::cout << "Performing source-local two-proton contractions on the CPU..." << std::endl;
 
         //variables:
         unsigned int nsites=Layout::sitesOnNode();
@@ -739,10 +739,17 @@ namespace Chroma {
     //Combined contractions:
     //*********************************************************************************************************
     //*********************************************************************************************************
-    int contract(LatticeComplex& result_P, std::map<std::string,LatticeHalfSpinMatrix>& resultmats, const LatticePropagator& prop0, const LatticePropagator& prop1, const SpinMatrix& diquark_proj, const LatticeComplex& phases, Fourier& fft, const bool& compute_locals){
+    int contract(LatticeComplex& result_P, 
+                 std::map<std::string,LatticeHalfSpinMatrix>& resultmats, 
+                 const LatticePropagator& prop0, 
+                 const LatticePropagator& prop1, 
+                 const SpinMatrix& diquark_proj, 
+                 const LatticeComplex& phases, 
+                 Fourier& fft, 
+                 const bool& compute_locals){
 
         START_CODE();
-        QDPIO::cout << "Performing source-displaced two-proton contractions on the CPU..." << std::flush;
+        QDPIO::cout << "Performing source-displaced two-proton contractions on the CPU..." << std::endl;
 
         //measure fft performance:
         StopWatch swatch_fft, swatch_cont;
@@ -932,10 +939,18 @@ namespace Chroma {
     }
 
     // With arbitrary sink
-    int contract(LatticeComplex& result_P, std::map<std::string,LatticeHalfSpinMatrix>& resultmats, const LatticePropagator& prop0, const LatticePropagator& prop1, const SpinMatrix& diquark_proj, const LatticeComplex& phases, Fourier& fft, const bool& compute_locals, const sink& snk){
+    int contract(LatticeComplex& result_P, 
+                 std::map<std::string,LatticeHalfSpinMatrix>& resultmats, 
+                 const LatticePropagator& prop0, 
+                 const LatticePropagator& prop1, 
+                 const SpinMatrix& diquark_proj, 
+                 const LatticeComplex& phases, 
+                 Fourier& fft, 
+                 const bool& compute_locals, 
+                 const sink& snk){
 
         START_CODE();
-        QDPIO::cout << "Performing source-displaced two-proton contractions on the CPU..." << std::flush;
+        QDPIO::cout << "Performing source-displaced two-proton contractions on the CPU..." << std::endl;
 
         //measure fft performance:
         StopWatch swatch_fft, swatch_cont;
@@ -1126,8 +1141,7 @@ namespace Chroma {
 
 
     // With linear combo sink
-    int contract(
-                 LatticeComplex& result_P,
+    int contract(LatticeComplex& result_P,
                  std::map<std::string, LatticeHalfSpinMatrix>& resultmats,
                  const LatticePropagator& prop0,
                  const LatticePropagator& prop1,
@@ -1139,7 +1153,7 @@ namespace Chroma {
                  const multi1d<Complex>& weights){
 
         START_CODE();
-        QDPIO::cout << "Performing source-displaced two-proton contractions on the CPU..." << std::flush;
+        QDPIO::cout << "Performing source-displaced two-proton contractions on the CPU..." << std::endl;
 
         //measure fft performance:
         StopWatch swatch_fft, swatch_cont, swatch_proton;
@@ -1339,7 +1353,7 @@ namespace Chroma {
     int contract_local(LatticeComplex& result_P, std::map<std::string,LatticeHalfSpinMatrix>& resultmats, const LatticePropagator& prop0, const LatticePropagator& prop1, const SpinMatrix& diquark_proj, const LatticeComplex& phases, Fourier& fft, const multi1d<sink*>& snk, const multi1d<Complex>& weights){
 
         START_CODE();
-        QDPIO::cout << "Performing source-displaced two-proton contractions on the CPU..." << std::flush;
+        QDPIO::cout << "Performing source-displaced two-proton contractions on the CPU..." << std::endl;
 
         //measure fft performance:
         StopWatch swatch_fft, swatch_cont;
@@ -1394,7 +1408,7 @@ namespace Chroma {
                  const multi1d<Complex>& weights){
 
         START_CODE();
-        QDPIO::cout << "Performing source-displaced two-proton contractions on the CPU..." << std::flush;
+        QDPIO::cout << "Performing source-displaced two-proton contractions on the CPU..." << std::endl;
 
         //measure fft performance:
         StopWatch swatch_fft, swatch_cont, swatch_proton;
@@ -1634,7 +1648,7 @@ namespace Chroma {
                  const bool& compute_loc_origin){
 
         START_CODE();
-        QDPIO::cout << "Performing two-nucleon contractions from blocks on the CPU..." << std::flush;
+        QDPIO::cout << "Performing two-nucleon contractions from blocks on the CPU..." << std::endl;
 
         // timers
         StopWatch swatch_contract_local, swatch_contract_nonlocal, swatch_fft, swatch_blocks;
@@ -1681,37 +1695,39 @@ namespace Chroma {
                 QDPIO::cout << "  Block add time " << swatch_blocks.getTimeInSeconds() << std::endl;
                 QDPIO::cout << "  Contract time= " << swatch_contract_local.getTimeInSeconds() << std::endl;
             }
-            QDPIO::cout << prop1_Ids[0] << "  111[+1] 111[-1] local contractions" << std::endl;
-            // zero out blocks
-            block0 = zero;
-            block1 = zero;
-            // b = block
-            for (int b=0; b < n_blocks; b++){
-                key0 = {prop1_Ids[b], prop1_Ids[b], prop1_Ids[b],  1, parity, origin, disp_list[b]};
-                key1 = {prop1_Ids[b], prop1_Ids[b], prop1_Ids[b], -1, parity, origin, disp_list[b]};
-                // add to blocks
-                QDPIO::cout << "  adding " << weights[b] << " * block["<<b<<"]" << std::endl;
-                swatch_blocks.start();
-                addWeightedHalfBlock(block0, weights[b], blockMap_list[b]->at(key0));
-                addWeightedHalfBlock(block1, weights[b], blockMap_list[b]->at(key1));
-                swatch_blocks.stop();
-            }
-            swatch_contract_local.start();
-            /*
-            if ( params.twonucleonsparam.compute_proton){
-                one_proton(latt_prot1, block1);
-            }
-            */
-            // Proton-Proton
-            two_proton_source_local(result_NN["PP_SING0_loc1"],block0,block1,PP_SING0.getTensor("000|000"));
+            if (prop1_Ids[0] != prop0_Ids[0]){
+                QDPIO::cout << prop1_Ids[0] << "  111[+1] 111[-1] local contractions" << std::endl;
+                // zero out blocks
+                block0 = zero;
+                block1 = zero;
+                // b = block
+                for (int b=0; b < n_blocks; b++){
+                    key0 = {prop1_Ids[b], prop1_Ids[b], prop1_Ids[b],  1, parity, origin, disp_list[b]};
+                    key1 = {prop1_Ids[b], prop1_Ids[b], prop1_Ids[b], -1, parity, origin, disp_list[b]};
+                    // add to blocks
+                    QDPIO::cout << "  adding " << weights[b] << " * block["<<b<<"]" << std::endl;
+                    swatch_blocks.start();
+                    addWeightedHalfBlock(block0, weights[b], blockMap_list[b]->at(key0));
+                    addWeightedHalfBlock(block1, weights[b], blockMap_list[b]->at(key1));
+                    swatch_blocks.stop();
+                }
+                swatch_contract_local.start();
+                /*
+                if ( params.twonucleonsparam.compute_proton){
+                    one_proton(latt_prot1, block1);
+                }
+                */
+                // Proton-Proton
+                two_proton_source_local(result_NN["PP_SING0_loc1"],block0,block1,PP_SING0.getTensor("000|000"));
 
-            // Proton-Neutron
-            two_proton_source_local(result_NN["PN_TRIPP_loc1"],block0,block1,PN_TRIPP.getTensor("000|000"));
-            two_proton_source_local(result_NN["PN_TRIP0_loc1"],block0,block1,PN_TRIP0.getTensor("000|000"));
-            two_proton_source_local(result_NN["PN_TRIPM_loc1"],block0,block1,PN_TRIPM.getTensor("000|000"));
-            swatch_contract_local.stop();
-            QDPIO::cout << "  Block add time " << swatch_blocks.getTimeInSeconds() << std::endl;
-            QDPIO::cout << "  Contract time= " << swatch_contract_local.getTimeInSeconds() << std::endl;
+                // Proton-Neutron
+                two_proton_source_local(result_NN["PN_TRIPP_loc1"],block0,block1,PN_TRIPP.getTensor("000|000"));
+                two_proton_source_local(result_NN["PN_TRIP0_loc1"],block0,block1,PN_TRIP0.getTensor("000|000"));
+                two_proton_source_local(result_NN["PN_TRIPM_loc1"],block0,block1,PN_TRIPM.getTensor("000|000"));
+                swatch_contract_local.stop();
+                QDPIO::cout << "  Block add time " << swatch_blocks.getTimeInSeconds() << std::endl;
+                QDPIO::cout << "  Contract time= " << swatch_contract_local.getTimeInSeconds() << std::endl;
+            }
         }
 
         // add non-local contractions
@@ -1847,10 +1863,17 @@ namespace Chroma {
 
 
     // With linear combo sink
-    int contract_local(LatticeComplex& result_P, std::map<std::string,LatticeHalfSpinMatrix>& resultmats, const multi1d<LatticePropagator>& prop0, const multi1d<LatticePropagator>& prop1, const SpinMatrix& diquark_proj, const LatticeComplex& phases, Fourier& fft, const multi1d<Complex>& weights){
+    int contract_local(LatticeComplex& result_P, 
+                       std::map<std::string,LatticeHalfSpinMatrix>& resultmats, 
+                       const multi1d<LatticePropagator>& prop0, 
+                       const multi1d<LatticePropagator>& prop1, 
+                       const SpinMatrix& diquark_proj, 
+                       const LatticeComplex& phases, 
+                       Fourier& fft, 
+                       const multi1d<Complex>& weights){
 
         START_CODE();
-        QDPIO::cout << "Performing source-displaced two-proton contractions on the CPU..." << std::flush;
+        QDPIO::cout << "Performing source-displaced two-proton contractions on the CPU..." << std::endl;
 
         //measure fft performance:
         StopWatch swatch_fft, swatch_cont;

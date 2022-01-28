@@ -526,12 +526,16 @@ namespace Chroma
                 parity = params.twonucleonsparam.parities[par];
                 
                 auto& NN_map_iterator = (parity == "POS_PAR") ? NN_map : NN_map_34;
-                for(unsigned int s = 0; s < nonlocalterms.size(); s++){
-                    NN_map_iterator[nonlocalterms[s]]=LatticeHalfSpinMatrix();
+                if (prop1_Ids[0] != prop0_Ids[0]){
+                    for(unsigned int s = 0; s < nonlocalterms.size(); s++){
+                        NN_map_iterator[nonlocalterms[s]]=LatticeHalfSpinMatrix();
+                    }
                 }
                 if( params.twonucleonsparam.compute_locals ){
-                    for (unsigned int s = 0; s < localterms1.size(); s++){
-                        NN_map_iterator[localterms1[s]]=LatticeHalfSpinMatrix();
+                    if (prop1_Ids[0] != prop0_Ids[0]){
+                        for (unsigned int s = 0; s < localterms1.size(); s++){
+                            NN_map_iterator[localterms1[s]]=LatticeHalfSpinMatrix();
+                        }
                     }
                     if( params.twonucleonsparam.compute_loc_o ){
                         for (unsigned int s = 0; s < localterms0.size(); s++){
@@ -588,14 +592,16 @@ namespace Chroma
                     //Single proton
                     if (p_tot[0]==0 && p_tot[1] == 0 && p_tot[2] == 0 && params.twonucleonsparam.compute_proton && params.twonucleonsparam.compute_locals){
                         const auto& prot0_obj = (parity == "POS_PAR") ? proton0 : proton0_34;
-                        const auto& prot1_obj = (parity == "POS_PAR") ? proton1 : proton1_34;
-                        QDPIO::cout << "Single proton1." << std::endl;
-                        token=zero;
-                        token += tshiftmap(prot1_obj, true);
-                        swatch_io_write.start();
-                        std::string corrname = "proton1_"+pos1_str+"_"+parity;
-                        chk.set_parameter(corrname,token, h5mode);
-                        swatch_io_write.stop();
+                        if (prop1_Ids[0] != prop0_Ids[0]){
+                            const auto& prot1_obj = (parity == "POS_PAR") ? proton1 : proton1_34;
+                            QDPIO::cout << "Single proton1." << std::endl;
+                            token=zero;
+                            token += tshiftmap(prot1_obj, true);
+                            swatch_io_write.start();
+                            std::string corrname = "proton1_"+pos1_str+"_"+parity;
+                            chk.set_parameter(corrname,token, h5mode);
+                            swatch_io_write.stop();
+                        }
 
                         if ( params.twonucleonsparam.compute_loc_o){
                             QDPIO::cout << "Single proton0." << std::endl;
@@ -615,7 +621,7 @@ namespace Chroma
                     std::string p0_dir = "O0_"+pos0_str;
                     std::string p1_dir = "O1_"+pos1_str;
                     chk.create_directory(boostdir+"/"+p0_dir);
-                    if( params.twonucleonsparam.compute_locals ){
+                    if( params.twonucleonsparam.compute_locals && prop1_Ids[0] != prop0_Ids[0]){
                         chk.create_directory(boostdir+"/"+p1_dir);
                     }
 
@@ -654,13 +660,15 @@ namespace Chroma
                                 }
                                 if (parity == "NEG_PAR")
                                     corrname += "_34";
-
+                                QDPIO::cout << corrname << std::endl;
                                 token  = zero;
                                 token += tshiftmap(LatticeComplex(trace((innerit->second)*(it->second))));
 
                                 swatch_io_write.start();
                                 if (idstring.find("loc1") != std::string::npos){
-                                    chk.set_parameter(boostdir+"/"+p1_dir+"/"+corrname,token, h5mode);
+                                    if( prop1_Ids[0] != prop0_Ids[0]){
+                                        chk.set_parameter(boostdir+"/"+p1_dir+"/"+corrname,token, h5mode);
+                                    }
                                 } else {
                                     chk.set_parameter(boostdir+"/"+p0_dir+"/"+corrname,token, h5mode);
                                 }
