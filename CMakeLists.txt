@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(LALIBE
    VERSION 1.0.0.0
-   LANGUAGES CXX )
+   LANGUAGES C CXX )
 
 # Add path to Lalibe CMake modules
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/configuration)
@@ -11,7 +11,11 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/configuration)
 option(BUILD_HDF5 "build with hdf5 reading/writing" OFF)
 
 # Find dependencies
-find_package(CHROMA)
+find_package(MPI REQUIRED)
+find_package(Chroma)
+
+
+# Compile definitions
 
 # Create lalibe target and add to it main source and
 # config header
@@ -34,22 +38,23 @@ target_include_directories(lalibe PRIVATE ${PROJECT_BINARY_DIR})
 add_subdirectory(lib)
 
 # Find dependencies and link them to lalibe
-find_package(CHROMA)
-if ( CHROMA_FOUND )
-    message("\nCHROMA_ROOT = ${CHROMA_ROOT}\n")
+find_package(Chroma)
+if ( Chroma_FOUND )
+    message("\nChroma_ROOT = ${Chroma_ROOT}\n")
 else()
-    message(FATAL_ERROR "we could not find CHROMA_ROOT: ${CHROMA_ROOT}")
+    message(FATAL_ERROR "we could not find Chroma_ROOT: ${Chroma_ROOT}")
 endif()
 
-find_package(OpenMP)
-target_link_libraries(lalibe PRIVATE CHROMA)
-target_link_libraries(lalibe PRIVATE OpenMP::OpenMP_CXX)
-target_link_libraries(lalibe PRIVATE qio lime)
-
-# Compile definitions
 if (BUILD_HDF5)
-   target_compile_definitions(lalibe PRIVATE BUILD_HDF5)
+    find_package(MPI REQUIRED)
+    find_package(HDF5 REQUIRED)
+    target_compile_definitions(lalibe PRIVATE BUILD_HDF5)
+    target_link_libraries(lalibe PRIVATE HDF5::HDF5)
 endif ()
+
+find_package(OpenMP)
+target_link_libraries(lalibe PRIVATE Chroma::chromalib)
+
 
 # Install executable
 install(TARGETS lalibe DESTINATION bin)
