@@ -29,7 +29,6 @@ namespace Chroma
               {
     START_CODE();
 
-
     /* Get the Field Strength Tensor from mesfield */
     // mesfield returns the upper triangular elements of F(mu,nu)
     // totaling Nd*(Nd-1) elements, where Nd = number spacetime dimensions.

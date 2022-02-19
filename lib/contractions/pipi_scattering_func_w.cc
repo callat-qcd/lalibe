@@ -47,9 +47,9 @@
 namespace Chroma
 {
     void pipi_correlator(CorrelatorType::Correlator& correlator_out,
-                        const LatticePropagator& quark_prop_1, const LatticePropagator& a_quark_prop_2,
-                        const multi1d<int>& origin, const int p2max, const int ptot2max,
-                        const int t0, const int j_decay, const int diagram)
+                         const LatticePropagator& quark_prop_1, const LatticePropagator& a_quark_prop_2,
+                         const multi1d<int>& origin, const int p2max, const int ptot2max,
+                         const int t0, const int j_decay, const int diagram)
     {
         int G5 = Ns * Ns - 1;
         // Construct SftMoms
@@ -61,63 +61,68 @@ namespace Chroma
         multi2d<DPropagator> Q(phases.numMom(), Nt);
         Q = zero;
 
+        QDPIO::cout << "DEBUG: compute_qqbar(Q, quark_prop_1, a_quark_prop_2, phases, t0)" << std::endl;
         compute_qqbar(Q, quark_prop_1, a_quark_prop_2, phases, t0);
+        QDPIO::cout << "DEBUG: success qqbar" << std::endl;
 
         DComplex origin_fix;
         Double origin_phases;
         multi1d<int> mom_comp1, mom_comp2;
 
         // Loop over all ps, p's and time
-        for (int mom_num1 = 0; mom_num1 < phases.numMom(); ++mom_num1)
-            for (int mom_num2 = 0; mom_num2 < phases.numMom(); ++mom_num2)
-                {
-                    mom_comp1 = phases.numToMom(mom_num1);
-                    mom_comp2 = phases.numToMom(mom_num2);
+        QDPIO::cout << "DEBUG: loop over mom_num1" << std::endl;
+        for (int mom_num1 = 0; mom_num1 < phases.numMom(); ++mom_num1){
+            QDPIO::cout << "DEBUG:     loop over mom_num2" << std::endl;
+            for (int mom_num2 = 0; mom_num2 < phases.numMom(); ++mom_num2){
+                mom_comp1 = phases.numToMom(mom_num1);
+                mom_comp2 = phases.numToMom(mom_num2);
 
-                    // Select momenta pairs that lower than the setting p total max
-                    int ptot2 = 0;
-                    for (int p_comp = 0; p_comp < 3; ++p_comp)
-                        ptot2 += (mom_comp1[p_comp] + mom_comp2[p_comp]) * (mom_comp1[p_comp] + mom_comp2[p_comp]);
-                    if (ptot2 <= ptot2max)
-                        {
-                            // Fix the origin
-                            origin_phases = 0;
-
-                            for (int p_comp = 0; p_comp < 3; ++p_comp)
-                                origin_phases -= (mom_comp1[p_comp] + mom_comp2[p_comp]) * (origin[p_comp]) * 2 * M_PI / Layout::lattSize()[p_comp];
-
-                            origin_fix = cmplx(cos(origin_phases), sin(origin_phases));
-
-                            std::pair< std::tuple<int, int, int>, std::tuple<int, int, int> > pq_pair;
-                            pq_pair = std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]));
-
-                            correlator_out[pq_pair] = tmp_multi1d;
-
-                            if (diagram == 1 || diagram == 4)
-                                {
-                                    for (int t = 0; t < Nt; ++t)
-                                        correlator_out[pq_pair][t] = (
-                                            trace(Q[mom_num1][t] * Gamma(G5))
-                                            * trace(Q[mom_num2][t] * Gamma(G5))
-                                        ) * origin_fix;
-                                }
-                            else if (diagram == 2 || diagram == 3)
-                                {
-                                    for (int t = 0; t < Nt; ++t)
-                                        correlator_out[pq_pair][t] = -(
-                                            trace(Q[mom_num1][t] * Gamma(G5) * Q[mom_num2][t] * Gamma(G5))
-                                        ) * origin_fix;
-                                }
-                            else
-                                {
-                                    for (int t = 0; t < Nt; ++t)
-                                        correlator_out[pq_pair][t] = 2 * (
-                                            trace(Q[mom_num1][t] * Gamma(G5)) * trace(Q[mom_num2][t] * Gamma(G5))
-                                            - trace(Q[mom_num1][t] * Gamma(G5) * Q[mom_num2][t] * Gamma(G5))
-                                        ) * origin_fix;
-                                }
-                        }
+                // Select momenta pairs that are less than equal to p_tot^2_max
+                int ptot2 = 0;
+                for (int p_comp = 0; p_comp < 3; ++p_comp){
+                    ptot2 += (mom_comp1[p_comp] + mom_comp2[p_comp]) * (mom_comp1[p_comp] + mom_comp2[p_comp]);
                 }
+                if (ptot2 <= ptot2max){
+                    // Fix the origin
+                    origin_phases = 0;
+
+                    for (int p_comp = 0; p_comp < 3; ++p_comp){
+                        origin_phases -= (mom_comp1[p_comp] + mom_comp2[p_comp]) * (origin[p_comp]) * 2 * M_PI / Layout::lattSize()[p_comp];
+                    }
+
+                    origin_fix = cmplx(cos(origin_phases), sin(origin_phases));
+
+                    std::pair< std::tuple<int, int, int>, std::tuple<int, int, int> > pq_pair;
+                    pq_pair = std::make_pair(std::make_tuple(mom_comp1[0], mom_comp1[1], mom_comp1[2]), std::make_tuple(mom_comp2[0], mom_comp2[1], mom_comp2[2]));
+
+                    correlator_out[pq_pair] = tmp_multi1d;
+
+                    if (diagram == 1 || diagram == 4){
+                        for (int t = 0; t < Nt; ++t){
+                            correlator_out[pq_pair][t] = (
+                                                          trace(Q[mom_num1][t] * Gamma(G5))
+                                                          * trace(Q[mom_num2][t] * Gamma(G5))
+                                                          ) * origin_fix;
+                        }
+                    } else if (diagram == 2 || diagram == 3){
+                        for (int t = 0; t < Nt; ++t){
+                            correlator_out[pq_pair][t] = -(
+                                                           trace(Q[mom_num1][t] * Gamma(G5) * Q[mom_num2][t] * Gamma(G5))
+                                                           ) * origin_fix;
+                        }
+                    } else {
+                        for (int t = 0; t < Nt; ++t){
+                            correlator_out[pq_pair][t] = 2 * (
+                                                              trace(Q[mom_num1][t] * Gamma(G5)) * trace(Q[mom_num2][t] * Gamma(G5))
+                                                              - trace(Q[mom_num1][t] * Gamma(G5) * Q[mom_num2][t] * Gamma(G5))
+                                                              ) * origin_fix;
+                        }
+                    }
+                }
+            }
+            QDPIO::cout << "DEBUG:     mom_num2 finish" << std::endl;
+        }
+        QDPIO::cout << "DEBUG: mom_num1 finish" << std::endl;
     }
 
     void pik_correlator(CorrelatorType::Correlator& correlator_out,
@@ -181,16 +186,16 @@ namespace Chroma
                                 {
                                     for (int t = 0; t < Nt; ++t)
                                         correlator_out[pq_pair][t] =
-                                        - trace(Q1[mom_num1][t] * Gamma(G5) * P1[mom_num2][t] * Gamma(G5))
-                                        * origin_fix;
+                                            - trace(Q1[mom_num1][t] * Gamma(G5) * P1[mom_num2][t] * Gamma(G5))
+                                            * origin_fix;
                                 }
                             else
                                 {
                                     for (int t = 0; t < Nt; ++t)
                                         correlator_out[pq_pair][t] = (
-                                            trace(Q1[mom_num1][t] * Gamma(G5)) * trace(P1[mom_num2][t] * Gamma(G5))
-                                            - trace(Q1[mom_num1][t] * Gamma(G5) * P1[mom_num2][t] * Gamma(G5))
-                                        ) * origin_fix;
+                                                                      trace(Q1[mom_num1][t] * Gamma(G5)) * trace(P1[mom_num2][t] * Gamma(G5))
+                                                                      - trace(Q1[mom_num1][t] * Gamma(G5) * P1[mom_num2][t] * Gamma(G5))
+                                                                      ) * origin_fix;
                                 }
                         }
                 }

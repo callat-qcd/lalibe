@@ -236,6 +236,7 @@ namespace Chroma
             pipi_correlator(correlators["pip_pip"],
                             *prop_map['u'], *prop_map['d'],
                             origin, params.param.p2_max, params.param.ptot2_max, t_0, j_decay, 0);
+            QDPIO::cout << "    DEBUG: success pi+ pi+" << std::endl;
             if (params.param.diagrams == 1) {
                 // do all 4 diagrams
                 for (int dd=1; dd<=4; dd++){
