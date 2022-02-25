@@ -4,7 +4,7 @@
 
   re-factoring of Arjun's port of latscat to lalibe
 */
-
+#include <iostream>
 // Chroma Stuff
 #include "chromabase.h"
 #include "meas/inline/abs_inline_measurement_factory.h"
