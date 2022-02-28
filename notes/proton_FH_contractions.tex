@@ -5,9 +5,9 @@
 \usepackage{graphicx}
 \usepackage{color}
 \usepackage{cancel}
-\usepackage{tikz} 
+\usepackage{tikz}
 \usetikzlibrary{shapes.misc}
-\newcommand*\dstrike[2][thin]{\tikz[baseline] \node [strike out,draw,anchor=text,inner sep=0pt,text=black,#1]{#2};}  
+\newcommand*\dstrike[2][thin]{\tikz[baseline] \node [strike out,draw,anchor=text,inner sep=0pt,text=black,#1]{#2};}
 \usepackage{tabularx}
 \usepackage{tabulary}
 
@@ -127,9 +127,9 @@
 
 Define the proton creation and annihilation operators as
 \begin{align}
-\bar{N}_{\gp} &= \epsilon_{\ip\jp\kp} P_{\gp\rp}\ \bar{u}^\ip_\rp (\bar{u}^{\jp}_{\ap} \G^{\dagger,src}_{\ap\bp} \bar{d}^\kp_\bp ) 
+\bar{N}_{\gp} &= \epsilon_{\ip\jp\kp} P_{\gp\rp}\ \bar{u}^\ip_\rp (\bar{u}^{\jp}_{\ap} \G^{\dagger,src}_{\ap\bp} \bar{d}^\kp_\bp )
 \\
-N_{\g} &= \epsilon_{ijk} P_{\g\rho}\ u^i_\rho (u^j_\a \G^{snk}_{\a\b} d^k_\b ) 
+N_{\g} &= \epsilon_{ijk} P_{\g\rho}\ u^i_\rho (u^j_\a \G^{snk}_{\a\b} d^k_\b )
 \end{align}
 In the Dirac basis, using only the upper and spin components of the quark spinor, the $\G$ matrices at the source and sink are given by
 \begin{align}
@@ -146,25 +146,28 @@ In the Dirac basis, using only the upper and spin components of the quark spinor
 	\end{pmatrix}
 \end{align}
 This matrix satisfies $\G^\dagger = -\G$.
+This non-relativistic spin wave-function is detailed in Refs.~\cite{Basak:2005aq,Basak:2005ir}, as well as those for the other octet and decuplet baryons.
+
+
 
 The proton two-point function is
 \begin{align}
-C_{\g\gp} &= \phantom{-}\epsilon_{ijk} \epsilon_{\ip\jp\kp} P_{\g\rho} P_{\gp\rp} \langle 0| 
-	u^i_\rho (u^j_\a \G^{snk}_{\a\b} d^k_\b ) \ \bar{u}^\ip_\rp (\bar{u}^{\jp}_{\ap} \G^{\dagger,src}_{\ap\bp} \bar{d}^\kp_\bp ) 
+C_{\g\gp} &= \phantom{-}\epsilon_{ijk} \epsilon_{\ip\jp\kp} P_{\g\rho} P_{\gp\rp} \langle 0|
+	u^i_\rho (u^j_\a \G^{snk}_{\a\b} d^k_\b ) \ \bar{u}^\ip_\rp (\bar{u}^{\jp}_{\ap} \G^{\dagger,src}_{\ap\bp} \bar{d}^\kp_\bp )
 	|0\rangle
 \nonumber\\ &=
 	-\epsilon_{ijk} \epsilon_{\ip\jp\kp} P_{\g\rho} P_{\gp\rp} \G^{snk}_{\a\b} \G^{src}_{\ap\bp}
-	\left[ -U^{i\ip}_{\rho\rp} U^{j\jp}_{\a\ap} D^{k\kp}_{\b\bp} 
-		+ U^{j\ip}_{\a\rp} U^{i\jp}_{\rho\ap} D^{k\kp}_{\b\bp} 
+	\left[ -U^{i\ip}_{\rho\rp} U^{j\jp}_{\a\ap} D^{k\kp}_{\b\bp}
+		+ U^{j\ip}_{\a\rp} U^{i\jp}_{\rho\ap} D^{k\kp}_{\b\bp}
 	\right]
 \nonumber\\ &=
-	\phantom{-}\epsilon_{ijk} \epsilon_{\ip\jp\kp} P_{\g\rho} P_{\gp\rp} \G^{snk}_{\a\b} \G^{src}_{\ap\bp} 
+	\phantom{-}\epsilon_{ijk} \epsilon_{\ip\jp\kp} P_{\g\rho} P_{\gp\rp} \G^{snk}_{\a\b} \G^{src}_{\ap\bp}
 	\left[
-		U^{i\ip}_{\rho\rp} U^{j\jp}_{\a\ap} D^{k\kp}_{\b\bp} 
-		+U^{i\ip}_{\a\rp} U^{j\jp}_{\rho\ap} D^{k\kp}_{\b\bp} 
+		U^{i\ip}_{\rho\rp} U^{j\jp}_{\a\ap} D^{k\kp}_{\b\bp}
+		+U^{i\ip}_{\a\rp} U^{j\jp}_{\rho\ap} D^{k\kp}_{\b\bp}
 	\right]
 \nonumber\\ &=
-	\phantom{-}\epsilon_{ijk} \epsilon_{\ip\jp\kp}  P_{\gp\rp}  \G^{src}_{\ap\bp} 
+	\phantom{-}\epsilon_{ijk} \epsilon_{\ip\jp\kp}  P_{\gp\rp}  \G^{src}_{\ap\bp}
 	\left[
 		P_{\g\rho} \G^{snk}_{\a\b} + P_{\g\a} \G^{snk}_{\rho\b}
 	\right]
@@ -179,15 +182,15 @@ The spin projectors to project onto the spin up and down proton are simply given
 Consider a FH propagator which causes a $d\rightarrow u$ transition.
 The two-point correlation function for this process is given by
 \begin{align}
-C^\l_{\g\gp} &= \phantom{-}\int d^4 z \epsilon_{ijk} \epsilon_{\ip\jp\kp} P_{\g\rho} P_{\gp\rp} 
-	\langle 0| 
-		u^i_\rho (u^j_\a \G^{snk}_{\a\b} d^k_\b ) \ 
+C^\l_{\g\gp} &= \phantom{-}\int d^4 z \epsilon_{ijk} \epsilon_{\ip\jp\kp} P_{\g\rho} P_{\gp\rp}
+	\langle 0|
+		u^i_\rho (u^j_\a \G^{snk}_{\a\b} d^k_\b ) \
 		\bar{u}^l_\s(z) \G^\l_{\s\sp} d^l_{\sp}(z)
-		\bar{d}^\ip_\rp (\bar{u}^{\jp}_{\ap} \G^{\dagger,src}_{\ap\bp} \bar{d}^\kp_\bp ) 
+		\bar{d}^\ip_\rp (\bar{u}^{\jp}_{\ap} \G^{\dagger,src}_{\ap\bp} \bar{d}^\kp_\bp )
 	|0\rangle
 \nonumber\\&=
-	-\epsilon_{ijk} \epsilon_{\ip\jp\kp} P_{\g\rho} P_{\gp\rp} 
-	\G^{snk}_{\a\b} \G^{src}_{\ap\bp} 
+	-\epsilon_{ijk} \epsilon_{\ip\jp\kp} P_{\g\rho} P_{\gp\rp}
+	\G^{snk}_{\a\b} \G^{src}_{\ap\bp}
 	\Big[
 		U^{j\jp}_{\a\ap} D^{k\ip}_{\b\rp} F^{i\kp}_{\rho\bp}
 		-U^{j\jp}_{\a\ap} D^{k\kp}_{\b\bp} F^{i\ip}_{\rho\rp}
@@ -196,8 +199,8 @@ C^\l_{\g\gp} &= \phantom{-}\int d^4 z \epsilon_{ijk} \epsilon_{\ip\jp\kp} P_{\g\
 		-U^{i\jp}_{\rho\ap} D^{k\ip}_{\b\rp} F^{j\kp}_{\a\bp}
 	\Big]
 \nonumber\\&=
-	\epsilon_{ijk} \epsilon_{\ip\jp\kp} P_{\g\rho} P_{\gp\rp} 
-	\G^{snk}_{\a\b} \G^{src}_{\ap\bp} 
+	\epsilon_{ijk} \epsilon_{\ip\jp\kp} P_{\g\rho} P_{\gp\rp}
+	\G^{snk}_{\a\b} \G^{src}_{\ap\bp}
 	\Big[
 		U^{i\ip}_{\a\ap} D^{j\jp}_{\b\bp} F^{k\kp}_{\rho\rp}
 		+U^{i\ip}_{\rho\ap} D^{j\jp}_{\b\bp} F^{k\kp}_{\a\rp}
@@ -205,9 +208,9 @@ C^\l_{\g\gp} &= \phantom{-}\int d^4 z \epsilon_{ijk} \epsilon_{\ip\jp\kp} P_{\g\
 		+U^{i\ip}_{\rho\ap} D^{j\jp}_{\b\rp} F^{k\kp}_{\a\bp}
 	\Big]
 \nonumber\\&=
-	\epsilon_{ijk} \epsilon_{\ip\jp\kp}  
-	\Big[ 
-		P_{\g\rho} \G^{snk}_{\a\b} 
+	\epsilon_{ijk} \epsilon_{\ip\jp\kp}
+	\Big[
+		P_{\g\rho} \G^{snk}_{\a\b}
 		+P_{\g\a} \G^{snk}_{\rho\b}
 	\Big] \Big[
 		P_{\gp\rp} \G^{src}_{\ap\bp} + P_{\gp\bp} \G^{src}_{\ap\rp}
@@ -221,19 +224,19 @@ F^{i\ip}_{\rho\rp}(y,x) = \int d^4z U^{ij}_{\rho\s}(y,z)\G_{\s\sp} D^{j\ip}_{\sp
 
 \subsection{Sequential source baryon three-point}
 
-Consider the three-point correlation function 
+Consider the three-point correlation function
 \begin{equation}
 C^\l (t_z) = \sum_{\g = \gp}C^\l_{\g\gp} (t_z) = \phantom{-} \sum_{\g = \gp} \int d^3 z \int d^3 y  e^{- i \vec{p} \cdot \vec{y}} e^{i \vec{q} \cdot \vec{z}} \langle 0| N_{\g} (y) \mathcal{J}^{\l}(z) \bar{N}_{\gp}(x) |0\rangle \Big|_{t_y},
 \end{equation}
 for some bilinear current density $\mathcal{J}^{\l}(z)$ and \emph{fixed} sink time $t_y$ \footnote{This expression is general enough to account for polarized and unpolarized states, which simply require judicious choice of $P^{src}$ and $P^{snk}$. }. For the connected only component of the $d \rightarrow d$ transition, the correlation function becomes
 \begin{align}
-C^\l (t_z) &= \phantom{-} \int d^3 z \int d^3 y  e^{- i \vec{p} \cdot \vec{y}} e^{i \vec{q} \cdot \vec{z}} \epsilon_{ijk} \epsilon_{\ip\jp\kp} P_{\g\rho} P_{\g\rp} 
-	\langle 0| 
-		u^i_\rho (u^j_\a \G^{snk}_{\a\b} d^k_\b ) \ 
+C^\l (t_z) &= \phantom{-} \int d^3 z \int d^3 y  e^{- i \vec{p} \cdot \vec{y}} e^{i \vec{q} \cdot \vec{z}} \epsilon_{ijk} \epsilon_{\ip\jp\kp} P_{\g\rho} P_{\g\rp}
+	\langle 0|
+		u^i_\rho (u^j_\a \G^{snk}_{\a\b} d^k_\b ) \
 		\bar{d}^l_\s(z) \G^\l_{\s\sp} d^l_{\sp}(z)
-		\bar{u}^\ip_\rp (\bar{u}^{\jp}_{\ap} \G^{\dagger,src}_{\ap\bp} \bar{d}^\kp_\bp ) 
+		\bar{u}^\ip_\rp (\bar{u}^{\jp}_{\ap} \G^{\dagger,src}_{\ap\bp} \bar{d}^\kp_\bp )
 	|0\rangle
-\nonumber\\&= 
+\nonumber\\&=
 \int d^3 z \int d^3 y  e^{- i \vec{p} \cdot \vec{y}} e^{i \vec{q} \cdot \vec{z}} \epsilon_{ijk} \epsilon_{\ip\jp\kp} P_{\g\rho} P_{\g\rp}  \G^{snk}_{\a\b}  \G^{\dagger,src}_{\ap\bp}
      D^{kl}_{\b\s}(y,z)\G^\l_{\s\sp} D^{l \kp}_{\sp\bp}(z,x)
      \Big[
@@ -244,7 +247,7 @@ C^\l (t_z) &= \phantom{-} \int d^3 z \int d^3 y  e^{- i \vec{p} \cdot \vec{y}} e
 \end{align}
 Calculation of the correlation function is aided by constructing a so called \emph{sequential source}, which for the above correlation function takes the form
 \begin{align}
-\chi^{ k\kp}_{\b\bp} &= \phantom{-}  e^{- i \vec{p} \cdot \vec{y}}  \epsilon_{ijk} \epsilon_{\ip\jp\kp} P_{\g\rho} P_{\g\rp} \G^{snk}_{\a\b} \G^{\dagger,src}_{\ap\bp}   
+\chi^{ k\kp}_{\b\bp} &= \phantom{-}  e^{- i \vec{p} \cdot \vec{y}}  \epsilon_{ijk} \epsilon_{\ip\jp\kp} P_{\g\rho} P_{\g\rp} \G^{snk}_{\a\b} \G^{\dagger,src}_{\ap\bp}
   \Big[
      U^{j\ip}_{\a\rp}(y,x)U^{i\jp}_{\rho\ap}(y,x)
      - U^{j\jp}_{\a\ap}(y,x)U^{i\ip}_{\rho\rp}(y,x)
@@ -258,7 +261,7 @@ which may then be used to construct our three point function\footnote{Implicit i
 \begin{equation}
 C^\l (t_z) = \int d^3 z  e^{i \vec{q} \cdot \vec{z}} \tr\Big[ \left( \gamma_{5} \Sigma(z,x) \gamma_{5}\right)^{\dagger} \G^\l D(z,x) \Big].
 \end{equation}
-The construction in terms of the sequential propagator allows arbitrary matrix elements to be computed without additional inversions. Since the properties of the source and sink are fixed, this technique requires an additional inversion for each source and sink spin combination, each source-sink separation time, each interpolator type used, and each unique flavor structure of the bilinear current. 
+The construction in terms of the sequential propagator allows arbitrary matrix elements to be computed without additional inversions. Since the properties of the source and sink are fixed, this technique requires an additional inversion for each source and sink spin combination, each source-sink separation time, each interpolator type used, and each unique flavor structure of the bilinear current.
 
 
 
@@ -315,7 +318,7 @@ The construction in terms of the sequential propagator allows arbitrary matrix e
 
 
 
-\bibliography{c51_bib}
+\bibliography{notes}
 
 
 
@@ -324,4 +327,3 @@ The construction in terms of the sequential propagator allows arbitrary matrix e
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \end{document}
-
