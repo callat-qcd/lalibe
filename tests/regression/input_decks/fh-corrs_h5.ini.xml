@@ -527,7 +527,7 @@
   <NamedObject>
     <up_quark>SS_up</up_quark>
     <down_quark>SS_dn</down_quark>
-    <fh_quark>fh_up_A3</fh_quark>
+    <fh_quark>SS_fh_up_A3</fh_quark>
   </NamedObject>
 </elem>
 
@@ -546,7 +546,7 @@
   <NamedObject>
     <up_quark>SS_up</up_quark>
     <down_quark>SS_dn</down_quark>
-    <fh_quark>fh_dn_A3</fh_quark>
+    <fh_quark>SS_fh_dn_A3</fh_quark>
   </NamedObject>
 </elem>
 
@@ -565,7 +565,7 @@
   <NamedObject>
     <up_quark>SS_up</up_quark>
     <down_quark>SS_dn</down_quark>
-    <fh_quark>fh_up_dn_A3</fh_quark>
+    <fh_quark>SS_fh_up_dn_A3</fh_quark>
   </NamedObject>
 </elem>
 

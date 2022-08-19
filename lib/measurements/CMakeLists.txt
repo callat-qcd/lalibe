@@ -5,11 +5,13 @@ target_include_directories( lalibe
 target_sources(lalibe
    PRIVATE
    baryon_contractions_w.cc
+   baryon_contractions_w.h
+   baryon_fh_contractions_w.cc
+   baryon_fh_contractions_w.h
    flavor_conserving_fh_baryon_contractions_w.cc
    HP_fh_prop_w.cc
    lalibe_seqsource_w.cc
    multi_prop_add.h
-   baryon_contractions_w.h
    flavor_conserving_fh_baryon_contractions_w.h
    HP_fh_prop_w.h
    lalibe_seqsource_w.h
