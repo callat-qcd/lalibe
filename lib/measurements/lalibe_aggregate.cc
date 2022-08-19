@@ -9,6 +9,7 @@
 #include "HP_fh_prop_w.h"
 #include "stochastic_four_quark_fh_prop_w.h"
 #include "baryon_contractions_w.h"
+#include "baryon_fh_contractions_w.h"
 #include "meson_contractions_w.h"
 #include "flavor_conserving_fh_baryon_contractions_w.h"
 #include "flavor_changing_fh_baryon_contractions_w.h"
@@ -33,55 +34,56 @@
 namespace Chroma
 {
 
-  //! Name and registration
-  namespace LalibeAggregateEnv
-  {
-    namespace
+    //! Name and registration
+    namespace LalibeAggregateEnv
     {
-      //! Local registration flag
-      bool registered = false;
-    }
+        namespace
+        {
+            //! Local registration flag
+            bool registered = false;
+        }
 
-    //! Register all the factories
-    bool registerAll()
-    {
-      bool success = true;
-      if (! registered)
-      {
-	// Fermact stuff from chroma
-	success &= WilsonTypeFermActsEnv::registerAll();
+        //! Register all the factories
+        bool registerAll()
+        {
+            bool success = true;
+            if (! registered)
+                {
+                    // Fermact stuff from chroma
+                    success &= WilsonTypeFermActsEnv::registerAll();
 
-  // INTERESTING PHYSICS
-	success &= LalibeStochasticFHPropagatorEnv::registerAll() ;
-	success &= LalibeHPFHPropagatorEnv::registerAll() ;
-	success &= LalibeStochasticFourQuarkFHPropagatorEnv::registerAll() ;
-	success &= LalibeMomentsFHPropagatorEnv::registerAll() ;
-	success &= LalibeFlavorConservingFHBaryonContractionsEnv::registerAll() ;
-	success &= LalibeFlavorChangingFHBaryonContractionsEnv::registerAll() ;
-	success &= LalibeBaryonContractionsEnv::registerAll() ;
-  success &= LalibeMesonContractionsEnv::registerAll() ;
-	success &= LalibeFHPropagatorEnv::registerAll() ;
-	success &= LalibeZNPropagatorEnv::registerAll() ;
-	success &= LalibeHPPropagatorEnv::registerAll() ;
-	success &= LalibeBar3ptfnEnv::registerAll() ;
-  success &= LalibeSeqSourceEnv::registerAll() ;
-  success &= LalibeCoherentSeqsourceEnv::registerAll() ;
-  success &= LalibePipiScatteringEnv::registerAll() ;
-  success &= LalibeQEDMProductFieldEnv::registerAll() ;
+                    // INTERESTING PHYSICS
+                    success &= LalibeStochasticFHPropagatorEnv::registerAll() ;
+                    success &= LalibeHPFHPropagatorEnv::registerAll() ;
+                    success &= LalibeStochasticFourQuarkFHPropagatorEnv::registerAll() ;
+                    success &= LalibeMomentsFHPropagatorEnv::registerAll() ;
+                    success &= LalibeFlavorConservingFHBaryonContractionsEnv::registerAll() ;
+                    success &= LalibeFlavorChangingFHBaryonContractionsEnv::registerAll() ;
+                    success &= LalibeBaryonContractionsEnv::registerAll() ;
+                    success &= LalibeBaryonFHContractionsEnv::registerAll() ;
+                    success &= LalibeMesonContractionsEnv::registerAll() ;
+                    success &= LalibeFHPropagatorEnv::registerAll() ;
+                    success &= LalibeZNPropagatorEnv::registerAll() ;
+                    success &= LalibeHPPropagatorEnv::registerAll() ;
+                    success &= LalibeBar3ptfnEnv::registerAll() ;
+                    success &= LalibeSeqSourceEnv::registerAll() ;
+                    success &= LalibeCoherentSeqsourceEnv::registerAll() ;
+                    success &= LalibePipiScatteringEnv::registerAll() ;
+                    success &= LalibeQEDMProductFieldEnv::registerAll() ;
 
-  // USEFUL UTILITIES
-  success &= LalibeMultiPropagatorAddEnv::registerAll() ;
+                    // USEFUL UTILITIES
+                    success &= LalibeMultiPropagatorAddEnv::registerAll() ;
 
 #ifdef BUILD_HDF5
-	success &= LalibeHDF5ReadNamedObjEnv::registerAll();
-	success &= LalibeHDF5WriteNamedObjEnv::registerAll();
-	success &= LalibeHDF5WriteEraseNamedObjEnv::registerAll();
+                    success &= LalibeHDF5ReadNamedObjEnv::registerAll();
+                    success &= LalibeHDF5WriteNamedObjEnv::registerAll();
+                    success &= LalibeHDF5WriteEraseNamedObjEnv::registerAll();
 #endif
 
-	registered = true;
-      }
-      return success;
+                    registered = true;
+                }
+            return success;
+        }
     }
-  }
 
 }
