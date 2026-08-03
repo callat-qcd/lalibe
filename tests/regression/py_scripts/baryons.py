@@ -45,8 +45,9 @@ def flavor_terms(isospin, isospin_z, strangeness):
         coeffs = [1]
     elif qnums==(0.5,0.5,0):
         # Proton
-        flavors = [[0,1,0],[1,0,0]]
+        flavors = [[1,0,0],[0,1,0]]
         coeffs = [1,-1]/np.sqrt(2)
+        #coeffs = [1,0]
     elif qnums==(0.5,-0.5,0):
         # Neutron
         flavors = [[0,1,1],[1,0,1]]
@@ -97,8 +98,6 @@ def flavor_terms(isospin, isospin_z, strangeness):
 
     flavors = np.array(flavors)
     coeffs = np.array(coeffs, dtype=np.complex128)
-
-    coeffs = np.ones_like(coeffs)
 
     return flavors, coeffs
 
@@ -307,9 +306,7 @@ def two_point_correlator(q1, q2, q3, flavors, flavor_coeffs, spins, spin_coeffs)
 
                     out += flavor_coeffs[ai] * flavor_coeffs[i] * spin_coeffs[aj] * spin_coeffs[j] * contractions.contract_quark_term(q1,q2,q3,f,l,af,al)
 
-                        
-
-        return out
+    return out
 
 def flavor_vector(isospin_z, strangeness):
     up = int(3/2 + 0.5*strangeness + isospin_z)
