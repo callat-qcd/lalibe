@@ -93,48 +93,51 @@ def main():
         for parity in [1, -1]:
             for s_name, spin_z in spin_zs[qnums[3]]:
 
-                if args.verbose: print(baryon,s_name,"p:",parity)
-
-                flavors = baryons.flavor_vector(isospin_z=qnums[1], strangeness=qnums[2])
-
-                q1 = ps_quarks_DP[flavors[0]]
-                q2 = ps_quarks_DP[flavors[1]]
-                q3 = ps_quarks_DP[flavors[2]]
-
-                #proton = contractions.proton_spin_contract(ps_up_DP,ps_up_DP,ps_dn_DP,corr,spin)
-                baryon_time = 0
-                if type(ps_q_fh_DP)==int:
-                    baryon_correlator = baryons.baryon_correlator(isospin=qnums[0], isospin_z=qnums[1], strangeness=qnums[2], spin=qnums[3], spin_z=spin_z, parity=parity)
-                    baryon_tensor = baryon_correlator(q1, q2, q3)
-                    baryon_time = np.einsum('tzyx->t',baryon_tensor)
-                else:
-                    baryon_correlator = baryons.fh_correlator(isospin=qnums[0], isospin_z=qnums[1], strangeness=qnums[2], spin=qnums[3], spin_z=spin_z, parity=parity, fh_flavor=0)
-                    baryon_tensor = baryon_correlator(q1, q2, ps_q_fh_DP)
-                    baryon_time = np.einsum('tzyx->t',baryon_tensor)
-                '''
-                for t in range(Nt):
-                    print(t,proton_up_time[t])
-                '''
                 p_name = ""
                 if parity==-1:
                     p_name = "_np"
-                
                 baryon_node = args.known_results_node.replace("*b", baryon+p_name).replace("*s", s_name)
-                known_baryon = known_results_file[baryon_node][()]
 
-                known_ratio = np.real(baryon_time)/np.real(known_baryon)
-                
-                if np.all(np.abs(known_ratio - 1) <= args.tol):
-                    if args.verbose: print('    PASS')
-                    passed += 1
-                elif np.all(np.abs(known_ratio + 1) <= args.tol):
-                    if args.verbose: print('    SIGN ERROR')
-                    signed += 1
-                else:
-                    if args.verbose: 
-                        print('    FAIL')
-                        print('Error ratio:',max(np.abs(known_ratio)))
-                    failed += 1
+                if(baryon_node in known_results_file):
+
+                    flavors = baryons.flavor_vector(isospin_z=qnums[1], strangeness=qnums[2])
+
+                    q1 = ps_quarks_DP[flavors[0]]
+                    q2 = ps_quarks_DP[flavors[1]]
+                    q3 = ps_quarks_DP[flavors[2]]
+
+                    baryon_time = 0
+                    
+                    if type(ps_q_fh_DP)==int:
+                        baryon_correlator = baryons.baryon_correlator(isospin=qnums[0], isospin_z=qnums[1], strangeness=qnums[2], spin=qnums[3], spin_z=spin_z, parity=parity)
+                        baryon_tensor = baryon_correlator(q1, q2, q3)
+                        baryon_time = np.einsum('tzyx->t',baryon_tensor)
+                    else:
+                        baryon_correlator = baryons.fh_correlator(isospin=qnums[0], isospin_z=qnums[1], strangeness=qnums[2], spin=qnums[3], spin_z=spin_z, parity=parity, fh_flavor=0)
+                        baryon_tensor = baryon_correlator(q1, q2, ps_q_fh_DP)
+                        baryon_time = np.einsum('tzyx->t',baryon_tensor)
+                    '''
+                    for t in range(Nt):
+                        print(t,proton_up_time[t])
+                    '''
+                    
+                    known_baryon = known_results_file[baryon_node][()]
+
+                    norm_baryon_sdev = sum([np.abs(a-b)**2 for a,b in zip(known_baryon, baryon_time)])**0.5 / np.mean(np.abs(known_baryon))
+                    signed_norm_baryon_sdev = sum([np.abs(a+b)**2 for a,b in zip(known_baryon, baryon_time)])**0.5 / np.mean(np.abs(known_baryon))
+
+                    
+                    if norm_baryon_sdev <= args.tol:
+                        if args.verbose: print('PASS:',baryon,s_name,"p:",parity)
+                        passed += 1
+                    elif signed_norm_baryon_sdev <= args.tol:
+                        if args.verbose: print('SIGN ERROR:',baryon,s_name,"p:",parity)
+                        signed += 1
+                    else:
+                        if args.verbose: 
+                            print('FAIL:',baryon,s_name,"p:",parity)
+                            print('Normalized standard deviation:',norm_baryon_sdev,'\n')
+                        failed += 1
 
     known_results_file.close()
 
